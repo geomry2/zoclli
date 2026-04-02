@@ -1,0 +1,152 @@
+<div class="modal-backdrop" (click)="close()"></div>
+
+<div class="modal">
+  <div class="modal-header">
+    <h2 class="modal-title">Add {{ tab() === 'clients' ? 'Client' : 'Lead' }}</h2>
+    <button class="close-btn" (click)="close()">✕</button>
+  </div>
+
+  <div class="modal-body">
+    @if (saveError()) {
+      <div class="error-banner">{{ saveError() }}</div>
+    }
+
+    @if (tab() === 'clients') {
+      <!-- CLIENT FORM -->
+      <div class="form-grid">
+        <div class="field-group full">
+          <label>Full Name *</label>
+          <input [(ngModel)]="client.name" placeholder="e.g. Jane Smith" />
+        </div>
+        <div class="field-group">
+          <label>Phone</label>
+          <input [(ngModel)]="client.phone" placeholder="+1-555-0100" />
+        </div>
+        <div class="field-group">
+          <label>Email</label>
+          <input [(ngModel)]="client.email" type="email" placeholder="jane@email.com" />
+        </div>
+
+        <div class="field-group section-divider full"><span>Property</span></div>
+
+        <div class="field-group">
+          <label>Building Name</label>
+          <input [(ngModel)]="client.buildingName" placeholder="e.g. Thea Court" />
+        </div>
+        <div class="field-group">
+          <label>Apartment / Unit</label>
+          <input [(ngModel)]="client.apartmentNumber" placeholder="e.g. 204" />
+        </div>
+        <div class="field-group full">
+          <label>Street</label>
+          <input [(ngModel)]="client.street" placeholder="e.g. 340 Lakeview Blvd" />
+        </div>
+        <div class="field-group">
+          <label>Property Type</label>
+          <select [(ngModel)]="client.propertyType">
+            @for (t of propertyTypes; track t) {
+              <option [value]="t">{{ t }}</option>
+            }
+          </select>
+        </div>
+        <div class="field-group">
+          <label>Status</label>
+          <select [(ngModel)]="client.status">
+            @for (s of clientStatuses; track s) {
+              <option [value]="s">{{ s }}</option>
+            }
+          </select>
+        </div>
+        <div class="field-group">
+          <label>Purchase Date</label>
+          <input [(ngModel)]="client.purchaseDate" type="date" />
+        </div>
+        <div class="field-group">
+          <label>Deal Value (€)</label>
+          <input [(ngModel)]="client.dealValue" type="number" placeholder="0" />
+        </div>
+
+        <div class="field-group section-divider full"><span>Realtor</span></div>
+
+        <div class="field-group">
+          <label>Realtor Name</label>
+          <input [(ngModel)]="client.realtorName" placeholder="e.g. Sandra Liu" />
+        </div>
+        <div class="field-group">
+          <label>Agency</label>
+          <input [(ngModel)]="client.realtorAgency" placeholder="e.g. BlueSky Properties" />
+        </div>
+        <div class="field-group full">
+          <label>Notes</label>
+          <textarea [(ngModel)]="client.notes" rows="3" placeholder="Any additional notes..."></textarea>
+        </div>
+      </div>
+
+    } @else {
+      <!-- LEAD FORM -->
+      <div class="form-grid">
+        <div class="field-group full">
+          <label>Full Name *</label>
+          <input [(ngModel)]="lead.name" placeholder="e.g. John Doe" />
+        </div>
+        <div class="field-group">
+          <label>Phone</label>
+          <input [(ngModel)]="lead.phone" placeholder="+1-555-0100" />
+        </div>
+        <div class="field-group">
+          <label>Email</label>
+          <input [(ngModel)]="lead.email" type="email" placeholder="john@email.com" />
+        </div>
+
+        <div class="field-group section-divider full"><span>Interest</span></div>
+
+        <div class="field-group full">
+          <label>Interested In</label>
+          <input [(ngModel)]="lead.interestedIn" placeholder="e.g. 2-bedroom apartment near downtown" />
+        </div>
+        <div class="field-group">
+          <label>Status</label>
+          <select [(ngModel)]="lead.status">
+            @for (s of leadStatuses; track s) {
+              <option [value]="s">{{ s }}</option>
+            }
+          </select>
+        </div>
+        <div class="field-group">
+          <label>First Contact</label>
+          <input [(ngModel)]="lead.firstInteractionDate" type="date" />
+        </div>
+        <div class="field-group">
+          <label>Budget Min (€)</label>
+          <input [(ngModel)]="lead.budgetMin" type="number" placeholder="0" />
+        </div>
+        <div class="field-group">
+          <label>Budget Max (€)</label>
+          <input [(ngModel)]="lead.budgetMax" type="number" placeholder="0" />
+        </div>
+
+        <div class="field-group section-divider full"><span>Source</span></div>
+
+        <div class="field-group">
+          <label>Realtor Name</label>
+          <input [(ngModel)]="lead.realtorName" placeholder="e.g. Carlos Mendes" />
+        </div>
+        <div class="field-group">
+          <label>Agency</label>
+          <input [(ngModel)]="lead.realtorAgency" placeholder="e.g. Horizon Real Estate" />
+        </div>
+        <div class="field-group full">
+          <label>Notes</label>
+          <textarea [(ngModel)]="lead.notes" rows="3" placeholder="Any additional notes..."></textarea>
+        </div>
+      </div>
+    }
+  </div>
+
+  <div class="modal-footer">
+    <button class="btn-cancel" (click)="close()">Cancel</button>
+    <button class="btn-save" (click)="save()" [disabled]="saving()">
+      {{ saving() ? 'Saving…' : 'Save' }}
+    </button>
+  </div>
+</div>

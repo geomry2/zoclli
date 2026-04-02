@@ -47,7 +47,7 @@ export class ClientsTable {
   ];
 
   formatDealValue(value: number): string {
-    return '$' + value.toLocaleString('en-US');
+    return '€' + value.toLocaleString('en-EU');
   }
 
   asRecord(client: Client): Record<string, unknown> {

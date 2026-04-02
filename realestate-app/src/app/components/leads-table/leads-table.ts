@@ -45,7 +45,7 @@ export class LeadsTable {
   ];
 
   formatBudget(lead: Lead): string {
-    return '$' + lead.budgetMin.toLocaleString('en-US') + ' – $' + lead.budgetMax.toLocaleString('en-US');
+    return '€' + lead.budgetMin.toLocaleString('en-EU') + ' – €' + lead.budgetMax.toLocaleString('en-EU');
   }
 
   asRecord(lead: Lead): Record<string, unknown> {

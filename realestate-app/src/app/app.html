@@ -4,7 +4,10 @@
       <h1 class="app-title">Real Estate</h1>
       <span class="app-subtitle">Client &amp; Lead Management</span>
     </div>
-    <app-search-bar (queryChange)="onQueryChange($event)" />
+    <div class="header-right">
+      <app-search-bar (queryChange)="onQueryChange($event)" />
+      <button class="btn-add" (click)="showCreateModal.set(true)">+ Add</button>
+    </div>
   </header>
 
   <app-tab-nav [activeTab]="activeTab()" (tabChange)="switchTab($event)" />
@@ -17,3 +20,7 @@
     }
   </main>
 </div>
+
+@if (showCreateModal()) {
+  <app-create-modal [tab]="activeTab()" (closed)="showCreateModal.set(false)" />
+}

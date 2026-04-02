@@ -23,7 +23,7 @@ export class RowDetail {
 
     switch (field.type) {
       case 'currency':
-        return '$' + Number(value).toLocaleString('en-US');
+        return '€' + Number(value).toLocaleString('en-EU');
       case 'date':
         return new Date(String(value)).toLocaleDateString('en-US', {
           year: 'numeric', month: 'long', day: 'numeric'
