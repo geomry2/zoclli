@@ -1,38 +1,44 @@
 .search-wrapper {
   position: relative;
-  width: 320px;
+  width: min(360px, 100%);
 
   .search-icon {
     position: absolute;
-    left: 10px;
+    left: 12px;
     top: 50%;
     transform: translateY(-50%);
-    color: #aaa;
+    color: #8b9198;
     pointer-events: none;
   }
 
   .search-input {
     width: 100%;
-    height: 36px;
-    padding: 0 12px 0 34px;
-    border: 1px solid #e0e0e0;
-    border-radius: 6px;
+    height: 38px;
+    padding: 0 12px 0 36px;
+    border: 1px solid #e7e8ea;
+    border-radius: 10px;
     font-family: inherit;
     font-size: 14px;
-    color: #1a1a1a;
-    background: #fafafa;
+    color: #2f3437;
+    background: #fbfbfb;
     outline: none;
     transition: border-color 0.15s, box-shadow 0.15s;
     box-sizing: border-box;
 
     &::placeholder {
-      color: #b0b0b0;
+      color: #a0a5ab;
     }
 
     &:focus {
-      border-color: #c0c0c0;
-      box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.06);
+      border-color: #ccd3dc;
+      box-shadow: 0 0 0 3px rgba(35, 131, 226, 0.18);
       background: #fff;
     }
+  }
+}
+
+@media (max-width: 760px) {
+  .search-wrapper {
+    width: 100%;
   }
 }

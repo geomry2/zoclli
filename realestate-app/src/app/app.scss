@@ -1,6 +1,6 @@
 .app-container {
-  max-width: 1200px;
-  margin: 0 auto;
+  max-width: 1120px;
+  margin: 24px auto;
   padding: 0 24px 48px;
 }
 
@@ -8,9 +8,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 28px 0 20px;
-  border-bottom: 1px solid #ebebeb;
+  padding: 26px 28px 18px;
+  border-bottom: 1px solid #ececec;
   margin-bottom: 0;
+  background: #ffffff;
+  border-radius: 12px 12px 0 0;
 }
 
 .header-left {
@@ -20,19 +22,42 @@
 }
 
 .app-title {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: #2f3437;
   margin: 0;
-  letter-spacing: -0.3px;
+  letter-spacing: -0.2px;
 }
 
 .app-subtitle {
   font-size: 13px;
-  color: #aaa;
+  color: #6f767c;
   font-weight: 400;
 }
 
 .tab-content {
-  margin-top: 0;
+  background: #ffffff;
+  border-radius: 0 0 12px 12px;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.05);
+  border: 1px solid #ececec;
+  border-top: none;
+  overflow: hidden;
+}
+
+@media (max-width: 760px) {
+  .app-container {
+    margin: 16px auto;
+    padding: 0 12px 24px;
+  }
+
+  .app-header {
+    padding: 18px 16px 14px;
+    gap: 12px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .tab-content {
+    border-radius: 0 0 12px 12px;
+  }
 }
