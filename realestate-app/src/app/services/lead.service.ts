@@ -1,6 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 import { Lead } from '../models/lead.model';
+import { toCamelCase, toSnakeCase } from './case.utils';
 
 @Injectable({ providedIn: 'root' })
 export class LeadService {
@@ -27,7 +28,7 @@ export class LeadService {
     if (error) {
       this.error.set(error.message);
     } else {
-      this.leads.set((data ?? []) as Lead[]);
+      this.leads.set((data ?? []).map(row => toCamelCase(row) as unknown as Lead));
     }
     this.loading.set(false);
   }
@@ -36,11 +37,11 @@ export class LeadService {
     if (!this.supabase) return { error: 'Supabase not configured.' };
     const { data, error } = await this.supabase
       .from('leads')
-      .insert(lead)
+      .insert(toSnakeCase(lead as unknown as Record<string, unknown>))
       .select()
       .single();
     if (error) return { error: error.message };
-    this.leads.update(list => [...list, data as Lead]);
+    this.leads.update(list => [...list, toCamelCase(data) as unknown as Lead]);
     return { error: null };
   }
 }

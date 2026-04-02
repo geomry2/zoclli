@@ -1,6 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 import { Client } from '../models/client.model';
+import { toCamelCase, toSnakeCase } from './case.utils';
 
 @Injectable({ providedIn: 'root' })
 export class ClientService {
@@ -27,7 +28,7 @@ export class ClientService {
     if (error) {
       this.error.set(error.message);
     } else {
-      this.clients.set((data ?? []) as Client[]);
+      this.clients.set((data ?? []).map(row => toCamelCase(row) as unknown as Client));
     }
     this.loading.set(false);
   }
@@ -36,11 +37,11 @@ export class ClientService {
     if (!this.supabase) return { error: 'Supabase not configured.' };
     const { data, error } = await this.supabase
       .from('clients')
-      .insert(client)
+      .insert(toSnakeCase(client as unknown as Record<string, unknown>))
       .select()
       .single();
     if (error) return { error: error.message };
-    this.clients.update(list => [...list, data as Client]);
+    this.clients.update(list => [...list, toCamelCase(data) as unknown as Client]);
     return { error: null };
   }
 }
