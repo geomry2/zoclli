@@ -1,0 +1,82 @@
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.empty-state {
+  padding: 48px 24px;
+  text-align: center;
+  color: #bbb;
+  font-size: 14px;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th {
+    padding: 10px 16px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #999;
+    border-bottom: 1px solid #ebebeb;
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 12px 16px;
+    font-size: 14px;
+    color: #1a1a1a;
+    border-bottom: 1px solid #f2f2f2;
+    vertical-align: middle;
+  }
+
+  .data-row {
+    cursor: pointer;
+    transition: background 0.1s;
+
+    &:hover {
+      background: #f9f9f9;
+    }
+
+    &.expanded {
+      background: #f5f5f5;
+
+      td {
+        border-bottom: none;
+      }
+    }
+  }
+
+  .detail-row td {
+    padding: 0;
+    border-bottom: 1px solid #ebebeb;
+  }
+}
+
+.col-name {
+  font-weight: 500;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: capitalize;
+
+  &.badge-active     { background: #e6f4ea; color: #1a7f37; }
+  &.badge-inactive   { background: #fce8e6; color: #c5221f; }
+  &.badge-closed     { background: #f1f1f1; color: #666; }
+  &.badge-new        { background: #e8f0fe; color: #1a73e8; }
+  &.badge-contacted  { background: #e6f4ea; color: #1a7f37; }
+  &.badge-negotiating { background: #fef9e0; color: #a16800; }
+  &.badge-lost       { background: #fce8e6; color: #c5221f; }
+  &.badge-apartment  { background: #f1f1f1; color: #555; }
+  &.badge-house      { background: #f1f1f1; color: #555; }
+  &.badge-commercial { background: #eef3fb; color: #1a73e8; }
+  &.badge-land       { background: #f1f1f1; color: #555; }
+}

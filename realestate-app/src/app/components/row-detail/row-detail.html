@@ -1,0 +1,14 @@
+<div class="detail-panel">
+  @for (field of fields(); track field.key) {
+    <div class="field-block">
+      <span class="field-label">{{ field.label }}</span>
+      @if (isBadge(field)) {
+        <span class="field-badge" [ngClass]="'badge-' + getBadgeValue(entry()[field.key])">
+          {{ getBadgeValue(entry()[field.key]) || '—' }}
+        </span>
+      } @else {
+        <span class="field-value">{{ formatValue(field, entry()[field.key]) }}</span>
+      }
+    </div>
+  }
+</div>

@@ -1,0 +1,45 @@
+<div class="table-wrapper">
+  @if (filteredClients().length === 0) {
+    <div class="empty-state">No clients match your search.</div>
+  } @else {
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Phone</th>
+          <th>Property Type</th>
+          <th>Status</th>
+          <th>Deal Value</th>
+          <th>Realtor</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (client of filteredClients(); track client.id) {
+          <tr
+            class="data-row"
+            [class.expanded]="expandedRowId() === client.id"
+            (click)="toggleRow(client.id)"
+          >
+            <td class="col-name">{{ client.name }}</td>
+            <td>{{ client.phone }}</td>
+            <td>
+              <span class="badge badge-{{ client.propertyType }}">{{ client.propertyType }}</span>
+            </td>
+            <td>
+              <span class="badge badge-{{ client.status }}">{{ client.status }}</span>
+            </td>
+            <td>{{ formatDealValue(client.dealValue) }}</td>
+            <td>{{ client.realtorName }}</td>
+          </tr>
+          @if (expandedRowId() === client.id) {
+            <tr class="detail-row">
+              <td colspan="6">
+                <app-row-detail [entry]="asRecord(client)" [fields]="clientFields" />
+              </td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  }
+</div>

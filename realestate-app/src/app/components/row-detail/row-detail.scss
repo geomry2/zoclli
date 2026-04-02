@@ -1,0 +1,49 @@
+.detail-panel {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+  padding: 20px 24px 24px;
+  background: #f9f9f9;
+  border-top: 1px solid #ebebeb;
+}
+
+.field-block {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.field-label {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #999;
+}
+
+.field-value {
+  font-size: 14px;
+  color: #1a1a1a;
+  word-break: break-word;
+}
+
+.field-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  width: fit-content;
+
+  &.badge-active   { background: #e6f4ea; color: #1a7f37; }
+  &.badge-inactive { background: #fce8e6; color: #c5221f; }
+  &.badge-closed   { background: #f1f1f1; color: #666; }
+  &.badge-new      { background: #e8f0fe; color: #1a73e8; }
+  &.badge-contacted { background: #e6f4ea; color: #1a7f37; }
+  &.badge-negotiating { background: #fef9e0; color: #a16800; }
+  &.badge-lost     { background: #fce8e6; color: #c5221f; }
+  &.badge-apartment  { background: #f1f1f1; color: #555; }
+  &.badge-house      { background: #f1f1f1; color: #555; }
+  &.badge-commercial { background: #f1f1f1; color: #555; }
+  &.badge-land       { background: #f1f1f1; color: #555; }
+}

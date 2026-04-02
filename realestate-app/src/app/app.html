@@ -1,0 +1,19 @@
+<div class="app-container">
+  <header class="app-header">
+    <div class="header-left">
+      <h1 class="app-title">Real Estate</h1>
+      <span class="app-subtitle">Client &amp; Lead Management</span>
+    </div>
+    <app-search-bar (queryChange)="onQueryChange($event)" />
+  </header>
+
+  <app-tab-nav [activeTab]="activeTab()" (tabChange)="switchTab($event)" />
+
+  <main class="tab-content">
+    @if (activeTab() === 'clients') {
+      <app-clients-table [searchQuery]="searchQuery()" />
+    } @else {
+      <app-leads-table [searchQuery]="searchQuery()" />
+    }
+  </main>
+</div>

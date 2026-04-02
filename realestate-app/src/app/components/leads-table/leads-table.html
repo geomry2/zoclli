@@ -1,0 +1,43 @@
+<div class="table-wrapper">
+  @if (filteredLeads().length === 0) {
+    <div class="empty-state">No leads match your search.</div>
+  } @else {
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Phone</th>
+          <th>Status</th>
+          <th>Budget Range</th>
+          <th>Interested In</th>
+          <th>Realtor</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (lead of filteredLeads(); track lead.id) {
+          <tr
+            class="data-row"
+            [class.expanded]="expandedRowId() === lead.id"
+            (click)="toggleRow(lead.id)"
+          >
+            <td class="col-name">{{ lead.name }}</td>
+            <td>{{ lead.phone }}</td>
+            <td>
+              <span class="badge badge-{{ lead.status }}">{{ lead.status }}</span>
+            </td>
+            <td>{{ formatBudget(lead) }}</td>
+            <td class="col-interest">{{ lead.interestedIn }}</td>
+            <td>{{ lead.realtorName }}</td>
+          </tr>
+          @if (expandedRowId() === lead.id) {
+            <tr class="detail-row">
+              <td colspan="6">
+                <app-row-detail [entry]="asRecord(lead)" [fields]="leadFields" />
+              </td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  }
+</div>

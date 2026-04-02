@@ -1,0 +1,16 @@
+<nav class="tab-nav">
+  <button
+    class="tab-btn"
+    [class.active]="activeTab() === 'clients'"
+    (click)="switchTab('clients')"
+  >
+    Clients
+  </button>
+  <button
+    class="tab-btn"
+    [class.active]="activeTab() === 'leads'"
+    (click)="switchTab('leads')"
+  >
+    Leads
+  </button>
+</nav>
