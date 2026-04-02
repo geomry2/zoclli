@@ -13,17 +13,7 @@
       <div class="error-banner">{{ saveError() }}</div>
     }
 
-    <!-- Datalists for autocomplete -->
-    <datalist id="buildings-list">
-      @for (b of allBuildings; track b) {
-        <option [value]="b"></option>
-      }
-    </datalist>
-    <datalist id="agencies-list">
-      @for (a of allAgencies; track a) {
-        <option [value]="a"></option>
-      }
-    </datalist>
+    <!-- Datalist for apartment number autocomplete only -->
     <datalist id="apt-list">
       @for (n of usedApartmentNumbers; track n) {
         <option [value]="n"></option>
@@ -47,10 +37,25 @@
 
         <div class="field-group section-divider full"><span>Property</span></div>
 
+        <!-- Building: select existing or add new -->
         <div class="field-group">
           <label>Building / Project</label>
-          <input [(ngModel)]="client.buildingName" list="buildings-list" placeholder="e.g. Thea Court" />
+          @if (buildingMode() === 'select') {
+            <select [(ngModel)]="selectedBuilding">
+              <option value="">— Select building —</option>
+              @for (b of allBuildings; track b) {
+                <option [value]="b">{{ b }}</option>
+              }
+              <option value="__new__">＋ Add new building</option>
+            </select>
+          } @else {
+            <div class="inline-new">
+              <input [(ngModel)]="client.buildingName" placeholder="New building name" autofocus />
+              <button class="btn-back" type="button" (click)="buildingMode.set('select')">↩</button>
+            </div>
+          }
         </div>
+
         <div class="field-group">
           <label>Apartment / Unit</label>
           <input [(ngModel)]="client.apartmentNumber" list="apt-list" placeholder="e.g. 204" />
@@ -86,10 +91,26 @@
           <label>Realtor Name</label>
           <input [(ngModel)]="client.realtorName" placeholder="e.g. Sandra Liu" />
         </div>
+
+        <!-- Agency: select existing or add new -->
         <div class="field-group">
           <label>Agency</label>
-          <input [(ngModel)]="client.realtorAgency" list="agencies-list" placeholder="e.g. BlueSky Properties" />
+          @if (agencyMode() === 'select') {
+            <select [(ngModel)]="selectedClientAgency">
+              <option value="">— Select agency —</option>
+              @for (a of allAgencies; track a) {
+                <option [value]="a">{{ a }}</option>
+              }
+              <option value="__new__">＋ Add new agency</option>
+            </select>
+          } @else {
+            <div class="inline-new">
+              <input [(ngModel)]="client.realtorAgency" placeholder="New agency name" autofocus />
+              <button class="btn-back" type="button" (click)="agencyMode.set('select')">↩</button>
+            </div>
+          }
         </div>
+
         <div class="field-group full">
           <label>Notes</label>
           <textarea [(ngModel)]="client.notes" rows="3" placeholder="Any additional notes..."></textarea>
@@ -144,10 +165,26 @@
           <label>Realtor Name</label>
           <input [(ngModel)]="lead.realtorName" placeholder="e.g. Carlos Mendes" />
         </div>
+
+        <!-- Agency: select existing or add new -->
         <div class="field-group">
           <label>Agency</label>
-          <input [(ngModel)]="lead.realtorAgency" list="agencies-list" placeholder="e.g. Horizon Real Estate" />
+          @if (agencyMode() === 'select') {
+            <select [(ngModel)]="selectedLeadAgency">
+              <option value="">— Select agency —</option>
+              @for (a of allAgencies; track a) {
+                <option [value]="a">{{ a }}</option>
+              }
+              <option value="__new__">＋ Add new agency</option>
+            </select>
+          } @else {
+            <div class="inline-new">
+              <input [(ngModel)]="lead.realtorAgency" placeholder="New agency name" autofocus />
+              <button class="btn-back" type="button" (click)="agencyMode.set('select')">↩</button>
+            </div>
+          }
         </div>
+
         <div class="field-group full">
           <label>Notes</label>
           <textarea [(ngModel)]="lead.notes" rows="3" placeholder="Any additional notes..."></textarea>
