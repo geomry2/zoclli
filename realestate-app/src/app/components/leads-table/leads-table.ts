@@ -19,11 +19,11 @@ export class LeadsTable {
   readonly filteredLeads = computed(() => {
     const q = this.searchQuery().toLowerCase().trim();
     if (!q) return this.leadService.leads();
-    return this.leadService.leads().filter((l: Lead) =>
-      Object.values(l).some(val =>
-        String(val ?? '').toLowerCase().includes(q)
-      )
-    );
+    const words = q.split(/\s+/).filter(Boolean);
+    return this.leadService.leads().filter((l: Lead) => {
+      const haystack = Object.values(l).map(val => String(val ?? '')).join(' ').toLowerCase();
+      return words.every(word => haystack.includes(word));
+    });
   });
 
   toggleRow(id: string) {

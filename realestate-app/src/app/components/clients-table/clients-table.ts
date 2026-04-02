@@ -19,11 +19,11 @@ export class ClientsTable {
   readonly filteredClients = computed(() => {
     const q = this.searchQuery().toLowerCase().trim();
     if (!q) return this.clientService.clients();
-    return this.clientService.clients().filter((c: Client) =>
-      Object.values(c).some(val =>
-        String(val ?? '').toLowerCase().includes(q)
-      )
-    );
+    const words = q.split(/\s+/).filter(Boolean);
+    return this.clientService.clients().filter((c: Client) => {
+      const haystack = Object.values(c).map(val => String(val ?? '')).join(' ').toLowerCase();
+      return words.every(word => haystack.includes(word));
+    });
   });
 
   toggleRow(id: string) {
