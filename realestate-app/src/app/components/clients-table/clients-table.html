@@ -35,7 +35,11 @@
             <tr class="confirm-row">
               <td colspan="7">
                 <div class="delete-confirm">
-                  <span>Delete <strong>{{ client.name }}</strong>?</span>
+                  @if (deleteError()) {
+                    <span class="delete-err">{{ deleteError() }}</span>
+                  } @else {
+                    <span>Delete <strong>{{ client.name }}</strong>?</span>
+                  }
                   <button class="btn-confirm-delete" (click)="confirmDelete(client.id)">Delete</button>
                   <button class="btn-cancel-delete" (click)="cancelDelete()">Cancel</button>
                 </div>

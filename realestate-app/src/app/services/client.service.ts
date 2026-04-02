@@ -38,18 +38,21 @@ export class ClientService {
   async update(client: Client): Promise<{ error: string | null }> {
     if (!this.supabase) return { error: 'Supabase not configured.' };
     const { id, ...rest } = client;
-    const { error } = await this.supabase
+    const { data, error } = await this.supabase
       .from('clients').update(toSnakeCase(rest as unknown as Record<string, unknown>))
-      .eq('id', id);
+      .eq('id', id).select();
     if (error) return { error: error.message };
+    if (!data || data.length === 0) return { error: 'Update blocked — missing UPDATE policy in Supabase RLS.' };
     this.clients.update(list => list.map(c => c.id === id ? client : c));
     return { error: null };
   }
 
   async remove(id: string): Promise<{ error: string | null }> {
     if (!this.supabase) return { error: 'Supabase not configured.' };
-    const { error } = await this.supabase.from('clients').delete().eq('id', id);
+    const { error, count } = await this.supabase
+      .from('clients').delete({ count: 'exact' }).eq('id', id);
     if (error) return { error: error.message };
+    if (count === 0) return { error: 'Delete blocked — missing DELETE policy in Supabase RLS.' };
     this.clients.update(list => list.filter(c => c.id !== id));
     return { error: null };
   }

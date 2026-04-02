@@ -44,10 +44,14 @@ export class LeadsTable {
     this.deletingId.set(id);
   }
 
-  cancelDelete() { this.deletingId.set(null); }
+  readonly deleteError = signal<string | null>(null);
+
+  cancelDelete() { this.deletingId.set(null); this.deleteError.set(null); }
 
   async confirmDelete(id: string) {
-    await this.leadService.remove(id);
+    const { error } = await this.leadService.remove(id);
+    if (error) { this.deleteError.set(error); return; }
+    this.deleteError.set(null);
     this.deletingId.set(null);
   }
 

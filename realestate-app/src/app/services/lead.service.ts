@@ -38,18 +38,21 @@ export class LeadService {
   async update(lead: Lead): Promise<{ error: string | null }> {
     if (!this.supabase) return { error: 'Supabase not configured.' };
     const { id, ...rest } = lead;
-    const { error } = await this.supabase
+    const { data, error } = await this.supabase
       .from('leads').update(toSnakeCase(rest as unknown as Record<string, unknown>))
-      .eq('id', id);
+      .eq('id', id).select();
     if (error) return { error: error.message };
+    if (!data || data.length === 0) return { error: 'Update blocked — missing UPDATE policy in Supabase RLS.' };
     this.leads.update(list => list.map(l => l.id === id ? lead : l));
     return { error: null };
   }
 
   async remove(id: string): Promise<{ error: string | null }> {
     if (!this.supabase) return { error: 'Supabase not configured.' };
-    const { error } = await this.supabase.from('leads').delete().eq('id', id);
+    const { error, count } = await this.supabase
+      .from('leads').delete({ count: 'exact' }).eq('id', id);
     if (error) return { error: error.message };
+    if (count === 0) return { error: 'Delete blocked — missing DELETE policy in Supabase RLS.' };
     this.leads.update(list => list.filter(l => l.id !== id));
     return { error: null };
   }

@@ -44,10 +44,14 @@ export class ClientsTable {
     this.deletingId.set(id);
   }
 
-  cancelDelete() { this.deletingId.set(null); }
+  readonly deleteError = signal<string | null>(null);
+
+  cancelDelete() { this.deletingId.set(null); this.deleteError.set(null); }
 
   async confirmDelete(id: string) {
-    await this.clientService.remove(id);
+    const { error } = await this.clientService.remove(id);
+    if (error) { this.deleteError.set(error); return; }
+    this.deleteError.set(null);
     this.deletingId.set(null);
     if (this.expandedRowId() === id) this.expandedRowId.set(null);
   }
