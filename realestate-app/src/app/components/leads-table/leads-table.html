@@ -1,4 +1,9 @@
 <div class="table-wrapper">
+  @if (searchQuery()) {
+    <div class="result-count">
+      {{ filteredLeads().length }} {{ filteredLeads().length === 1 ? 'result' : 'results' }}
+    </div>
+  }
   @if (filteredLeads().length === 0) {
     <div class="empty-state">No leads match your search.</div>
   } @else {

@@ -1,4 +1,9 @@
 <div class="table-wrapper">
+  @if (searchQuery()) {
+    <div class="result-count">
+      {{ filteredClients().length }} {{ filteredClients().length === 1 ? 'result' : 'results' }}
+    </div>
+  }
   @if (filteredClients().length === 0) {
     <div class="empty-state">No clients match your search.</div>
   } @else {
