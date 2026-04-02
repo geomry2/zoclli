@@ -8,7 +8,7 @@ export class ClientService {
   private readonly http = inject(HttpClient);
 
   readonly clients = toSignal(
-    this.http.get<Client[]>('/assets/data/clients.json'),
+    this.http.get<Client[]>('assets/data/clients.json'),
     { initialValue: [] as Client[] }
   );
 }

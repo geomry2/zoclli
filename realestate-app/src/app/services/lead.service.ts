@@ -8,7 +8,7 @@ export class LeadService {
   private readonly http = inject(HttpClient);
 
   readonly leads = toSignal(
-    this.http.get<Lead[]>('/assets/data/leads.json'),
+    this.http.get<Lead[]>('assets/data/leads.json'),
     { initialValue: [] as Lead[] }
   );
 }
