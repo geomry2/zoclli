@@ -15,12 +15,12 @@
 
     <!-- Datalists for autocomplete -->
     <datalist id="buildings-list">
-      @for (b of buildingService.buildings(); track b) {
+      @for (b of allBuildings; track b) {
         <option [value]="b"></option>
       }
     </datalist>
     <datalist id="agencies-list">
-      @for (a of agencyService.agencies(); track a) {
+      @for (a of allAgencies; track a) {
         <option [value]="a"></option>
       }
     </datalist>

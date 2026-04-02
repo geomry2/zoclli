@@ -39,9 +39,24 @@ export class CreateModal implements OnInit {
 
   get usedApartmentNumbers(): string[] {
     const nums = this.clientService.clients()
-      .map(c => c.apartmentNumber)
-      .filter(n => !!n);
+      .map(c => c.apartmentNumber).filter(Boolean);
     return [...new Set(nums)].sort();
+  }
+
+  get allBuildings(): string[] {
+    const fromClients = this.clientService.clients()
+      .map(c => c.buildingName).filter(Boolean);
+    const fromTable = this.buildingService.buildings();
+    return [...new Set([...fromTable, ...fromClients])].sort();
+  }
+
+  get allAgencies(): string[] {
+    const fromClients = this.clientService.clients()
+      .map(c => c.realtorAgency).filter(Boolean);
+    const fromLeads = this.leadService.leads()
+      .map(l => l.realtorAgency).filter(Boolean);
+    const fromTable = this.agencyService.agencies();
+    return [...new Set([...fromTable, ...fromClients, ...fromLeads])].sort();
   }
 
   ngOnInit() {
