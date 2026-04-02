@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, signal } from '@angular/core';
+import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { ClientService } from '../../services/client.service';
 import { Client } from '../../models/client.model';
 import { RowDetail, FieldDefinition } from '../row-detail/row-detail';
@@ -12,9 +12,11 @@ import { RowDetail, FieldDefinition } from '../row-detail/row-detail';
 })
 export class ClientsTable {
   readonly searchQuery = input<string>('');
+  readonly editRequest = output<Client>();
 
   private readonly clientService = inject(ClientService);
   readonly expandedRowId = signal<string | null>(null);
+  readonly deletingId = signal<string | null>(null);
 
   readonly filteredClients = computed(() => {
     const q = this.searchQuery().toLowerCase().trim();
@@ -27,16 +29,35 @@ export class ClientsTable {
   });
 
   toggleRow(id: string) {
+    if (this.deletingId() === id) return;
     this.expandedRowId.set(this.expandedRowId() === id ? null : id);
+  }
+
+  requestEdit(event: Event, client: Client) {
+    event.stopPropagation();
+    this.editRequest.emit(client);
+  }
+
+  startDelete(event: Event, id: string) {
+    event.stopPropagation();
+    this.expandedRowId.set(null);
+    this.deletingId.set(id);
+  }
+
+  cancelDelete() { this.deletingId.set(null); }
+
+  async confirmDelete(id: string) {
+    await this.clientService.remove(id);
+    this.deletingId.set(null);
+    if (this.expandedRowId() === id) this.expandedRowId.set(null);
   }
 
   readonly clientFields: FieldDefinition[] = [
     { key: 'name', label: 'Full Name' },
     { key: 'phone', label: 'Phone' },
     { key: 'email', label: 'Email' },
-    { key: 'buildingName', label: 'Building' },
+    { key: 'buildingName', label: 'Building / Project' },
     { key: 'apartmentNumber', label: 'Apartment / Unit' },
-    { key: 'street', label: 'Street' },
     { key: 'propertyType', label: 'Property Type', type: 'badge' },
     { key: 'status', label: 'Status', type: 'badge' },
     { key: 'purchaseDate', label: 'Purchase Date', type: 'date' },

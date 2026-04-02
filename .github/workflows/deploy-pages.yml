@@ -30,11 +30,12 @@ jobs:
         working-directory: realestate-app
         run: npm ci
 
-      - name: Inject Supabase credentials
+      - name: Inject secrets
         working-directory: realestate-app
         run: |
           sed -i "s|SUPABASE_URL_PLACEHOLDER|${{ secrets.SUPABASE_URL }}|g" src/environments/environment.prod.ts
           sed -i "s|SUPABASE_ANON_KEY_PLACEHOLDER|${{ secrets.SUPABASE_ANON_KEY }}|g" src/environments/environment.prod.ts
+          sed -i "s|APP_PASSWORD_PLACEHOLDER|${{ secrets.APP_PASSWORD }}|g" src/environments/environment.prod.ts
 
       - name: Build
         working-directory: realestate-app

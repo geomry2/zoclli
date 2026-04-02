@@ -1,3 +1,4 @@
+<app-password-gate>
 <div class="app-container">
   <header class="app-header">
     <div class="header-left">
@@ -6,7 +7,7 @@
     </div>
     <div class="header-right">
       <app-search-bar (queryChange)="onQueryChange($event)" />
-      <button class="btn-add" (click)="showCreateModal.set(true)">+ Add</button>
+      <button class="btn-add" (click)="openCreate()">+ Add</button>
     </div>
   </header>
 
@@ -14,13 +15,19 @@
 
   <main class="tab-content">
     @if (activeTab() === 'clients') {
-      <app-clients-table [searchQuery]="searchQuery()" />
+      <app-clients-table [searchQuery]="searchQuery()" (editRequest)="openEditClient($event)" />
     } @else {
-      <app-leads-table [searchQuery]="searchQuery()" />
+      <app-leads-table [searchQuery]="searchQuery()" (editRequest)="openEditLead($event)" />
     }
   </main>
 </div>
 
-@if (showCreateModal()) {
-  <app-create-modal [tab]="activeTab()" (closed)="showCreateModal.set(false)" />
+@if (showModal()) {
+  <app-create-modal
+    [tab]="activeTab()"
+    [editClient]="editingClient()"
+    [editLead]="editingLead()"
+    (closed)="closeModal()"
+  />
 }
+</app-password-gate>

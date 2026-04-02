@@ -2,7 +2,9 @@
 
 <div class="modal">
   <div class="modal-header">
-    <h2 class="modal-title">Add {{ tab() === 'clients' ? 'Client' : 'Lead' }}</h2>
+    <h2 class="modal-title">
+      {{ isEdit ? 'Edit' : 'Add' }} {{ tab() === 'clients' ? 'Client' : 'Lead' }}
+    </h2>
     <button class="close-btn" (click)="close()">✕</button>
   </div>
 
@@ -11,8 +13,24 @@
       <div class="error-banner">{{ saveError() }}</div>
     }
 
+    <!-- Datalists for autocomplete -->
+    <datalist id="buildings-list">
+      @for (b of buildingService.buildings(); track b) {
+        <option [value]="b"></option>
+      }
+    </datalist>
+    <datalist id="agencies-list">
+      @for (a of agencyService.agencies(); track a) {
+        <option [value]="a"></option>
+      }
+    </datalist>
+    <datalist id="apt-list">
+      @for (n of usedApartmentNumbers; track n) {
+        <option [value]="n"></option>
+      }
+    </datalist>
+
     @if (tab() === 'clients') {
-      <!-- CLIENT FORM -->
       <div class="form-grid">
         <div class="field-group full">
           <label>Full Name *</label>
@@ -30,16 +48,12 @@
         <div class="field-group section-divider full"><span>Property</span></div>
 
         <div class="field-group">
-          <label>Building Name</label>
-          <input [(ngModel)]="client.buildingName" placeholder="e.g. Thea Court" />
+          <label>Building / Project</label>
+          <input [(ngModel)]="client.buildingName" list="buildings-list" placeholder="e.g. Thea Court" />
         </div>
         <div class="field-group">
           <label>Apartment / Unit</label>
-          <input [(ngModel)]="client.apartmentNumber" placeholder="e.g. 204" />
-        </div>
-        <div class="field-group full">
-          <label>Street</label>
-          <input [(ngModel)]="client.street" placeholder="e.g. 340 Lakeview Blvd" />
+          <input [(ngModel)]="client.apartmentNumber" list="apt-list" placeholder="e.g. 204" />
         </div>
         <div class="field-group">
           <label>Property Type</label>
@@ -74,7 +88,7 @@
         </div>
         <div class="field-group">
           <label>Agency</label>
-          <input [(ngModel)]="client.realtorAgency" placeholder="e.g. BlueSky Properties" />
+          <input [(ngModel)]="client.realtorAgency" list="agencies-list" placeholder="e.g. BlueSky Properties" />
         </div>
         <div class="field-group full">
           <label>Notes</label>
@@ -83,7 +97,6 @@
       </div>
 
     } @else {
-      <!-- LEAD FORM -->
       <div class="form-grid">
         <div class="field-group full">
           <label>Full Name *</label>
@@ -133,7 +146,7 @@
         </div>
         <div class="field-group">
           <label>Agency</label>
-          <input [(ngModel)]="lead.realtorAgency" placeholder="e.g. Horizon Real Estate" />
+          <input [(ngModel)]="lead.realtorAgency" list="agencies-list" placeholder="e.g. Horizon Real Estate" />
         </div>
         <div class="field-group full">
           <label>Notes</label>
@@ -146,7 +159,7 @@
   <div class="modal-footer">
     <button class="btn-cancel" (click)="close()">Cancel</button>
     <button class="btn-save" (click)="save()" [disabled]="saving()">
-      {{ saving() ? 'Saving…' : 'Save' }}
+      {{ saving() ? 'Saving…' : (isEdit ? 'Save Changes' : 'Save') }}
     </button>
   </div>
 </div>

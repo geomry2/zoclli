@@ -16,18 +16,10 @@ export class LeadService {
   }
 
   private async load() {
-    if (!this.supabase) {
-      this.error.set('Supabase not configured.');
-      return;
-    }
+    if (!this.supabase) { this.error.set('Supabase not configured.'); return; }
     this.loading.set(true);
-    const { data, error } = await this.supabase
-      .from('leads')
-      .select('*')
-      .order('name');
-    if (error) {
-      this.error.set(error.message);
-    } else {
+    const { data, error } = await this.supabase.from('leads').select('*').order('name');
+    if (error) { this.error.set(error.message); } else {
       this.leads.set((data ?? []).map(row => toCamelCase(row) as unknown as Lead));
     }
     this.loading.set(false);
@@ -36,12 +28,29 @@ export class LeadService {
   async add(lead: Omit<Lead, 'id'>): Promise<{ error: string | null }> {
     if (!this.supabase) return { error: 'Supabase not configured.' };
     const { data, error } = await this.supabase
-      .from('leads')
-      .insert(toSnakeCase(lead as unknown as Record<string, unknown>))
-      .select()
-      .single();
+      .from('leads').insert(toSnakeCase(lead as unknown as Record<string, unknown>))
+      .select().single();
     if (error) return { error: error.message };
     this.leads.update(list => [...list, toCamelCase(data) as unknown as Lead]);
+    return { error: null };
+  }
+
+  async update(lead: Lead): Promise<{ error: string | null }> {
+    if (!this.supabase) return { error: 'Supabase not configured.' };
+    const { id, ...rest } = lead;
+    const { error } = await this.supabase
+      .from('leads').update(toSnakeCase(rest as unknown as Record<string, unknown>))
+      .eq('id', id);
+    if (error) return { error: error.message };
+    this.leads.update(list => list.map(l => l.id === id ? lead : l));
+    return { error: null };
+  }
+
+  async remove(id: string): Promise<{ error: string | null }> {
+    if (!this.supabase) return { error: 'Supabase not configured.' };
+    const { error } = await this.supabase.from('leads').delete().eq('id', id);
+    if (error) return { error: error.message };
+    this.leads.update(list => list.filter(l => l.id !== id));
     return { error: null };
   }
 }

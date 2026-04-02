@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, signal } from '@angular/core';
+import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { LeadService } from '../../services/lead.service';
 import { Lead } from '../../models/lead.model';
 import { RowDetail, FieldDefinition } from '../row-detail/row-detail';
@@ -12,9 +12,11 @@ import { RowDetail, FieldDefinition } from '../row-detail/row-detail';
 })
 export class LeadsTable {
   readonly searchQuery = input<string>('');
+  readonly editRequest = output<Lead>();
 
   private readonly leadService = inject(LeadService);
   readonly expandedRowId = signal<string | null>(null);
+  readonly deletingId = signal<string | null>(null);
 
   readonly filteredLeads = computed(() => {
     const q = this.searchQuery().toLowerCase().trim();
@@ -27,7 +29,26 @@ export class LeadsTable {
   });
 
   toggleRow(id: string) {
+    if (this.deletingId() === id) return;
     this.expandedRowId.set(this.expandedRowId() === id ? null : id);
+  }
+
+  requestEdit(event: Event, lead: Lead) {
+    event.stopPropagation();
+    this.editRequest.emit(lead);
+  }
+
+  startDelete(event: Event, id: string) {
+    event.stopPropagation();
+    this.expandedRowId.set(null);
+    this.deletingId.set(id);
+  }
+
+  cancelDelete() { this.deletingId.set(null); }
+
+  async confirmDelete(id: string) {
+    await this.leadService.remove(id);
+    this.deletingId.set(null);
   }
 
   readonly leadFields: FieldDefinition[] = [

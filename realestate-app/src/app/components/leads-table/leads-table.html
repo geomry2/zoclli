@@ -1,8 +1,6 @@
 <div class="table-wrapper">
   @if (searchQuery()) {
-    <div class="result-count">
-      {{ filteredLeads().length }} {{ filteredLeads().length === 1 ? 'result' : 'results' }}
-    </div>
+    <div class="result-count">{{ filteredLeads().length }} {{ filteredLeads().length === 1 ? 'result' : 'results' }}</div>
   }
   @if (filteredLeads().length === 0) {
     <div class="empty-state">No leads match your search.</div>
@@ -16,27 +14,37 @@
           <th>Budget Range</th>
           <th>Interested In</th>
           <th>Realtor</th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
         @for (lead of filteredLeads(); track lead.id) {
-          <tr
-            class="data-row"
-            [class.expanded]="expandedRowId() === lead.id"
-            (click)="toggleRow(lead.id)"
-          >
+          <tr class="data-row" [class.expanded]="expandedRowId() === lead.id" (click)="toggleRow(lead.id)">
             <td class="col-name">{{ lead.name }}</td>
             <td>{{ lead.phone }}</td>
-            <td>
-              <span class="badge badge-{{ lead.status }}">{{ lead.status }}</span>
-            </td>
+            <td><span class="badge badge-{{ lead.status }}">{{ lead.status }}</span></td>
             <td>{{ formatBudget(lead) }}</td>
             <td class="col-interest">{{ lead.interestedIn }}</td>
             <td>{{ lead.realtorName }}</td>
+            <td class="col-actions">
+              <button class="action-btn edit-btn" title="Edit" (click)="requestEdit($event, lead)">✏</button>
+              <button class="action-btn delete-btn" title="Delete" (click)="startDelete($event, lead.id)">✕</button>
+            </td>
           </tr>
+          @if (deletingId() === lead.id) {
+            <tr class="confirm-row">
+              <td colspan="7">
+                <div class="delete-confirm">
+                  <span>Delete <strong>{{ lead.name }}</strong>?</span>
+                  <button class="btn-confirm-delete" (click)="confirmDelete(lead.id)">Delete</button>
+                  <button class="btn-cancel-delete" (click)="cancelDelete()">Cancel</button>
+                </div>
+              </td>
+            </tr>
+          }
           @if (expandedRowId() === lead.id) {
             <tr class="detail-row">
-              <td colspan="6">
+              <td colspan="7">
                 <app-row-detail [entry]="asRecord(lead)" [fields]="leadFields" />
               </td>
             </tr>
