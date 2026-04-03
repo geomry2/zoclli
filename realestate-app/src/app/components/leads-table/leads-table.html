@@ -13,6 +13,7 @@
           <th>Status</th>
           <th>Budget Range</th>
           <th>Interested In</th>
+          <th>Follow-up</th>
           <th>Realtor</th>
           <th></th>
         </tr>
@@ -25,6 +26,17 @@
             <td><span class="badge badge-{{ lead.status }}">{{ lead.status }}</span></td>
             <td>{{ formatBudget(lead) }}</td>
             <td class="col-interest">{{ lead.interestedIn }}</td>
+            <td>
+              @if (lead.followUpDate) {
+                <span class="follow-up-date"
+                  [class.overdue]="isOverdue(lead.followUpDate)"
+                  [class.due-today]="isDueToday(lead.followUpDate)">
+                  {{ formatFollowUp(lead.followUpDate) }}
+                </span>
+              } @else {
+                <span class="no-date">—</span>
+              }
+            </td>
             <td>{{ lead.realtorName }}</td>
             <td class="col-actions">
               <button class="action-btn edit-btn" title="Edit" (click)="requestEdit($event, lead)">✏</button>
@@ -33,7 +45,7 @@
           </tr>
           @if (deletingId() === lead.id) {
             <tr class="confirm-row">
-              <td colspan="7">
+              <td colspan="8">
                 <div class="delete-confirm">
                   @if (deleteError()) {
                     <span class="delete-err">{{ deleteError() }}</span>
@@ -48,7 +60,7 @@
           }
           @if (expandedRowId() === lead.id) {
             <tr class="detail-row">
-              <td colspan="7">
+              <td colspan="8">
                 <app-row-detail [entry]="asRecord(lead)" [fields]="leadFields" />
               </td>
             </tr>

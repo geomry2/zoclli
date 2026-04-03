@@ -6,3 +6,18 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+.follow-up-date {
+  &.overdue {
+    color: #c5221f;
+    font-weight: 500;
+  }
+  &.due-today {
+    color: #a16800;
+    font-weight: 500;
+  }
+}
+
+.no-date {
+  color: #bbb;
+}

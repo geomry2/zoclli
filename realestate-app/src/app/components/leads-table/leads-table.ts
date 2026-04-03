@@ -63,6 +63,7 @@ export class LeadsTable {
     { key: 'status', label: 'Status', type: 'badge' },
     { key: 'budgetMin', label: 'Budget Min', type: 'currency' },
     { key: 'budgetMax', label: 'Budget Max', type: 'currency' },
+    { key: 'followUpDate', label: 'Follow-up Date', type: 'date' },
     { key: 'realtorName', label: 'Realtor' },
     { key: 'realtorAgency', label: 'Agency' },
     { key: 'firstInteractionDate', label: 'First Contact', type: 'date' },
@@ -71,6 +72,21 @@ export class LeadsTable {
 
   formatBudget(lead: Lead): string {
     return '€' + lead.budgetMin.toLocaleString('en-EU') + ' – €' + lead.budgetMax.toLocaleString('en-EU');
+  }
+
+  formatFollowUp(date: string): string {
+    if (!date) return '—';
+    return new Date(date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  isOverdue(date: string): boolean {
+    if (!date) return false;
+    return new Date(date) < new Date(new Date().toDateString());
+  }
+
+  isDueToday(date: string): boolean {
+    if (!date) return false;
+    return new Date(date).toDateString() === new Date().toDateString();
   }
 
   asRecord(lead: Lead): Record<string, unknown> {
