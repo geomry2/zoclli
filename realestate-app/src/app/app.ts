@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { SearchBar } from './components/search-bar/search-bar';
 import { TabNav, TabType } from './components/tab-nav/tab-nav';
 import { ClientsTable } from './components/clients-table/clients-table';
@@ -7,6 +7,9 @@ import { CreateModal } from './components/create-modal/create-modal';
 import { PasswordGate } from './components/password-gate/password-gate';
 import { Client } from './models/client.model';
 import { Lead } from './models/lead.model';
+import { ClientService } from './services/client.service';
+import { LeadService } from './services/lead.service';
+import { exportToCsv, applySearch } from './utils/csv.utils';
 
 @Component({
   selector: 'app-root',
@@ -21,6 +24,9 @@ export class App {
   readonly showModal = signal(false);
   readonly editingClient = signal<Client | null>(null);
   readonly editingLead = signal<Lead | null>(null);
+
+  private readonly clientService = inject(ClientService);
+  private readonly leadService = inject(LeadService);
 
   switchTab(tab: TabType) {
     this.activeTab.set(tab);
@@ -51,5 +57,16 @@ export class App {
     this.showModal.set(false);
     this.editingClient.set(null);
     this.editingLead.set(null);
+  }
+
+  exportCsv() {
+    const q = this.searchQuery();
+    if (this.activeTab() === 'clients') {
+      const rows = applySearch(this.clientService.clients() as unknown as Record<string, unknown>[], q);
+      exportToCsv('clients.csv', rows);
+    } else {
+      const rows = applySearch(this.leadService.leads() as unknown as Record<string, unknown>[], q);
+      exportToCsv('leads.csv', rows);
+    }
   }
 }
