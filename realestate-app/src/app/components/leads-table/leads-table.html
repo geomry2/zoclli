@@ -39,6 +39,7 @@
             </td>
             <td>{{ lead.realtorName }}</td>
             <td class="col-actions">
+              <button class="action-btn convert-btn" title="Convert to client" (click)="requestConvert($event, lead)">→</button>
               <button class="action-btn edit-btn" title="Edit" (click)="requestEdit($event, lead)">✏</button>
               <button class="action-btn delete-btn" title="Delete" (click)="startDelete($event, lead.id)">✕</button>
             </td>

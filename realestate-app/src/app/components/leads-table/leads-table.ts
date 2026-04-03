@@ -13,6 +13,7 @@ import { RowDetail, FieldDefinition } from '../row-detail/row-detail';
 export class LeadsTable {
   readonly searchQuery = input<string>('');
   readonly editRequest = output<Lead>();
+  readonly convertRequest = output<Lead>();
 
   private readonly leadService = inject(LeadService);
   readonly expandedRowId = signal<string | null>(null);
@@ -36,6 +37,11 @@ export class LeadsTable {
   requestEdit(event: Event, lead: Lead) {
     event.stopPropagation();
     this.editRequest.emit(lead);
+  }
+
+  requestConvert(event: Event, lead: Lead) {
+    event.stopPropagation();
+    this.convertRequest.emit(lead);
   }
 
   startDelete(event: Event, id: string) {

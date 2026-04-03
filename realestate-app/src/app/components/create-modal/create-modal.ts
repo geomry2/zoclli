@@ -21,6 +21,7 @@ export class CreateModal implements OnInit {
   readonly tab = input<Tab>('clients');
   readonly editClient = input<Client | null>(null);
   readonly editLead = input<Lead | null>(null);
+  readonly convertLead = input<Lead | null>(null);
   readonly closed = output<void>();
 
   private readonly clientService = inject(ClientService);
@@ -39,6 +40,10 @@ export class CreateModal implements OnInit {
 
   get isEdit(): boolean {
     return !!(this.editClient() || this.editLead());
+  }
+
+  get isConvert(): boolean {
+    return !!this.convertLead();
   }
 
   get allBuildings(): string[] {
@@ -106,7 +111,6 @@ export class CreateModal implements OnInit {
     if (ec) {
       const { id, ...rest } = ec;
       this.client = { ...rest };
-      // If existing value not in list yet (data still loading), start in new mode
       if (ec.buildingName) this.buildingMode.set('select');
       if (ec.realtorAgency) this.agencyMode.set('select');
     }
@@ -115,6 +119,17 @@ export class CreateModal implements OnInit {
       const { id, ...rest } = el;
       this.lead = { ...rest };
       if (el.realtorAgency) this.agencyMode.set('select');
+    }
+    const cl = this.convertLead();
+    if (cl) {
+      this.client.name = cl.name;
+      this.client.phone = cl.phone;
+      this.client.email = cl.email;
+      this.client.realtorName = cl.realtorName;
+      this.client.realtorAgency = cl.realtorAgency;
+      this.client.dealValue = cl.budgetMax || cl.budgetMin || 0;
+      this.client.notes = cl.notes;
+      if (cl.realtorAgency) this.agencyMode.set('select');
     }
   }
 
@@ -133,7 +148,7 @@ export class CreateModal implements OnInit {
       name: '', phone: '', email: '',
       interestedIn: '', realtorName: '', realtorAgency: '',
       firstInteractionDate: '', status: 'new',
-      budgetMin: 0, budgetMax: 0, notes: '',
+      budgetMin: 0, budgetMax: 0, followUpDate: '', notes: '',
     };
   }
 
@@ -148,7 +163,7 @@ export class CreateModal implements OnInit {
       const ec = this.editClient();
       result = ec
         ? await this.clientService.update({ ...this.client, id: ec.id })
-        : await this.clientService.add(this.client);
+        : await this.clientService.add(this.client, this.isConvert ? 'converted' : 'created');
     } else {
       await this.agencyService.ensureExists(this.lead.realtorAgency);
       const el = this.editLead();

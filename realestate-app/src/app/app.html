@@ -6,7 +6,7 @@
       <span class="app-subtitle">Client &amp; Lead Management</span>
     </div>
     <div class="header-right">
-      @if (activeTab() !== 'dashboard') {
+      @if (activeTab() !== 'dashboard' && activeTab() !== 'properties') {
         <app-search-bar (queryChange)="onQueryChange($event)" />
         <button class="btn-export" (click)="exportCsv()">↓ CSV</button>
         <button class="btn-add" (click)="openCreate()">+ Add</button>
@@ -21,8 +21,10 @@
       <app-dashboard />
     } @else if (activeTab() === 'clients') {
       <app-clients-table [searchQuery]="searchQuery()" (editRequest)="openEditClient($event)" />
+    } @else if (activeTab() === 'leads') {
+      <app-leads-table [searchQuery]="searchQuery()" (editRequest)="openEditLead($event)" (convertRequest)="openConvertLead($event)" />
     } @else {
-      <app-leads-table [searchQuery]="searchQuery()" (editRequest)="openEditLead($event)" />
+      <app-property-catalogue />
     }
   </main>
 </div>
@@ -32,6 +34,7 @@
     [tab]="activeTab()"
     [editClient]="editingClient()"
     [editLead]="editingLead()"
+    [convertLead]="convertingLead()"
     (closed)="closeModal()"
   />
 }

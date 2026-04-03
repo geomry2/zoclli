@@ -1,6 +1,7 @@
 import { Component, computed, inject } from '@angular/core';
 import { ClientService } from '../../services/client.service';
 import { LeadService } from '../../services/lead.service';
+import { ActivityService, ActivityEntry } from '../../services/activity.service';
 
 interface StatRow { label: string; count: number; color: string; }
 
@@ -13,6 +14,9 @@ interface StatRow { label: string; count: number; color: string; }
 export class Dashboard {
   private readonly clientService = inject(ClientService);
   private readonly leadService = inject(LeadService);
+  private readonly activityService = inject(ActivityService);
+
+  readonly recentActivity = computed(() => this.activityService.activities().slice(0, 20));
 
   readonly totalClients = computed(() => this.clientService.clients().length);
   readonly totalLeads = computed(() => this.leadService.leads().length);
@@ -99,4 +103,36 @@ export class Dashboard {
   pct(count: number, total: number): number {
     return total === 0 ? 0 : Math.round(count / total * 100);
   }
+
+  activityIcon(entry: ActivityEntry): string {
+    if (entry.action === 'created') return '＋';
+    if (entry.action === 'updated') return '✏';
+    if (entry.action === 'deleted') return '✕';
+    if (entry.action === 'converted') return '→';
+    return '·';
+  }
+
+  activityLabel(entry: ActivityEntry): string {
+    const type = entry.entityType === 'client' ? 'client' : 'lead';
+    const labels: Record<string, string> = {
+      created: `New ${type} added`,
+      updated: `${type.charAt(0).toUpperCase() + type.slice(1)} updated`,
+      deleted: `${type.charAt(0).toUpperCase() + type.slice(1)} deleted`,
+      converted: 'Lead converted to client',
+    };
+    return labels[entry.action] ?? entry.action;
+  }
+
+  formatTime(iso: string): string {
+    const d = new Date(iso);
+    const now = new Date();
+    const diffMs = now.getTime() - d.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    if (diffMins < 1) return 'just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    const diffHrs = Math.floor(diffMins / 60);
+    if (diffHrs < 24) return `${diffHrs}h ago`;
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  }
 }
+

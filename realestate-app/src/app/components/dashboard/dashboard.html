@@ -68,9 +68,11 @@
 
   </div>
 
-  <!-- Top Realtors -->
+  <!-- Bottom row: Top Realtors + Activity Timeline -->
+  <div class="bottom-row">
+
   @if (topRealtors().length) {
-    <div class="panel wide">
+    <div class="panel">
       <div class="panel-title">Top Realtors</div>
       <table class="realtor-table">
         <thead>
@@ -92,5 +94,28 @@
       </table>
     </div>
   }
+
+  <!-- Activity Timeline -->
+  <div class="panel">
+    <div class="panel-title">Recent Activity</div>
+    @if (recentActivity().length === 0) {
+      <div class="activity-empty">No activity yet.</div>
+    } @else {
+      <ul class="activity-list">
+        @for (entry of recentActivity(); track entry.id) {
+          <li class="activity-item activity-{{ entry.action }}">
+            <span class="activity-icon">{{ activityIcon(entry) }}</span>
+            <div class="activity-body">
+              <span class="activity-name">{{ entry.name }}</span>
+              <span class="activity-desc">{{ activityLabel(entry) }}</span>
+            </div>
+            <span class="activity-time">{{ formatTime(entry.timestamp) }}</span>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+
+  </div><!-- /bottom-row -->
 
 </div>
