@@ -6,16 +6,20 @@
       <span class="app-subtitle">Client &amp; Lead Management</span>
     </div>
     <div class="header-right">
-      <app-search-bar (queryChange)="onQueryChange($event)" />
-      <button class="btn-export" (click)="exportCsv()">↓ CSV</button>
-      <button class="btn-add" (click)="openCreate()">+ Add</button>
+      @if (activeTab() !== 'dashboard') {
+        <app-search-bar (queryChange)="onQueryChange($event)" />
+        <button class="btn-export" (click)="exportCsv()">↓ CSV</button>
+        <button class="btn-add" (click)="openCreate()">+ Add</button>
+      }
     </div>
   </header>
 
   <app-tab-nav [activeTab]="activeTab()" (tabChange)="switchTab($event)" />
 
   <main class="tab-content">
-    @if (activeTab() === 'clients') {
+    @if (activeTab() === 'dashboard') {
+      <app-dashboard />
+    } @else if (activeTab() === 'clients') {
       <app-clients-table [searchQuery]="searchQuery()" (editRequest)="openEditClient($event)" />
     } @else {
       <app-leads-table [searchQuery]="searchQuery()" (editRequest)="openEditLead($event)" />

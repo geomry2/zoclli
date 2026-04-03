@@ -5,6 +5,7 @@ import { ClientsTable } from './components/clients-table/clients-table';
 import { LeadsTable } from './components/leads-table/leads-table';
 import { CreateModal } from './components/create-modal/create-modal';
 import { PasswordGate } from './components/password-gate/password-gate';
+import { Dashboard } from './components/dashboard/dashboard';
 import { Client } from './models/client.model';
 import { Lead } from './models/lead.model';
 import { ClientService } from './services/client.service';
@@ -14,7 +15,7 @@ import { exportToCsv, applySearch } from './utils/csv.utils';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [SearchBar, TabNav, ClientsTable, LeadsTable, CreateModal, PasswordGate],
+  imports: [SearchBar, TabNav, ClientsTable, LeadsTable, CreateModal, PasswordGate, Dashboard],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
