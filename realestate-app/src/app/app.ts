@@ -6,6 +6,7 @@ import { LeadsTable } from './components/leads-table/leads-table';
 import { CreateModal } from './components/create-modal/create-modal';
 import { PasswordGate } from './components/password-gate/password-gate';
 import { Dashboard } from './components/dashboard/dashboard';
+import { PropertyCatalogue } from './components/property-catalogue/property-catalogue';
 import { Client } from './models/client.model';
 import { Lead } from './models/lead.model';
 import { ClientService } from './services/client.service';
@@ -15,7 +16,7 @@ import { exportToCsv, applySearch } from './utils/csv.utils';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [SearchBar, TabNav, ClientsTable, LeadsTable, CreateModal, PasswordGate, Dashboard],
+  imports: [SearchBar, TabNav, ClientsTable, LeadsTable, CreateModal, PasswordGate, Dashboard, PropertyCatalogue],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
@@ -25,6 +26,7 @@ export class App {
   readonly showModal = signal(false);
   readonly editingClient = signal<Client | null>(null);
   readonly editingLead = signal<Lead | null>(null);
+  readonly convertingLead = signal<Lead | null>(null);
 
   private readonly clientService = inject(ClientService);
   private readonly leadService = inject(LeadService);
@@ -51,6 +53,15 @@ export class App {
   openEditLead(lead: Lead) {
     this.editingLead.set(lead);
     this.editingClient.set(null);
+    this.convertingLead.set(null);
+    this.showModal.set(true);
+  }
+
+  openConvertLead(lead: Lead) {
+    this.activeTab.set('clients');
+    this.convertingLead.set(lead);
+    this.editingClient.set(null);
+    this.editingLead.set(null);
     this.showModal.set(true);
   }
 
@@ -58,6 +69,7 @@ export class App {
     this.showModal.set(false);
     this.editingClient.set(null);
     this.editingLead.set(null);
+    this.convertingLead.set(null);
   }
 
   exportCsv() {

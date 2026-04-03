@@ -1,11 +1,13 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { SupabaseService } from './supabase.service';
+import { ActivityService } from './activity.service';
 import { Lead } from '../models/lead.model';
 import { toCamelCase, toSnakeCase } from './case.utils';
 
 @Injectable({ providedIn: 'root' })
 export class LeadService {
   private readonly supabase = inject(SupabaseService).client;
+  private readonly activity = inject(ActivityService);
 
   readonly leads = signal<Lead[]>([]);
   readonly loading = signal(false);
@@ -32,6 +34,7 @@ export class LeadService {
       .select().single();
     if (error) return { error: error.message };
     this.leads.update(list => [...list, toCamelCase(data) as unknown as Lead]);
+    this.activity.log('created', 'lead', lead.name);
     return { error: null };
   }
 
@@ -44,16 +47,20 @@ export class LeadService {
     if (error) return { error: error.message };
     if (!data || data.length === 0) return { error: 'Update blocked — missing UPDATE policy in Supabase RLS.' };
     this.leads.update(list => list.map(l => l.id === id ? lead : l));
+    this.activity.log('updated', 'lead', lead.name);
     return { error: null };
   }
 
   async remove(id: string): Promise<{ error: string | null }> {
     if (!this.supabase) return { error: 'Supabase not configured.' };
+    const name = this.leads().find(l => l.id === id)?.name ?? id;
     const { error, count } = await this.supabase
       .from('leads').delete({ count: 'exact' }).eq('id', id);
     if (error) return { error: error.message };
     if (count === 0) return { error: 'Delete blocked — missing DELETE policy in Supabase RLS.' };
     this.leads.update(list => list.filter(l => l.id !== id));
+    this.activity.log('deleted', 'lead', name);
     return { error: null };
   }
 }
+

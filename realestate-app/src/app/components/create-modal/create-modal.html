@@ -3,7 +3,7 @@
 <div class="modal">
   <div class="modal-header">
     <h2 class="modal-title">
-      {{ isEdit ? 'Edit' : 'Add' }} {{ tab() === 'clients' ? 'Client' : 'Lead' }}
+      {{ isConvert ? 'Convert Lead to Client' : (isEdit ? 'Edit' : 'Add') + ' ' + (tab() === 'clients' ? 'Client' : 'Lead') }}
     </h2>
     <button class="close-btn" (click)="close()">✕</button>
   </div>

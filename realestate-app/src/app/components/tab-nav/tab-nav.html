@@ -20,4 +20,11 @@
   >
     Leads
   </button>
+  <button
+    class="tab-btn"
+    [class.active]="activeTab() === 'properties'"
+    (click)="switchTab('properties')"
+  >
+    Properties
+  </button>
 </nav>

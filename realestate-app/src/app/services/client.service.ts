@@ -1,11 +1,13 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { SupabaseService } from './supabase.service';
+import { ActivityService } from './activity.service';
 import { Client } from '../models/client.model';
 import { toCamelCase, toSnakeCase } from './case.utils';
 
 @Injectable({ providedIn: 'root' })
 export class ClientService {
   private readonly supabase = inject(SupabaseService).client;
+  private readonly activity = inject(ActivityService);
 
   readonly clients = signal<Client[]>([]);
   readonly loading = signal(false);
@@ -25,13 +27,14 @@ export class ClientService {
     this.loading.set(false);
   }
 
-  async add(client: Omit<Client, 'id'>): Promise<{ error: string | null }> {
+  async add(client: Omit<Client, 'id'>, action: 'created' | 'converted' = 'created'): Promise<{ error: string | null }> {
     if (!this.supabase) return { error: 'Supabase not configured.' };
     const { data, error } = await this.supabase
       .from('clients').insert(toSnakeCase(client as unknown as Record<string, unknown>))
       .select().single();
     if (error) return { error: error.message };
     this.clients.update(list => [...list, toCamelCase(data) as unknown as Client]);
+    this.activity.log(action, 'client', client.name);
     return { error: null };
   }
 
@@ -44,16 +47,20 @@ export class ClientService {
     if (error) return { error: error.message };
     if (!data || data.length === 0) return { error: 'Update blocked — missing UPDATE policy in Supabase RLS.' };
     this.clients.update(list => list.map(c => c.id === id ? client : c));
+    this.activity.log('updated', 'client', client.name);
     return { error: null };
   }
 
   async remove(id: string): Promise<{ error: string | null }> {
     if (!this.supabase) return { error: 'Supabase not configured.' };
+    const name = this.clients().find(c => c.id === id)?.name ?? id;
     const { error, count } = await this.supabase
       .from('clients').delete({ count: 'exact' }).eq('id', id);
     if (error) return { error: error.message };
     if (count === 0) return { error: 'Delete blocked — missing DELETE policy in Supabase RLS.' };
     this.clients.update(list => list.filter(c => c.id !== id));
+    this.activity.log('deleted', 'client', name);
     return { error: null };
   }
 }
+
