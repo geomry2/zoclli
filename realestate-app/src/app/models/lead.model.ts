@@ -12,5 +12,6 @@ export interface Lead {
   status: LeadStatus;
   budgetMin: number;
   budgetMax: number;
+  followUpDate: string;
   notes: string;
 }
