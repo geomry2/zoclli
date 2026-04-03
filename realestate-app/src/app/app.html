@@ -1,19 +1,41 @@
+<app-password-gate>
 <div class="app-container">
   <header class="app-header">
     <div class="header-left">
       <h1 class="app-title">Real Estate</h1>
       <span class="app-subtitle">Client &amp; Lead Management</span>
     </div>
-    <app-search-bar (queryChange)="onQueryChange($event)" />
+    <div class="header-right">
+      @if (activeTab() !== 'dashboard' && activeTab() !== 'properties') {
+        <app-search-bar (queryChange)="onQueryChange($event)" />
+        <button class="btn-export" (click)="exportCsv()">↓ CSV</button>
+        <button class="btn-add" (click)="openCreate()">+ Add</button>
+      }
+    </div>
   </header>
 
   <app-tab-nav [activeTab]="activeTab()" (tabChange)="switchTab($event)" />
 
   <main class="tab-content">
-    @if (activeTab() === 'clients') {
-      <app-clients-table [searchQuery]="searchQuery()" />
+    @if (activeTab() === 'dashboard') {
+      <app-dashboard />
+    } @else if (activeTab() === 'clients') {
+      <app-clients-table [searchQuery]="searchQuery()" (editRequest)="openEditClient($event)" />
+    } @else if (activeTab() === 'leads') {
+      <app-leads-table [searchQuery]="searchQuery()" (editRequest)="openEditLead($event)" (convertRequest)="openConvertLead($event)" />
     } @else {
-      <app-leads-table [searchQuery]="searchQuery()" />
+      <app-property-catalogue />
     }
   </main>
 </div>
+
+@if (showModal()) {
+  <app-create-modal
+    [tab]="modalTab()"
+    [editClient]="editingClient()"
+    [editLead]="editingLead()"
+    [convertLead]="convertingLead()"
+    (closed)="closeModal()"
+  />
+}
+</app-password-gate>

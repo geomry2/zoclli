@@ -3,8 +3,8 @@
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 20px;
   padding: 20px 24px 24px;
-  background: #f9f9f9;
-  border-top: 1px solid #ebebeb;
+  background: #fafafa;
+  border-top: 1px solid #efefef;
 }
 
 .field-block {
@@ -18,20 +18,20 @@
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #999;
+  color: #8b9298;
 }
 
 .field-value {
   font-size: 14px;
-  color: #1a1a1a;
+  color: #2f3437;
   word-break: break-word;
 }
 
 .field-badge {
   display: inline-block;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 12px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 11px;
   font-weight: 500;
   width: fit-content;
 

@@ -1,4 +1,7 @@
 <div class="table-wrapper">
+  @if (searchQuery()) {
+    <div class="result-count">{{ filteredClients().length }} {{ filteredClients().length === 1 ? 'result' : 'results' }}</div>
+  }
   @if (filteredClients().length === 0) {
     <div class="empty-state">No clients match your search.</div>
   } @else {
@@ -11,29 +14,41 @@
           <th>Status</th>
           <th>Deal Value</th>
           <th>Realtor</th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
         @for (client of filteredClients(); track client.id) {
-          <tr
-            class="data-row"
-            [class.expanded]="expandedRowId() === client.id"
-            (click)="toggleRow(client.id)"
-          >
+          <tr class="data-row" [class.expanded]="expandedRowId() === client.id" (click)="toggleRow(client.id)">
             <td class="col-name">{{ client.name }}</td>
             <td>{{ client.phone }}</td>
-            <td>
-              <span class="badge badge-{{ client.propertyType }}">{{ client.propertyType }}</span>
-            </td>
-            <td>
-              <span class="badge badge-{{ client.status }}">{{ client.status }}</span>
-            </td>
+            <td><span class="badge badge-{{ client.propertyType }}">{{ client.propertyType }}</span></td>
+            <td><span class="badge badge-{{ client.status }}">{{ client.status }}</span></td>
             <td>{{ formatDealValue(client.dealValue) }}</td>
             <td>{{ client.realtorName }}</td>
+            <td class="col-actions">
+              <button class="action-btn edit-btn" title="Edit" (click)="requestEdit($event, client)">✏</button>
+              <button class="action-btn delete-btn" title="Delete" (click)="startDelete($event, client.id)">✕</button>
+            </td>
           </tr>
+          @if (deletingId() === client.id) {
+            <tr class="confirm-row">
+              <td colspan="7">
+                <div class="delete-confirm">
+                  @if (deleteError()) {
+                    <span class="delete-err">{{ deleteError() }}</span>
+                  } @else {
+                    <span>Delete <strong>{{ client.name }}</strong>?</span>
+                  }
+                  <button class="btn-confirm-delete" (click)="confirmDelete(client.id)">Delete</button>
+                  <button class="btn-cancel-delete" (click)="cancelDelete()">Cancel</button>
+                </div>
+              </td>
+            </tr>
+          }
           @if (expandedRowId() === client.id) {
             <tr class="detail-row">
-              <td colspan="6">
+              <td colspan="7">
                 <app-row-detail [entry]="asRecord(client)" [fields]="clientFields" />
               </td>
             </tr>

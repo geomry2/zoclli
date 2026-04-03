@@ -1,6 +1,13 @@
 <nav class="tab-nav">
   <button
     class="tab-btn"
+    [class.active]="activeTab() === 'dashboard'"
+    (click)="switchTab('dashboard')"
+  >
+    Dashboard
+  </button>
+  <button
+    class="tab-btn"
     [class.active]="activeTab() === 'clients'"
     (click)="switchTab('clients')"
   >
@@ -12,5 +19,12 @@
     (click)="switchTab('leads')"
   >
     Leads
+  </button>
+  <button
+    class="tab-btn"
+    [class.active]="activeTab() === 'properties'"
+    (click)="switchTab('properties')"
+  >
+    Properties
   </button>
 </nav>

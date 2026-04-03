@@ -1,6 +1,6 @@
 import { Component, input, output } from '@angular/core';
 
-export type TabType = 'clients' | 'leads';
+export type TabType = 'clients' | 'leads' | 'dashboard' | 'properties';
 
 @Component({
   selector: 'app-tab-nav',

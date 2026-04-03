@@ -1,0 +1,121 @@
+<div class="dashboard">
+
+  <!-- KPI cards -->
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <div class="kpi-label">Total Clients</div>
+      <div class="kpi-value">{{ totalClients() }}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Total Leads</div>
+      <div class="kpi-value">{{ totalLeads() }}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Total Revenue</div>
+      <div class="kpi-value">{{ formatCurrency(totalRevenue()) }}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Avg Deal Value</div>
+      <div class="kpi-value">{{ formatCurrency(avgDeal()) }}</div>
+    </div>
+  </div>
+
+  <!-- Second row -->
+  <div class="section-row">
+
+    <!-- Lead Pipeline -->
+    <div class="panel">
+      <div class="panel-title">Lead Pipeline</div>
+      @for (row of leadsByStatus(); track row.label) {
+        <div class="stat-row">
+          <span class="stat-label">{{ row.label }}</span>
+          <div class="bar-wrap">
+            <div class="bar" [style.width.%]="pct(row.count, totalLeads())" [style.background]="row.color"></div>
+          </div>
+          <span class="stat-count">{{ row.count }}</span>
+        </div>
+      }
+    </div>
+
+    <!-- Client Status -->
+    <div class="panel">
+      <div class="panel-title">Client Status</div>
+      @for (row of clientsByStatus(); track row.label) {
+        <div class="stat-row">
+          <span class="stat-label">{{ row.label }}</span>
+          <div class="bar-wrap">
+            <div class="bar" [style.width.%]="pct(row.count, totalClients())" [style.background]="row.color"></div>
+          </div>
+          <span class="stat-count">{{ row.count }}</span>
+        </div>
+      }
+    </div>
+
+    <!-- Follow-ups -->
+    <div class="panel">
+      <div class="panel-title">Follow-ups</div>
+      <div class="followup-grid">
+        <div class="followup-card overdue">
+          <div class="followup-num">{{ overdueCount() }}</div>
+          <div class="followup-desc">Overdue</div>
+        </div>
+        <div class="followup-card due-today">
+          <div class="followup-num">{{ dueTodayCount() }}</div>
+          <div class="followup-desc">Due today</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bottom row: Top Realtors + Activity Timeline -->
+  <div class="bottom-row">
+
+  @if (topRealtors().length) {
+    <div class="panel">
+      <div class="panel-title">Top Realtors</div>
+      <table class="realtor-table">
+        <thead>
+          <tr>
+            <th>Realtor</th>
+            <th>Closed Deals</th>
+            <th>Revenue</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (r of topRealtors(); track r.name) {
+            <tr>
+              <td>{{ r.name }}</td>
+              <td>{{ r.deals }}</td>
+              <td>{{ formatCurrency(r.revenue) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <!-- Activity Timeline -->
+  <div class="panel">
+    <div class="panel-title">Recent Activity</div>
+    @if (recentActivity().length === 0) {
+      <div class="activity-empty">No activity yet.</div>
+    } @else {
+      <ul class="activity-list">
+        @for (entry of recentActivity(); track entry.id) {
+          <li class="activity-item activity-{{ entry.action }}">
+            <span class="activity-icon">{{ activityIcon(entry) }}</span>
+            <div class="activity-body">
+              <span class="activity-name">{{ entry.name }}</span>
+              <span class="activity-desc">{{ activityLabel(entry) }}</span>
+            </div>
+            <span class="activity-time">{{ formatTime(entry.timestamp) }}</span>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+
+  </div><!-- /bottom-row -->
+
+</div>

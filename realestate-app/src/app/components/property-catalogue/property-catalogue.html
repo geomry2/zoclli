@@ -1,0 +1,95 @@
+<div class="catalogue">
+
+  <!-- Summary row -->
+  <div class="summary-row">
+    <div class="summary-card">
+      <div class="summary-label">Buildings</div>
+      <div class="summary-value">{{ totalBuildings() }}</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-label">Units tracked</div>
+      <div class="summary-value">{{ totalUnits() }}</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-label">Portfolio value</div>
+      <div class="summary-value">{{ formatCurrency(totalPortfolioValue()) }}</div>
+    </div>
+  </div>
+
+  @if (properties().length === 0) {
+    <div class="empty-state">No properties yet — add clients with a building name to see them here.</div>
+  } @else {
+    <div class="building-list">
+      @for (prop of properties(); track prop.building) {
+        <div class="building-card" [class.expanded]="expandedBuilding() === prop.building">
+
+          <!-- Building header -->
+          <div class="building-header" (click)="toggleBuilding(prop.building)">
+            <div class="building-info">
+              <span class="building-name">{{ prop.building }}</span>
+              <div class="building-meta">
+                <span>{{ prop.clients.length }} client{{ prop.clients.length !== 1 ? 's' : '' }}</span>
+                @if (prop.units.length) {
+                  <span>·</span>
+                  <span>{{ prop.units.length }} unit{{ prop.units.length !== 1 ? 's' : '' }}</span>
+                }
+              </div>
+            </div>
+            <div class="building-right">
+              @if (prop.totalValue > 0) {
+                <span class="building-value">{{ formatCurrency(prop.totalValue) }}</span>
+              }
+              <div class="status-dots">
+                @if (prop.statusCounts['active']) {
+                  <span class="dot dot-active" [title]="prop.statusCounts['active'] + ' active'"></span>
+                }
+                @if (prop.statusCounts['inactive']) {
+                  <span class="dot dot-inactive" [title]="prop.statusCounts['inactive'] + ' inactive'"></span>
+                }
+                @if (prop.statusCounts['closed']) {
+                  <span class="dot dot-closed" [title]="prop.statusCounts['closed'] + ' closed'"></span>
+                }
+              </div>
+              <span class="chevron">{{ expandedBuilding() === prop.building ? '▲' : '▼' }}</span>
+            </div>
+          </div>
+
+          <!-- Expanded unit/client list -->
+          @if (expandedBuilding() === prop.building) {
+            <div class="unit-list">
+              <table class="unit-table">
+                <thead>
+                  <tr>
+                    <th>Unit</th>
+                    <th>Client</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th>Deal Value</th>
+                    <th>Realtor</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (c of prop.clients; track c.id) {
+                    <tr>
+                      <td class="unit-num">{{ c.apartmentNumber || '—' }}</td>
+                      <td>
+                        <div class="client-name">{{ c.name }}</div>
+                        @if (c.phone) { <div class="client-sub">{{ c.phone }}</div> }
+                      </td>
+                      <td><span class="badge badge-{{ c.propertyType }}">{{ c.propertyType }}</span></td>
+                      <td><span class="badge badge-{{ c.status }}">{{ c.status }}</span></td>
+                      <td>{{ c.dealValue ? formatCurrency(c.dealValue) : '—' }}</td>
+                      <td>{{ c.realtorName || '—' }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+
+        </div>
+      }
+    </div>
+  }
+
+</div>
