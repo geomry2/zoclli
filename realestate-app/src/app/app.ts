@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { SearchBar } from './components/search-bar/search-bar';
 import { TabNav, TabType } from './components/tab-nav/tab-nav';
 import { ClientsTable } from './components/clients-table/clients-table';
@@ -27,6 +27,10 @@ export class App {
   readonly editingClient = signal<Client | null>(null);
   readonly editingLead = signal<Lead | null>(null);
   readonly convertingLead = signal<Lead | null>(null);
+  /** Narrows activeTab to only the values CreateModal accepts */
+  readonly modalTab = computed<'clients' | 'leads'>(() =>
+    this.activeTab() === 'leads' ? 'leads' : 'clients'
+  );
 
   private readonly clientService = inject(ClientService);
   private readonly leadService = inject(LeadService);
