@@ -159,7 +159,7 @@
           <input [(ngModel)]="lead.budgetMax" type="number" placeholder="0" />
         </div>
         <div class="field-group">
-          <label>Follow-up Date</label>
+          <label>Follow-up Date {{ lead.status !== 'lost' ? '*' : '' }}</label>
           <input [(ngModel)]="lead.followUpDate" type="date" />
         </div>
 
