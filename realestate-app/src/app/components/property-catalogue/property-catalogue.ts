@@ -5,11 +5,26 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 import { ClientService } from '../../services/client.service';
 import { BuildingService } from '../../services/building.service';
 import { Client } from '../../models/client.model';
+import { Unit } from '../../models/unit.model';
+import { UnitService } from '../../services/unit.service';
+
+interface PropertyEntry {
+  id: string;
+  apartmentNumber: string;
+  propertyType: string;
+  status: string;
+  dealValue: number;
+  realtorName: string;
+  phone?: string;
+  clientName?: string;
+  isStandalone: boolean;
+}
 
 interface PropertyRow {
   building: string;
   units: string[];
   clients: Client[];
+  entries: PropertyEntry[];
   totalValue: number;
   statusCounts: Record<string, number>;
 }
@@ -25,6 +40,7 @@ export class PropertyCatalogue {
   readonly ts = inject(TranslationService);
   private readonly clientService = inject(ClientService);
   private readonly buildingService = inject(BuildingService);
+  private readonly unitService = inject(UnitService);
 
   readonly addUnitRequest = output<string>();
 
@@ -34,27 +50,82 @@ export class PropertyCatalogue {
   readonly creatingProperty = signal(false);
 
   readonly properties = computed((): PropertyRow[] => {
-    const map = new Map<string, Client[]>();
+    const clientMap = new Map<string, Client[]>();
+    const unitMap = new Map<string, Unit[]>();
+
     for (const c of this.clientService.clients()) {
       const key = c.buildingName || '(No building)';
-      if (!map.has(key)) map.set(key, []);
-      map.get(key)!.push(c);
+      if (!clientMap.has(key)) clientMap.set(key, []);
+      clientMap.get(key)!.push(c);
     }
-    // Include buildings from the buildings table even if they have no clients yet
+    for (const unit of this.unitService.units()) {
+      const key = unit.buildingName || '(No building)';
+      if (!unitMap.has(key)) unitMap.set(key, []);
+      unitMap.get(key)!.push(unit);
+    }
+
     for (const b of this.buildingService.buildings()) {
-      if (!map.has(b)) map.set(b, []);
+      if (!clientMap.has(b)) clientMap.set(b, []);
+      if (!unitMap.has(b)) unitMap.set(b, []);
     }
-    return [...map.entries()]
-      .map(([building, clients]) => ({
-        building,
-        units: [...new Set(clients.map(c => c.apartmentNumber).filter(Boolean))].sort(),
-        clients,
-        totalValue: clients.reduce((s, c) => s + (c.dealValue ?? 0), 0),
-        statusCounts: clients.reduce((acc, c) => {
-          acc[c.status] = (acc[c.status] ?? 0) + 1;
+
+    const buildings = new Set([...clientMap.keys(), ...unitMap.keys()]);
+    return [...buildings]
+      .map(building => {
+        const clients = clientMap.get(building) ?? [];
+        const standaloneUnits = unitMap.get(building) ?? [];
+        const entryMap = new Map<string, PropertyEntry>();
+
+        for (const unit of standaloneUnits) {
+          const key = unit.apartmentNumber || `standalone:${unit.id}`;
+          entryMap.set(key, {
+            id: `unit:${unit.id}`,
+            apartmentNumber: unit.apartmentNumber,
+            propertyType: unit.propertyType,
+            status: unit.status,
+            dealValue: unit.dealValue ?? 0,
+            realtorName: unit.realtorName,
+            isStandalone: true,
+          });
+        }
+
+        for (const client of clients) {
+          const key = client.apartmentNumber || `client:${client.id}`;
+          const existing = entryMap.get(key);
+          entryMap.set(key, {
+            id: existing?.id ?? `client:${client.id}`,
+            apartmentNumber: client.apartmentNumber,
+            propertyType: client.propertyType || existing?.propertyType || 'apartment',
+            status: client.status || existing?.status || 'active',
+            dealValue: client.dealValue ?? existing?.dealValue ?? 0,
+            realtorName: client.realtorName || existing?.realtorName || '',
+            phone: client.phone,
+            clientName: client.name,
+            isStandalone: false,
+          });
+        }
+
+        const entries = [...entryMap.values()].sort((a, b) =>
+          a.apartmentNumber.localeCompare(b.apartmentNumber, undefined, { numeric: true, sensitivity: 'base' })
+        );
+
+        const statusCounts = entries.reduce((acc, entry) => {
+          acc[entry.status] = (acc[entry.status] ?? 0) + 1;
           return acc;
-        }, {} as Record<string, number>),
-      }))
+        }, {} as Record<string, number>);
+        const units = [...new Set(entries.map(entry => entry.apartmentNumber).filter(Boolean))].sort((a, b) =>
+          a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' })
+        );
+
+        return {
+          building,
+          units,
+          clients,
+          entries,
+          totalValue: entries.reduce((sum, entry) => sum + (entry.dealValue ?? 0), 0),
+          statusCounts,
+        };
+      })
       .sort((a, b) => b.totalValue - a.totalValue);
   });
 

@@ -53,21 +53,6 @@
         <input [(ngModel)]="unit.dealValue" type="number" placeholder="0" />
       </div>
 
-      <div class="field-group section-divider full"><span>{{ 'form.sectionClient' | translate }}</span></div>
-
-      <div class="field-group full">
-        <label>{{ 'form.fullName' | translate }}</label>
-        <input [(ngModel)]="unit.name" placeholder="e.g. Jane Smith" />
-      </div>
-      <div class="field-group">
-        <label>{{ 'form.phone' | translate }}</label>
-        <input [(ngModel)]="unit.phone" placeholder="+1-555-0100" />
-      </div>
-      <div class="field-group">
-        <label>{{ 'form.email' | translate }}</label>
-        <input [(ngModel)]="unit.email" type="email" placeholder="jane@email.com" />
-      </div>
-
       <div class="field-group section-divider full"><span>{{ 'form.sectionRealtor' | translate }}</span></div>
 
       <div class="field-group">
@@ -94,6 +79,7 @@
 
       <div class="field-group full">
         <label>{{ 'form.notes' | translate }}</label>
+        <div class="field-hint">{{ 'addUnit.unassignedHint' | translate }}</div>
         <textarea [(ngModel)]="unit.notes" rows="3" [attr.placeholder]="'form.notesPlaceholder' | translate"></textarea>
       </div>
 
