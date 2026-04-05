@@ -25,8 +25,12 @@ export class BuildingService {
 
   async remove(name: string): Promise<{ error: string | null }> {
     if (!name?.trim() || !this.supabase) return { error: null };
-    const { error } = await this.supabase.from('buildings').delete().eq('name', name);
+    const { error, count } = await this.supabase
+      .from('buildings')
+      .delete({ count: 'exact' })
+      .eq('name', name);
     if (error) return { error: error.message };
+    if (count === 0) return { error: 'Delete blocked — missing DELETE policy in Supabase RLS.' };
     this.buildings.update(list => list.filter(item => item !== name));
     return { error: null };
   }
