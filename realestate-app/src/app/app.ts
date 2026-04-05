@@ -7,6 +7,7 @@ import { CreateModal } from './components/create-modal/create-modal';
 import { PasswordGate } from './components/password-gate/password-gate';
 import { Dashboard } from './components/dashboard/dashboard';
 import { PropertyCatalogue } from './components/property-catalogue/property-catalogue';
+import { AddUnitModal } from './components/add-unit-modal/add-unit-modal';
 import { Client } from './models/client.model';
 import { Lead } from './models/lead.model';
 import { ClientService } from './services/client.service';
@@ -17,7 +18,7 @@ import { applySearch } from './utils/csv.utils';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [SearchBar, TabNav, ClientsTable, LeadsTable, CreateModal, PasswordGate, Dashboard, PropertyCatalogue],
+  imports: [SearchBar, TabNav, ClientsTable, LeadsTable, CreateModal, AddUnitModal, PasswordGate, Dashboard, PropertyCatalogue],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
@@ -29,6 +30,8 @@ export class App {
   readonly editingLead = signal<Lead | null>(null);
   readonly convertingLead = signal<Lead | null>(null);
   readonly prefillBuilding = signal<string | null>(null);
+  readonly showAddUnitModal = signal(false);
+  readonly addUnitBuilding = signal<string>('');
   /** Narrows activeTab to only the values CreateModal accepts */
   readonly modalTab = computed<'clients' | 'leads'>(() =>
     this.activeTab() === 'leads' ? 'leads' : 'clients'
@@ -80,11 +83,13 @@ export class App {
   }
 
   openAddUnit(buildingName: string) {
-    this.editingClient.set(null);
-    this.editingLead.set(null);
-    this.convertingLead.set(null);
-    this.prefillBuilding.set(buildingName);
-    this.showModal.set(true);
+    this.addUnitBuilding.set(buildingName);
+    this.showAddUnitModal.set(true);
+  }
+
+  closeAddUnitModal() {
+    this.showAddUnitModal.set(false);
+    this.addUnitBuilding.set('');
   }
 
   exportXlsx() {
