@@ -97,6 +97,7 @@
                       <th>{{ 'col.status' | translate }}</th>
                       <th>{{ 'col.dealValue' | translate }}</th>
                       <th>{{ 'col.realtor' | translate }}</th>
+                      <th>{{ 'col.actions' | translate }}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -108,9 +109,64 @@
                           @if (entry.phone) { <div class="client-sub">{{ entry.phone }}</div> }
                         </td>
                         <td><span class="badge badge-{{ entry.propertyType }}">{{ entry.propertyType }}</span></td>
-                        <td><span class="badge badge-{{ entry.status }}">{{ entry.status }}</span></td>
-                        <td>{{ entry.dealValue ? formatCurrency(entry.dealValue) : '—' }}</td>
+                        <td>
+                          @if (entry.isStandalone && entry.unitId) {
+                            <select
+                              class="quick-input quick-select"
+                              [ngModel]="currentStatus(entry)"
+                              (ngModelChange)="setQuickStatus(entry, $event)"
+                              (click)="$event.stopPropagation()">
+                              <option value="active">active</option>
+                              <option value="inactive">inactive</option>
+                              <option value="closed">closed</option>
+                            </select>
+                          } @else {
+                            <span class="badge badge-{{ entry.status }}">{{ entry.status }}</span>
+                          }
+                        </td>
+                        <td>
+                          @if (entry.isStandalone && entry.unitId) {
+                            <input
+                              class="quick-input quick-number"
+                              type="number"
+                              min="0"
+                              [ngModel]="currentValue(entry)"
+                              (ngModelChange)="setQuickValue(entry, $event)"
+                              (click)="$event.stopPropagation()" />
+                          } @else {
+                            {{ entry.dealValue ? formatCurrency(entry.dealValue) : '—' }}
+                          }
+                        </td>
                         <td>{{ entry.realtorName || '—' }}</td>
+                        <td class="unit-actions-cell">
+                          @if (entry.isStandalone && entry.unitId) {
+                            <div class="unit-actions">
+                              <button class="btn-row-action" (click)="requestEditUnit($event, entry)">
+                                {{ 'btn.edit' | translate }}
+                              </button>
+                              <button
+                                class="btn-row-action btn-row-save"
+                                [disabled]="!hasQuickChanges(entry) || quickSavingId() === entry.unitId"
+                                (click)="quickSave($event, entry)">
+                                {{ quickSavingId() === entry.unitId ? ('btn.saving' | translate) : ('prop.quickSave' | translate) }}
+                              </button>
+                              <button class="btn-row-action btn-row-danger" (click)="startDelete($event, entry)">
+                                {{ 'btn.delete' | translate }}
+                              </button>
+                            </div>
+                            @if (deletePendingId() === entry.unitId) {
+                              <div class="row-confirm">
+                                <span>{{ 'prop.deleteUnit' | translate }} {{ entry.apartmentNumber || '—' }}?</span>
+                                <button class="btn-mini-danger" (click)="confirmDelete($event, entry)">{{ 'btn.confirmDelete' | translate }}</button>
+                                <button class="btn-mini-muted" (click)="cancelDelete($event)">{{ 'btn.cancelDelete' | translate }}</button>
+                              </div>
+                            } @else if (errorFor(entry)) {
+                              <div class="row-error">{{ errorFor(entry) }}</div>
+                            }
+                          } @else {
+                            <span class="linked-unit-note">{{ 'prop.linkedClientUnit' | translate }}</span>
+                          }
+                        </td>
                       </tr>
                     }
                   </tbody>

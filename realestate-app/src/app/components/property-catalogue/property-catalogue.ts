@@ -10,11 +10,15 @@ import { UnitService } from '../../services/unit.service';
 
 interface PropertyEntry {
   id: string;
+  unitId?: string;
   apartmentNumber: string;
   propertyType: string;
   status: string;
   dealValue: number;
   realtorName: string;
+  realtorAgency?: string;
+  purchaseDate?: string;
+  notes?: string;
   phone?: string;
   clientName?: string;
   isStandalone: boolean;
@@ -43,11 +47,18 @@ export class PropertyCatalogue {
   private readonly unitService = inject(UnitService);
 
   readonly addUnitRequest = output<string>();
+  readonly editUnitRequest = output<Unit>();
 
   readonly expandedBuilding = signal<string | null>(null);
   readonly showNewPropertyForm = signal(false);
   readonly newPropertyName = signal('');
   readonly creatingProperty = signal(false);
+  readonly quickEditStatus = signal<Record<string, string>>({});
+  readonly quickEditValue = signal<Record<string, number>>({});
+  readonly quickSavingId = signal<string | null>(null);
+  readonly deletePendingId = signal<string | null>(null);
+  readonly actionError = signal<string | null>(null);
+  readonly actionErrorId = signal<string | null>(null);
 
   readonly properties = computed((): PropertyRow[] => {
     const clientMap = new Map<string, Client[]>();
@@ -80,11 +91,15 @@ export class PropertyCatalogue {
           const key = unit.apartmentNumber || `standalone:${unit.id}`;
           entryMap.set(key, {
             id: `unit:${unit.id}`,
+            unitId: unit.id,
             apartmentNumber: unit.apartmentNumber,
             propertyType: unit.propertyType,
             status: unit.status,
             dealValue: unit.dealValue ?? 0,
             realtorName: unit.realtorName,
+            realtorAgency: unit.realtorAgency,
+            purchaseDate: unit.purchaseDate,
+            notes: unit.notes,
             isStandalone: true,
           });
         }
@@ -146,6 +161,97 @@ export class PropertyCatalogue {
     this.addUnitRequest.emit(buildingName);
   }
 
+  requestEditUnit(event: Event, entry: PropertyEntry) {
+    event.stopPropagation();
+    const unit = this.findUnit(entry.unitId);
+    if (!unit) return;
+    this.editUnitRequest.emit(unit);
+  }
+
+  startDelete(event: Event, entry: PropertyEntry) {
+    event.stopPropagation();
+    if (!entry.unitId) return;
+    this.actionError.set(null);
+    this.actionErrorId.set(null);
+    this.deletePendingId.set(entry.unitId);
+  }
+
+  cancelDelete(event?: Event) {
+    event?.stopPropagation();
+    this.deletePendingId.set(null);
+    this.actionError.set(null);
+    this.actionErrorId.set(null);
+  }
+
+  setQuickStatus(entry: PropertyEntry, value: string) {
+    if (!entry.unitId) return;
+    this.quickEditStatus.update(state => ({ ...state, [entry.unitId!]: value }));
+  }
+
+  setQuickValue(entry: PropertyEntry, value: string | number) {
+    if (!entry.unitId) return;
+    const parsed = Number(value);
+    this.quickEditValue.update(state => ({ ...state, [entry.unitId!]: Number.isFinite(parsed) ? parsed : 0 }));
+  }
+
+  currentStatus(entry: PropertyEntry): string {
+    return entry.unitId ? (this.quickEditStatus()[entry.unitId] ?? entry.status) : entry.status;
+  }
+
+  currentValue(entry: PropertyEntry): number {
+    return entry.unitId ? (this.quickEditValue()[entry.unitId] ?? (entry.dealValue ?? 0)) : (entry.dealValue ?? 0);
+  }
+
+  hasQuickChanges(entry: PropertyEntry): boolean {
+    return this.currentStatus(entry) !== entry.status || this.currentValue(entry) !== (entry.dealValue ?? 0);
+  }
+
+  async quickSave(event: Event, entry: PropertyEntry) {
+    event.stopPropagation();
+    const unit = this.findUnit(entry.unitId);
+    if (!unit) return;
+    this.quickSavingId.set(unit.id);
+    this.actionError.set(null);
+    this.actionErrorId.set(null);
+    const { error } = await this.unitService.update({
+      ...unit,
+      status: this.currentStatus(entry) as Unit['status'],
+      dealValue: this.currentValue(entry),
+    });
+    this.quickSavingId.set(null);
+    if (error) {
+      this.actionError.set(error);
+      this.actionErrorId.set(unit.id);
+      return;
+    }
+    this.quickEditStatus.update(state => {
+      const next = { ...state };
+      delete next[unit.id];
+      return next;
+    });
+    this.quickEditValue.update(state => {
+      const next = { ...state };
+      delete next[unit.id];
+      return next;
+    });
+  }
+
+  async confirmDelete(event: Event, entry: PropertyEntry) {
+    event.stopPropagation();
+    if (!entry.unitId) return;
+    const { error } = await this.unitService.remove(entry.unitId);
+    if (error) {
+      this.actionError.set(error);
+      this.actionErrorId.set(entry.unitId);
+      return;
+    }
+    this.cancelDelete();
+  }
+
+  errorFor(entry: PropertyEntry): string | null {
+    return this.actionErrorId() === entry.unitId ? this.actionError() : null;
+  }
+
   openNewPropertyForm(event: Event) {
     event.stopPropagation();
     this.newPropertyName.set('');
@@ -172,5 +278,10 @@ export class PropertyCatalogue {
     if (value >= 1_000_000) return '€' + (value / 1_000_000).toFixed(2) + 'M';
     if (value >= 1_000) return '€' + (value / 1_000).toFixed(0) + 'K';
     return '€' + value.toLocaleString('en-US');
+  }
+
+  private findUnit(id?: string): Unit | undefined {
+    if (!id) return undefined;
+    return this.unitService.units().find(unit => unit.id === id);
   }
 }

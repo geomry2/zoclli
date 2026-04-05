@@ -3,7 +3,7 @@
 <div class="modal">
   <div class="modal-header">
     <div class="modal-header-info">
-      <h2 class="modal-title">{{ 'modal.addUnit' | translate }}</h2>
+      <h2 class="modal-title">{{ (editUnit() ? 'modal.editUnit' : 'modal.addUnit') | translate }}</h2>
       <span class="modal-building">{{ buildingName() }}</span>
     </div>
     <button class="close-btn" (click)="close()">✕</button>
@@ -89,7 +89,7 @@
   <div class="modal-footer">
     <button class="btn-cancel" (click)="close()">{{ 'btn.cancel' | translate }}</button>
     <button class="btn-save" (click)="save()" [disabled]="saving()">
-      {{ saving() ? ('btn.saving' | translate) : ('addUnit.addBtn' | translate) }}
+      {{ saving() ? ('btn.saving' | translate) : ((editUnit() ? 'btn.saveChanges' : 'addUnit.addBtn') | translate) }}
     </button>
   </div>
 </div>
