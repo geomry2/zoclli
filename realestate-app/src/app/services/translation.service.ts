@@ -68,6 +68,7 @@ const EN: Translations = {
   'search.placeholder': 'Search by any field…',
   'view.board': 'Board',
   'view.table': 'Table',
+  'view.followUps': 'Follow-ups',
   // Filters
   'filter.status': 'Status',
   'filter.propertyType': 'Property Type',
@@ -101,6 +102,7 @@ const EN: Translations = {
   'dash.leadPipeline': 'Lead Pipeline',
   'dash.clientStatus': 'Client Status',
   'dash.followUps': 'Follow-ups',
+  'dash.openList': 'Open List',
   'dash.overdue': 'Overdue',
   'dash.dueToday': 'Due today',
   'dash.propertyMix': 'Property Mix',
@@ -141,6 +143,19 @@ const EN: Translations = {
   'leadBoard.noInterest': 'No property preference yet',
   'leadBoard.noRealtor': 'No realtor assigned',
   'leadBoard.saving': 'Saving stage…',
+  // Follow-ups list
+  'followUps.title': 'Lead Follow-ups',
+  'followUps.subtitle': 'Review the next touchpoints in due-date order and update them fast.',
+  'followUps.all': 'All',
+  'followUps.overdue': 'Overdue',
+  'followUps.today': 'Today',
+  'followUps.upcoming': 'Upcoming',
+  'followUps.empty': 'No leads match this follow-up view.',
+  'followUps.noDate': 'No date scheduled',
+  'followUps.noInterest': 'No property preference yet',
+  'followUps.noRealtor': 'No realtor assigned',
+  'followUps.markContacted': 'Mark Contacted',
+  'followUps.reschedule': 'Reschedule',
   // Property types
   'proptype.apartment': 'Apartment',
   'proptype.house': 'House',
@@ -212,6 +227,12 @@ const EN: Translations = {
   // Add unit
   'addUnit.addBtn': 'Add Unit',
   'addUnit.unassignedHint': 'This creates a standalone unit. You can link a client to it later by using the same building and unit number.',
+  // Notes timeline
+  'notes.add': 'Add Note',
+  'notes.placeholder': 'Log a call, update, or next step…',
+  'notes.hint': 'Each note is saved with a timestamp in the contact history.',
+  'notes.empty': 'No notes yet. Add the first timeline entry.',
+  'notes.legacy': 'Imported note',
 };
 
 const RU: Translations = {
@@ -278,6 +299,7 @@ const RU: Translations = {
   'search.placeholder': 'Поиск по любому полю…',
   'view.board': 'Доска',
   'view.table': 'Таблица',
+  'view.followUps': 'Контакты',
   // Filters
   'filter.status': 'Статус',
   'filter.propertyType': 'Тип объекта',
@@ -311,6 +333,7 @@ const RU: Translations = {
   'dash.leadPipeline': 'Воронка лидов',
   'dash.clientStatus': 'Статус клиентов',
   'dash.followUps': 'Контакты',
+  'dash.openList': 'Открыть список',
   'dash.overdue': 'Просрочено',
   'dash.dueToday': 'Сегодня',
   'dash.propertyMix': 'Структура объектов',
@@ -351,6 +374,19 @@ const RU: Translations = {
   'leadBoard.noInterest': 'Пока без предпочтений по объекту',
   'leadBoard.noRealtor': 'Риелтор не назначен',
   'leadBoard.saving': 'Сохраняем этап…',
+  // Follow-ups list
+  'followUps.title': 'План контактов',
+  'followUps.subtitle': 'Просматривайте следующие касания по сроку и обновляйте их в пару кликов.',
+  'followUps.all': 'Все',
+  'followUps.overdue': 'Просрочено',
+  'followUps.today': 'На сегодня',
+  'followUps.upcoming': 'Впереди',
+  'followUps.empty': 'Для этого режима контактов лиды не найдены.',
+  'followUps.noDate': 'Дата не назначена',
+  'followUps.noInterest': 'Пока без предпочтений по объекту',
+  'followUps.noRealtor': 'Риелтор не назначен',
+  'followUps.markContacted': 'Отметить контакт',
+  'followUps.reschedule': 'Перенести',
   // Property types
   'proptype.apartment': 'Квартира',
   'proptype.house': 'Дом',
@@ -422,6 +458,12 @@ const RU: Translations = {
   // Add unit
   'addUnit.addBtn': 'Добавить юнит',
   'addUnit.unassignedHint': 'Это создаст отдельный юнит. Позже можно связать его с клиентом, указав то же здание и номер юнита.',
+  // Notes timeline
+  'notes.add': 'Добавить заметку',
+  'notes.placeholder': 'Зафиксируйте звонок, апдейт или следующий шаг…',
+  'notes.hint': 'Каждая заметка сохраняется с отметкой времени в истории контакта.',
+  'notes.empty': 'Заметок пока нет. Добавьте первую запись в таймлайн.',
+  'notes.legacy': 'Импортированная заметка',
 };
 
 const DICTS: Record<Lang, Translations> = { en: EN, ru: RU };

@@ -1,3 +1,5 @@
+import { ContactNote } from './contact-note.model';
+
 export type PropertyType = 'apartment' | 'house' | 'commercial' | 'land' | 'villa';
 export type ClientStatus = 'active' | 'inactive' | 'closed';
 
@@ -14,5 +16,5 @@ export interface Client {
   dealValue: number;
   realtorName: string;
   realtorAgency: string;
-  notes: string;
+  notes: ContactNote[];
 }

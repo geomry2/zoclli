@@ -77,16 +77,19 @@
     <div class="panel">
       <div class="panel-header">
         <span class="panel-title">{{ 'dash.followUps' | translate }}</span>
+        <button class="panel-link-btn" type="button" (click)="openFollowUps('all')">
+          {{ 'dash.openList' | translate }}
+        </button>
       </div>
       <div class="followup-grid">
-        <div class="followup-card overdue">
+        <button class="followup-card overdue" type="button" (click)="openFollowUps('overdue')">
           <div class="followup-num">{{ overdueCount() }}</div>
           <div class="followup-desc">{{ 'dash.overdue' | translate }}</div>
-        </div>
-        <div class="followup-card due-today">
+        </button>
+        <button class="followup-card due-today" type="button" (click)="openFollowUps('today')">
           <div class="followup-num">{{ dueTodayCount() }}</div>
           <div class="followup-desc">{{ 'dash.dueToday' | translate }}</div>
-        </div>
+        </button>
       </div>
     </div>
 

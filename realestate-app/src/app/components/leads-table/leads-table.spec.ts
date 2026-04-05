@@ -18,7 +18,7 @@ function buildLead(overrides: Partial<Lead>): Lead {
     budgetMin: 0,
     budgetMax: 0,
     followUpDate: '',
-    notes: '',
+    notes: [],
     ...overrides,
   };
 }

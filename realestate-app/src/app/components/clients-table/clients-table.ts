@@ -128,7 +128,7 @@ export class ClientsTable {
     { key: 'dealValue', label: 'field.dealValue', type: 'currency' },
     { key: 'realtorName', label: 'field.realtorName' },
     { key: 'realtorAgency', label: 'field.realtorAgency' },
-    { key: 'notes', label: 'field.notes', multiline: true },
+    { key: 'notes', label: 'field.notes', type: 'notes' },
   ];
 
   formatDealValue(value: number): string {

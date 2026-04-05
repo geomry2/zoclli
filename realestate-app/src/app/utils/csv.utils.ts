@@ -1,7 +1,10 @@
+import { flattenValue, normalizeRecordForExport } from './record.utils';
+
 export function exportToCsv(filename: string, rows: Record<string, unknown>[]): void {
   if (!rows.length) return;
 
-  const headers = Object.keys(rows[0]).filter(k => k !== 'id');
+  const normalizedRows = rows.map(row => normalizeRecordForExport(row));
+  const headers = Object.keys(normalizedRows[0]);
   const escape = (val: unknown): string => {
     const s = String(val ?? '').replace(/"/g, '""');
     return s.includes(',') || s.includes('"') || s.includes('\n') ? `"${s}"` : s;
@@ -9,7 +12,7 @@ export function exportToCsv(filename: string, rows: Record<string, unknown>[]): 
 
   const lines = [
     headers.join(','),
-    ...rows.map(row => headers.map(h => escape(row[h])).join(','))
+    ...normalizedRows.map(row => headers.map(h => escape(row[h])).join(','))
   ];
 
   const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
@@ -26,7 +29,7 @@ export function applySearch<T extends Record<string, unknown>>(items: T[], query
   if (!q) return items;
   const words = q.split(/\s+/).filter(Boolean);
   return items.filter(item => {
-    const haystack = Object.values(item).map(v => String(v ?? '')).join(' ').toLowerCase();
+    const haystack = Object.values(item).map(v => flattenValue(v)).join(' ').toLowerCase();
     return words.every(w => haystack.includes(w));
   });
 }

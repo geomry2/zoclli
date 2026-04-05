@@ -1,0 +1,33 @@
+<div class="notes-box">
+  @if (editable()) {
+    <div class="notes-composer">
+      <textarea
+        class="notes-input"
+        rows="3"
+        [attr.placeholder]="'notes.placeholder' | translate"
+        [ngModel]="draftBody()"
+        (ngModelChange)="updateDraft($event)"></textarea>
+      <div class="notes-composer__footer">
+        <span class="notes-helper">{{ 'notes.hint' | translate }}</span>
+        <button class="notes-add-btn" type="button" [disabled]="!draftBody().trim()" (click)="addNote()">
+          {{ 'notes.add' | translate }}
+        </button>
+      </div>
+    </div>
+  }
+
+  <div class="notes-timeline">
+    @if (!normalizedNotes().length) {
+      <div class="notes-empty">{{ 'notes.empty' | translate }}</div>
+    } @else {
+      @for (note of normalizedNotes(); track note.id) {
+        <article class="notes-entry">
+          <div class="notes-entry__header">
+            <span class="notes-entry__timestamp">{{ formatTimestamp(note) }}</span>
+          </div>
+          <div class="notes-entry__body">{{ note.body }}</div>
+        </article>
+      }
+    }
+  </div>
+</div>
