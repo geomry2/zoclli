@@ -1,4 +1,4 @@
-import { Component, inject, input, output, signal } from '@angular/core';
+import { Component, effect, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { ClientService } from '../../services/client.service';
@@ -19,6 +19,7 @@ type FieldMode = 'select' | 'new';
 })
 export class AddUnitModal {
   readonly buildingName = input.required<string>();
+  readonly editUnit = input<Unit | null>(null);
   readonly closed = output<void>();
 
   private readonly clientService = inject(ClientService);
@@ -31,6 +32,33 @@ export class AddUnitModal {
   readonly agencyMode = signal<FieldMode>('select');
 
   unit: Omit<Unit, 'id'> = this.emptyUnit();
+
+  constructor() {
+    effect(() => {
+      const editUnit = this.editUnit();
+      if (editUnit) {
+        this.unit = {
+          buildingName: editUnit.buildingName,
+          apartmentNumber: editUnit.apartmentNumber,
+          propertyType: editUnit.propertyType,
+          status: editUnit.status,
+          purchaseDate: editUnit.purchaseDate,
+          dealValue: editUnit.dealValue,
+          realtorName: editUnit.realtorName,
+          realtorAgency: editUnit.realtorAgency,
+          notes: editUnit.notes,
+        };
+        this.agencyMode.set(editUnit.realtorAgency ? 'select' : 'select');
+        this.saveError.set(null);
+        return;
+      }
+
+      this.unit = this.emptyUnit();
+      this.unit.buildingName = this.buildingName();
+      this.agencyMode.set('select');
+      this.saveError.set(null);
+    });
+  }
 
   get allAgencies(): string[] {
     const fromUnits = this.unitService.units().map(u => u.realtorAgency).filter(Boolean);
@@ -79,7 +107,10 @@ export class AddUnitModal {
   async save() {
     const apartmentNumber = this.unit.apartmentNumber.trim();
     if (!apartmentNumber) { this.saveError.set('Unit number is required.'); return; }
-    if (this.usedApartmentNumbers.includes(apartmentNumber)) {
+    const currentUnit = this.editUnit();
+    const apartmentTaken = this.usedApartmentNumbers.includes(apartmentNumber)
+      && apartmentNumber !== currentUnit?.apartmentNumber;
+    if (apartmentTaken) {
       this.saveError.set(`Unit ${apartmentNumber} already exists in ${this.buildingName()}.`);
       return;
     }
@@ -95,7 +126,9 @@ export class AddUnitModal {
     };
     await this.buildingService.ensureExists(this.buildingName());
     await this.agencyService.ensureExists(payload.realtorAgency);
-    const { error } = await this.unitService.add(payload);
+    const { error } = currentUnit
+      ? await this.unitService.update({ ...currentUnit, ...payload })
+      : await this.unitService.add(payload);
     this.saving.set(false);
     if (error) { this.saveError.set(error); } else { this.closed.emit(); }
   }

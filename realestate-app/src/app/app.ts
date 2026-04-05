@@ -10,6 +10,7 @@ import { PropertyCatalogue } from './components/property-catalogue/property-cata
 import { AddUnitModal } from './components/add-unit-modal/add-unit-modal';
 import { Client } from './models/client.model';
 import { Lead } from './models/lead.model';
+import { Unit } from './models/unit.model';
 import { ClientService } from './services/client.service';
 import { LeadService } from './services/lead.service';
 import { TranslationService } from './services/translation.service';
@@ -35,6 +36,7 @@ export class App {
   readonly prefillBuilding = signal<string | null>(null);
   readonly showAddUnitModal = signal(false);
   readonly addUnitBuilding = signal<string>('');
+  readonly editingUnit = signal<Unit | null>(null);
   /** Narrows activeTab to only the values CreateModal accepts */
   readonly modalTab = computed<'clients' | 'leads'>(() =>
     this.activeTab() === 'leads' ? 'leads' : 'clients'
@@ -86,13 +88,21 @@ export class App {
   }
 
   openAddUnit(buildingName: string) {
+    this.editingUnit.set(null);
     this.addUnitBuilding.set(buildingName);
+    this.showAddUnitModal.set(true);
+  }
+
+  openEditUnit(unit: Unit) {
+    this.editingUnit.set(unit);
+    this.addUnitBuilding.set(unit.buildingName);
     this.showAddUnitModal.set(true);
   }
 
   closeAddUnitModal() {
     this.showAddUnitModal.set(false);
     this.addUnitBuilding.set('');
+    this.editingUnit.set(null);
   }
 
   exportXlsx() {

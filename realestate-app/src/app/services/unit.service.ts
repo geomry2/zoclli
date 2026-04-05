@@ -41,4 +41,32 @@ export class UnitService {
     this.units.update(list => [...list, toCamelCase(data) as unknown as Unit]);
     return { error: null };
   }
+
+  async update(unit: Unit): Promise<{ error: string | null }> {
+    if (!this.supabase) return { error: 'Supabase not configured.' };
+    const { id, ...rest } = unit;
+    const { data, error } = await this.supabase
+      .from('units')
+      .update(toSnakeCase(rest as unknown as Record<string, unknown>))
+      .eq('id', id)
+      .select()
+      .single();
+    if (error) return { error: error.message };
+    if (!data) return { error: 'Update blocked — missing UPDATE policy in Supabase RLS.' };
+    const updated = toCamelCase(data) as unknown as Unit;
+    this.units.update(list => list.map(entry => entry.id === id ? updated : entry));
+    return { error: null };
+  }
+
+  async remove(id: string): Promise<{ error: string | null }> {
+    if (!this.supabase) return { error: 'Supabase not configured.' };
+    const { error, count } = await this.supabase
+      .from('units')
+      .delete({ count: 'exact' })
+      .eq('id', id);
+    if (error) return { error: error.message };
+    if (count === 0) return { error: 'Delete blocked — missing DELETE policy in Supabase RLS.' };
+    this.units.update(list => list.filter(unit => unit.id !== id));
+    return { error: null };
+  }
 }
