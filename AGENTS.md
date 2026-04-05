@@ -41,9 +41,12 @@ npm run test
 
 - `src/app/components/dashboard/`: KPIs and recent activity
 - `src/app/components/clients-table/`: client list and editing entry point
+- `src/app/components/leads-board/`: kanban pipeline grouped by lead status
+- `src/app/components/lead-follow-ups/`: due-date-oriented follow-up queue with quick actions
 - `src/app/components/leads-table/`: lead list and conversion/editing entry point
 - `src/app/components/property-catalogue/`: grouped building/unit view
 - `src/app/components/create-modal/`: create/edit client or lead, including lead-to-client conversion
+- `src/app/components/contact-notes/`: reusable chronological notes timeline for clients and leads
 - `src/app/components/add-unit-modal/`: create/edit units
 - `src/app/components/password-gate/`: simple password gate backed by `environment.appPassword`
 
@@ -60,8 +63,8 @@ npm run test
 
 ### Models
 
-- `Client`: contact + purchase/deal data
-- `Lead`: prospect + follow-up data
+- `Client`: contact + purchase/deal data, commission fields, serialized notes timeline
+- `Lead`: prospect + follow-up data with serialized notes timeline
 - `Unit`: property inventory row, aligned closely with client property fields
 
 ## Data And Environment
@@ -96,6 +99,7 @@ Supabase tables currently implied by the app:
 There are SQL files in `supabase/` for some schema pieces:
 
 - `supabase/buildings.sql`
+- `supabase/clients-commission.sql`
 - `supabase/units.sql`
 
 The services expect snake_case rows from Supabase and convert them to camelCase in the app using `case.utils.ts`.
@@ -103,10 +107,15 @@ The services expect snake_case rows from Supabase and convert them to camelCase 
 ## Product Behavior Notes
 
 - Clients and leads are searchable from the app shell.
+- Client and lead tables support sorting, structured filters, per-table column visibility, and responsive mobile card layouts.
+- The leads area has multiple operational views: kanban board, table, and follow-up list.
 - Leads can be converted into clients through `CreateModal`.
+- Contact notes are handled as a chronological timeline and serialized into the existing `notes` field for persistence/backward compatibility.
 - Dashboard metrics are derived client-side from loaded clients, leads, and activity entries.
+- Dashboard `Top Realtors` reflects commission earnings, not just deal counts.
 - Property catalogue combines building names, client records, and standalone units into grouped property rows.
 - XLSX export is available from the shell for clients and leads.
+- Print-friendly PDF export is available for client summaries and property sheets.
 - Translation strings live in `TranslationService`; new user-facing copy should usually be added in both EN and RU.
 
 ## Editing Guidance For Agents
@@ -115,12 +124,14 @@ The services expect snake_case rows from Supabase and convert them to camelCase 
 - Follow existing signal-based patterns instead of introducing RxJS-heavy state unless there is a strong reason.
 - Keep snake_case/camelCase conversions consistent with `case.utils.ts`.
 - When changing forms, check both create and edit flows.
+- When changing clients or leads list UX, review both desktop table behavior and the mobile card presentation.
 - When changing lead or client fields, also review:
   - models
   - create modal
   - table components
   - dashboard-derived stats
   - XLSX/search helpers if relevant
+- When changing notes behavior, also review `contact-notes`, `row-detail`, and notes serialization helpers.
 - When changing copy, update both EN and RU translations.
 
 ## Validation Checklist
