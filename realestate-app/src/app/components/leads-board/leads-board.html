@@ -1,0 +1,90 @@
+<div class="board-shell">
+  <div class="board-header">
+    <div class="board-intro">
+      <div class="board-title">{{ 'leadBoard.title' | translate }}</div>
+      <div class="board-subtitle">{{ 'leadBoard.subtitle' | translate }}</div>
+    </div>
+
+    @if (showResultCount()) {
+      <div class="board-results">{{ ts.results(visibleLeads().length) }}</div>
+    }
+  </div>
+
+  @if (visibleLeads().length === 0) {
+    <div class="board-empty">{{ 'empty.leads' | translate }}</div>
+  } @else {
+    <div class="board-columns">
+      @for (column of columns(); track column.status) {
+        <section
+          class="board-column board-column-{{ column.status }}"
+          [class.drop-target]="isDropTarget(column.status)"
+          (dragover)="onDragOver($event, column.status)"
+          (dragleave)="onDragLeave(column.status)"
+          (drop)="onDrop($event, column.status)">
+          <header class="column-header">
+            <div class="column-title-wrap">
+              <span class="column-dot"></span>
+              <h3 class="column-title">{{ ('status.' + column.status) | translate }}</h3>
+            </div>
+            <span class="column-count">{{ column.leads.length }}</span>
+          </header>
+
+          <div class="column-body">
+            @if (isDropTarget(column.status)) {
+              <div class="drop-zone">{{ 'leadBoard.dropHere' | translate }}</div>
+            }
+
+            @if (column.leads.length === 0) {
+              <div class="column-empty">{{ 'leadBoard.emptyColumn' | translate }}</div>
+            } @else {
+              @for (lead of column.leads; track lead.id) {
+                <article
+                  class="lead-card"
+                  [class.dragging]="isDragging(lead)"
+                  [class.saving]="isSaving(lead)"
+                  draggable="true"
+                  (dragstart)="onDragStart($event, lead)"
+                  (dragend)="onDragEnd()">
+                  <div class="lead-card__top">
+                    <div>
+                      <h4 class="lead-name">{{ lead.name }}</h4>
+                      <div class="lead-phone">{{ lead.phone || '-' }}</div>
+                    </div>
+                    <span class="lead-budget">{{ formatBudget(lead) }}</span>
+                  </div>
+
+                  <div class="lead-interest">{{ lead.interestedIn || ('leadBoard.noInterest' | translate) }}</div>
+
+                  <div class="lead-meta">
+                    <span class="lead-tag">{{ lead.realtorName || ('leadBoard.noRealtor' | translate) }}</span>
+                    <span
+                      class="lead-follow-up"
+                      [class.overdue]="isOverdue(lead.followUpDate)"
+                      [class.today]="isDueToday(lead.followUpDate)">
+                      {{ 'leadBoard.followUp' | translate }}: {{ formatFollowUp(lead.followUpDate) }}
+                    </span>
+                  </div>
+
+                  <div class="lead-actions">
+                    <button class="lead-action" type="button" (click)="requestEdit($event, lead)">
+                      {{ 'btn.edit' | translate }}
+                    </button>
+                    <button class="lead-action lead-action-primary" type="button" (click)="requestConvert($event, lead)">
+                      {{ 'btn.convert' | translate }}
+                    </button>
+                  </div>
+
+                  @if (isSaving(lead)) {
+                    <div class="lead-status-note">{{ 'leadBoard.saving' | translate }}</div>
+                  } @else if (errorFor(lead)) {
+                    <div class="lead-status-note lead-status-note-error">{{ errorFor(lead) }}</div>
+                  }
+                </article>
+              }
+            }
+          </div>
+        </section>
+      }
+    </div>
+  }
+</div>
