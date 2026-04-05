@@ -22,6 +22,7 @@ export class CreateModal implements OnInit {
   readonly editClient = input<Client | null>(null);
   readonly editLead = input<Lead | null>(null);
   readonly convertLead = input<Lead | null>(null);
+  readonly prefillBuilding = input<string | null>(null);
   readonly closed = output<void>();
 
   private readonly clientService = inject(ClientService);
@@ -130,6 +131,11 @@ export class CreateModal implements OnInit {
       this.client.dealValue = cl.budgetMax || cl.budgetMin || 0;
       this.client.notes = cl.notes;
       if (cl.realtorAgency) this.agencyMode.set('select');
+    }
+    const pb = this.prefillBuilding();
+    if (pb) {
+      this.client.buildingName = pb;
+      this.buildingMode.set('select');
     }
   }
 

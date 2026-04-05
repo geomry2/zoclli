@@ -8,7 +8,7 @@
     <div class="header-right">
       @if (activeTab() !== 'dashboard' && activeTab() !== 'properties') {
         <app-search-bar (queryChange)="onQueryChange($event)" />
-        <button class="btn-export" (click)="exportCsv()">↓ CSV</button>
+        <button class="btn-export" (click)="exportXlsx()">↓ XLSX</button>
         <button class="btn-add" (click)="openCreate()">+ Add</button>
       }
     </div>
@@ -24,7 +24,7 @@
     } @else if (activeTab() === 'leads') {
       <app-leads-table [searchQuery]="searchQuery()" (editRequest)="openEditLead($event)" (convertRequest)="openConvertLead($event)" />
     } @else {
-      <app-property-catalogue />
+      <app-property-catalogue (addUnitRequest)="openAddUnit($event)" />
     }
   </main>
 </div>
@@ -35,6 +35,7 @@
     [editClient]="editingClient()"
     [editLead]="editingLead()"
     [convertLead]="convertingLead()"
+    [prefillBuilding]="prefillBuilding()"
     (closed)="closeModal()"
   />
 }
