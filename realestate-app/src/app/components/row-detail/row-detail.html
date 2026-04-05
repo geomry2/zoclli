@@ -1,14 +1,63 @@
-<div class="detail-panel">
-  @for (field of fields(); track field.key) {
-    <div class="field-block">
-      <span class="field-label">{{ field.label }}</span>
-      @if (isBadge(field)) {
-        <span class="field-badge" [ngClass]="'badge-' + getBadgeValue(entry()[field.key])">
-          {{ getBadgeValue(entry()[field.key]) || '—' }}
-        </span>
-      } @else {
-        <span class="field-value">{{ formatValue(field, entry()[field.key]) }}</span>
-      }
-    </div>
-  }
+<div class="detail-wrap">
+  <div class="detail-panel">
+    @for (field of fields(); track field.key) {
+      <div class="field-block">
+        <span class="field-label">{{ field.label }}</span>
+        @if (editMode()) {
+          @if (isBadge(field) && field.options) {
+            <select
+              class="field-input field-select"
+              [ngModel]="draft[field.key]"
+              (ngModelChange)="draft[field.key] = $event">
+              @for (opt of field.options; track opt) {
+                <option [value]="opt">{{ opt }}</option>
+              }
+            </select>
+          } @else if (field.type === 'date') {
+            <input
+              type="date"
+              class="field-input"
+              [ngModel]="draft[field.key]"
+              (ngModelChange)="draft[field.key] = $event" />
+          } @else if (field.type === 'currency') {
+            <input
+              type="number"
+              class="field-input"
+              [ngModel]="draft[field.key]"
+              (ngModelChange)="setDraftNumber(field.key, $event)" />
+          } @else if (field.multiline) {
+            <textarea
+              class="field-input field-textarea"
+              [ngModel]="draft[field.key]"
+              (ngModelChange)="draft[field.key] = $event"></textarea>
+          } @else {
+            <input
+              type="text"
+              class="field-input"
+              [ngModel]="draft[field.key]"
+              (ngModelChange)="draft[field.key] = $event" />
+          }
+        } @else {
+          @if (isBadge(field)) {
+            <span class="field-badge" [ngClass]="'badge-' + getBadgeValue(entry()[field.key])">
+              {{ getBadgeValue(entry()[field.key]) || '—' }}
+            </span>
+          } @else {
+            <span class="field-value">{{ formatValue(field, entry()[field.key]) }}</span>
+          }
+        }
+      </div>
+    }
+  </div>
+  <div class="detail-footer">
+    @if (saveError()) {
+      <span class="detail-save-error">{{ saveError() }}</span>
+    }
+    @if (!editMode()) {
+      <button class="detail-btn detail-edit-btn" (click)="startEdit($event)">Edit</button>
+    } @else {
+      <button class="detail-btn detail-save-btn" (click)="saveDraft($event)">Save</button>
+      <button class="detail-btn detail-cancel-btn" (click)="cancelEdit($event)">Cancel</button>
+    }
+  </div>
 </div>

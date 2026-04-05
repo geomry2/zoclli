@@ -62,7 +62,7 @@
           @if (expandedRowId() === lead.id) {
             <tr class="detail-row">
               <td colspan="8">
-                <app-row-detail [entry]="asRecord(lead)" [fields]="leadFields" />
+                <app-row-detail [entry]="asRecord(lead)" [fields]="leadFields" (entrySave)="onLeadSave($event)" />
               </td>
             </tr>
           }

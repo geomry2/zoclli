@@ -49,7 +49,7 @@
           @if (expandedRowId() === client.id) {
             <tr class="detail-row">
               <td colspan="7">
-                <app-row-detail [entry]="asRecord(client)" [fields]="clientFields" />
+                <app-row-detail [entry]="asRecord(client)" [fields]="clientFields" (entrySave)="onClientSave($event)" />
               </td>
             </tr>
           }
