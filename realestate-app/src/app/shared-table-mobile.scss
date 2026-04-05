@@ -1,0 +1,165 @@
+.mobile-sort-group {
+  display: none;
+}
+
+.mobile-sort-indicator {
+  margin-left: 6px;
+  font-size: 10px;
+  opacity: 0.7;
+}
+
+.mobile-card-list {
+  display: none;
+}
+
+.mobile-card {
+  background: #fff;
+}
+
+.mobile-card-shell {
+  cursor: pointer;
+}
+
+.mobile-card-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.mobile-card-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1f2933;
+}
+
+.mobile-card-badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.mobile-expand-indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: #f3f2ef;
+  color: #5a6370;
+  font-size: 18px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.mobile-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.mobile-card-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.mobile-card-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #96a0a9;
+}
+
+.mobile-card-value {
+  font-size: 14px;
+  color: #2f3437;
+  word-break: break-word;
+}
+
+.mobile-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.mobile-card-action {
+  flex: 1 1 96px;
+  min-height: 38px;
+  padding: 0 12px;
+  border: 1px solid #d5dadd;
+  border-radius: 12px;
+  background: #fff;
+  color: #2f3437;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    background: #f7f8f9;
+  }
+}
+
+.mobile-card-action-convert:hover { background: #e6f4ea; color: #1a7f37; }
+.mobile-card-action-edit:hover { background: #e8f0fe; color: #1a73e8; }
+.mobile-card-action-delete:hover { background: #fdf1f0; color: #c5221f; }
+.mobile-card-action-pdf:hover { background: #eef3ff; color: #3858a6; }
+
+.mobile-card-panel {
+  border-top: 1px solid #ece9e2;
+  background: #fcfbf8;
+}
+
+@media (max-width: 760px) {
+  .table-wrapper {
+    overflow: visible;
+  }
+
+  .mobile-sort-group {
+    display: flex;
+    width: 100%;
+  }
+
+  .data-table {
+    display: none;
+  }
+
+  .mobile-card-list {
+    display: grid;
+    gap: 12px;
+    padding: 0 14px 14px;
+  }
+
+  .mobile-card {
+    border: 1px solid #ece9e2;
+    border-radius: 18px;
+    box-shadow: 0 10px 24px rgba(31, 41, 51, 0.06);
+    overflow: hidden;
+  }
+
+  .mobile-card.expanded {
+    border-color: #d8d1c4;
+  }
+
+  .mobile-card-shell {
+    padding: 14px;
+  }
+}
+
+@media (max-width: 520px) {
+  .mobile-card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .mobile-card-action {
+    flex-basis: calc(50% - 4px);
+  }
+}

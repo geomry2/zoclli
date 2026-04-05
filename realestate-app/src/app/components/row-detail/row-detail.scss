@@ -129,3 +129,16 @@
   color: #c5221f;
   margin-right: 4px;
 }
+
+@media (max-width: 760px) {
+  .detail-panel {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 16px;
+  }
+
+  .detail-footer {
+    flex-wrap: wrap;
+    padding: 0 16px 16px;
+  }
+}

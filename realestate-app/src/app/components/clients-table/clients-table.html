@@ -85,6 +85,24 @@
       </div>
     </div>
 
+    <div class="filter-group mobile-sort-group">
+      <span class="filter-label">{{ 'sort.title' | translate }}</span>
+      <div class="filter-chip-row">
+        @for (column of visibleClientColumns(); track column.key) {
+          <button
+            class="filter-chip"
+            type="button"
+            [class.active]="sortDirection(column.key) !== null"
+            (click)="toggleSort(column.key)">
+            <span>{{ column.label | translate }}</span>
+            <span class="mobile-sort-indicator">
+              {{ sortDirection(column.key) === 'asc' ? '▲' : sortDirection(column.key) === 'desc' ? '▼' : '↕' }}
+            </span>
+          </button>
+        }
+      </div>
+    </div>
+
     <div class="filter-group filter-group-columns">
       <span class="filter-label">{{ 'columns.title' | translate }}</span>
       <div class="filter-chip-row">
@@ -119,6 +137,78 @@
   @if (filteredClients().length === 0) {
     <div class="empty-state">{{ 'empty.clients' | translate }}</div>
   } @else {
+    <div class="mobile-card-list">
+      @for (client of filteredClients(); track client.id) {
+        <article class="mobile-card" [class.expanded]="expandedRowId() === client.id" (click)="toggleRow(client.id)">
+          <div class="mobile-card-shell">
+            <div class="mobile-card-header">
+              <div class="mobile-card-copy">
+                <div class="mobile-card-title-row">
+                  <h3 class="mobile-card-title">{{ client.name }}</h3>
+                  <span class="mobile-expand-indicator" aria-hidden="true">
+                    {{ expandedRowId() === client.id ? '-' : '+' }}
+                  </span>
+                </div>
+                @if (isColumnVisible('status') || isColumnVisible('propertyType')) {
+                  <div class="mobile-card-badge-row">
+                    @if (isColumnVisible('status')) {
+                      <span class="badge badge-{{ client.status }}">{{ ('status.' + client.status) | translate }}</span>
+                    }
+                    @if (isColumnVisible('propertyType')) {
+                      <span class="badge badge-{{ client.propertyType }}">{{ ('proptype.' + client.propertyType) | translate }}</span>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+
+            @if (mobileClientColumns().length) {
+              <div class="mobile-card-grid">
+                @for (column of mobileClientColumns(); track column.key) {
+                  <div class="mobile-card-field">
+                    <span class="mobile-card-label">{{ column.label | translate }}</span>
+                    <span class="mobile-card-value">{{ formatClientColumnValue(client, column.key) }}</span>
+                  </div>
+                }
+              </div>
+            }
+
+            <div class="mobile-card-actions">
+              <button class="mobile-card-action mobile-card-action-pdf" type="button" (click)="exportClientSummary($event, client)">
+                {{ 'btn.pdf' | translate }}
+              </button>
+              <button class="mobile-card-action mobile-card-action-edit" type="button" (click)="requestEdit($event, client)">
+                {{ 'btn.edit' | translate }}
+              </button>
+              <button class="mobile-card-action mobile-card-action-delete" type="button" (click)="startDelete($event, client.id)">
+                {{ 'btn.delete' | translate }}
+              </button>
+            </div>
+          </div>
+
+          @if (deletingId() === client.id) {
+            <div class="mobile-card-panel" (click)="$event.stopPropagation()">
+              <div class="delete-confirm">
+                @if (deleteError()) {
+                  <span class="delete-err">{{ deleteError() }}</span>
+                } @else {
+                  <span [innerHTML]="('delete.title' | translate : {name: client.name})"></span>
+                }
+                <button class="btn-confirm-delete" (click)="confirmDelete(client.id)">{{ 'btn.confirmDelete' | translate }}</button>
+                <button class="btn-cancel-delete" (click)="cancelDelete()">{{ 'btn.cancelDelete' | translate }}</button>
+              </div>
+            </div>
+          }
+
+          @if (expandedRowId() === client.id) {
+            <div class="mobile-card-panel" (click)="$event.stopPropagation()">
+              <app-row-detail [entry]="asRecord(client)" [fields]="clientFields" (entrySave)="onClientSave($event)" />
+            </div>
+          }
+        </article>
+      }
+    </div>
+
     <table class="data-table">
       <thead>
         <tr>

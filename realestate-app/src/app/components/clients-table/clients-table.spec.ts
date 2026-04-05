@@ -189,4 +189,30 @@ describe('ClientsTable', () => {
       'realtorName',
     ]);
   });
+
+  it('builds mobile client cards from the remaining visible columns', () => {
+    const client = buildClient({
+      id: 'c1',
+      name: 'Anna',
+      phone: '+357 555 0101',
+      dealValue: 420000,
+      realtorName: 'Bella',
+    });
+    const { table, injector: createdInjector } = createClientsTable([client]);
+    injector = createdInjector;
+
+    expect(table.mobileClientColumns().map(column => column.key)).toEqual([
+      'phone',
+      'dealValue',
+      'realtorName',
+    ]);
+    expect(table.formatClientColumnValue(client, 'dealValue')).toBe('€420,000');
+
+    table.toggleColumnVisibility('phone');
+
+    expect(table.mobileClientColumns().map(column => column.key)).toEqual([
+      'dealValue',
+      'realtorName',
+    ]);
+  });
 });
