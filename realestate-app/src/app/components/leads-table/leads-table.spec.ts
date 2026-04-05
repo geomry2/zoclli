@@ -157,4 +157,36 @@ describe('LeadsTable', () => {
       'realtorName',
     ]);
   });
+
+  it('builds mobile lead cards from non-header columns and formats their values', () => {
+    const lead = buildLead({
+      id: 'l1',
+      name: 'Anna',
+      phone: '+357 555 0199',
+      budgetMin: 100000,
+      budgetMax: 220000,
+      interestedIn: 'Unit 204',
+      realtorName: 'Bella',
+      followUpDate: '2026-04-12',
+    });
+    const { table, injector: createdInjector } = createLeadsTable([lead]);
+    injector = createdInjector;
+
+    expect(table.mobileLeadColumns().map(column => column.key)).toEqual([
+      'phone',
+      'budgetRange',
+      'interestedIn',
+      'realtorName',
+    ]);
+    expect(table.formatLeadColumnValue(lead, 'budgetRange')).toContain('€100,000');
+    expect(table.formatLeadColumnValue(lead, 'budgetRange')).toContain('€220,000');
+
+    table.toggleColumnVisibility('interestedIn');
+
+    expect(table.mobileLeadColumns().map(column => column.key)).toEqual([
+      'phone',
+      'budgetRange',
+      'realtorName',
+    ]);
+  });
 });

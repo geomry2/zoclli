@@ -43,6 +43,7 @@ const LEAD_COLUMNS: LeadColumnDefinition[] = [
 
 const LEAD_COLUMN_KEYS = LEAD_COLUMNS.map(column => column.key) as LeadColumnKey[];
 const LEAD_COLUMN_STORAGE_KEY = 'leads-table-visible-columns';
+const LEAD_MOBILE_HEADER_KEYS: LeadColumnKey[] = ['name', 'status', 'followUpDate'];
 
 @Component({
   selector: 'app-leads-table',
@@ -76,6 +77,10 @@ export class LeadsTable {
 
   readonly visibleLeadColumns = computed(() =>
     this.leadColumns.filter(column => this.visibleColumnKeys().includes(column.key))
+  );
+
+  readonly mobileLeadColumns = computed(() =>
+    this.visibleLeadColumns().filter(column => !LEAD_MOBILE_HEADER_KEYS.includes(column.key))
   );
 
   readonly detailColspan = computed(() => this.visibleLeadColumns().length + 1);
@@ -181,6 +186,25 @@ export class LeadsTable {
   formatFollowUp(date: string): string {
     if (!date) return '—';
     return new Date(date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  formatLeadColumnValue(lead: Lead, key: LeadColumnKey): string {
+    switch (key) {
+      case 'name':
+        return lead.name || '-';
+      case 'phone':
+        return lead.phone || '-';
+      case 'status':
+        return this.ts.t(`status.${lead.status}`);
+      case 'budgetRange':
+        return this.formatBudget(lead);
+      case 'interestedIn':
+        return lead.interestedIn || '-';
+      case 'followUpDate':
+        return this.formatFollowUp(lead.followUpDate);
+      case 'realtorName':
+        return lead.realtorName || '-';
+    }
   }
 
   isOverdue(date: string): boolean {

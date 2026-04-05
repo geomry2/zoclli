@@ -1,3 +1,5 @@
+@use './shared-badges';
+
 .table-wrapper {
   overflow-x: auto;
   background: #ffffff;
@@ -210,29 +212,6 @@
   color: #1a1a1a;
 }
 
-.badge {
-  display: inline-block;
-  padding: 2px 9px;
-  border-radius: 5px;
-  font-size: 11px;
-  font-weight: 500;
-  text-transform: capitalize;
-  letter-spacing: 0.01em;
-
-  &.badge-active     { background: #e6f4ea; color: #1a7f37; }
-  &.badge-inactive   { background: #f3f3f1; color: #777; }
-  &.badge-closed     { background: #eef0f2; color: #5a6370; }
-  &.badge-new        { background: #e8f0fe; color: #1a73e8; }
-  &.badge-contacted  { background: #e6f4ea; color: #1a7f37; }
-  &.badge-negotiating { background: #fef6e0; color: #a16800; }
-  &.badge-lost       { background: #fdf1f0; color: #c5221f; }
-  &.badge-apartment  { background: #edf3fb; color: #2a6db5; }
-  &.badge-house      { background: #eaf6ee; color: #2a7a4e; }
-  &.badge-commercial { background: #fef6e0; color: #a16800; }
-  &.badge-land       { background: #f4f0eb; color: #7a5a30; }
-  &.badge-villa      { background: #f0ecfb; color: #6b3ecf; }
-}
-
 .col-actions {
   width: 80px;
   text-align: right;
@@ -307,5 +286,26 @@
 
   .filter-reset {
     align-self: flex-start;
+  }
+}
+
+@media (max-width: 760px) {
+  .table-filters {
+    gap: 12px 14px;
+    padding: 14px 14px 10px;
+  }
+
+  .filter-group-columns {
+    min-width: 0;
+  }
+
+  .filter-range-row {
+    align-items: stretch;
+  }
+
+  .delete-confirm {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 14px;
   }
 }

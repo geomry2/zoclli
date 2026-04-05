@@ -45,6 +45,7 @@ const CLIENT_COLUMNS: ClientColumnDefinition[] = [
 
 const CLIENT_COLUMN_KEYS = CLIENT_COLUMNS.map(column => column.key) as ClientColumnKey[];
 const CLIENT_COLUMN_STORAGE_KEY = 'clients-table-visible-columns';
+const CLIENT_MOBILE_HEADER_KEYS: ClientColumnKey[] = ['name', 'propertyType', 'status'];
 
 @Component({
   selector: 'app-clients-table',
@@ -79,6 +80,10 @@ export class ClientsTable {
 
   readonly visibleClientColumns = computed(() =>
     this.clientColumns.filter(column => this.visibleColumnKeys().includes(column.key))
+  );
+
+  readonly mobileClientColumns = computed(() =>
+    this.visibleClientColumns().filter(column => !CLIENT_MOBILE_HEADER_KEYS.includes(column.key))
   );
 
   readonly detailColspan = computed(() => this.visibleClientColumns().length + 1);
@@ -177,6 +182,23 @@ export class ClientsTable {
 
   formatDealValue(value: number): string {
     return '€' + value.toLocaleString('en-US');
+  }
+
+  formatClientColumnValue(client: Client, key: ClientColumnKey): string {
+    switch (key) {
+      case 'name':
+        return client.name || '-';
+      case 'phone':
+        return client.phone || '-';
+      case 'propertyType':
+        return this.ts.t(`proptype.${client.propertyType}`);
+      case 'status':
+        return this.ts.t(`status.${client.status}`);
+      case 'dealValue':
+        return this.formatDealValue(client.dealValue);
+      case 'realtorName':
+        return client.realtorName || '-';
+    }
   }
 
   exportClientSummary(event: Event, client: Client) {
