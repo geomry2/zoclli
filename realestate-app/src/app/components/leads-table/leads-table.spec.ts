@@ -47,6 +47,7 @@ describe('LeadsTable', () => {
   afterEach(() => {
     injector?.destroy();
     injector = undefined;
+    localStorage.clear();
   });
 
   it('filters leads by status, realtor, follow-up date, and overlapping budget range', () => {
@@ -125,5 +126,35 @@ describe('LeadsTable', () => {
     table.toggleSort('budgetRange');
     expect(table.filteredLeads().map(lead => lead.id)).toEqual(['l1', 'l3', 'l2']);
     expect(table.ariaSort('budgetRange')).toBe('descending');
+  });
+
+  it('loads stored lead columns and keeps sort on a visible column', () => {
+    localStorage.setItem('leads-table-visible-columns', JSON.stringify(['name', 'status']));
+
+    const { table, injector: createdInjector } = createLeadsTable([
+      buildLead({ id: 'l1', name: 'Anna' }),
+    ]);
+    injector = createdInjector;
+
+    expect(table.visibleLeadColumns().map(column => column.key)).toEqual(['name', 'status']);
+    expect(table.sortState()).toEqual({ key: 'name', direction: 'asc' });
+
+    table.toggleColumnVisibility('name');
+
+    expect(table.visibleLeadColumns().map(column => column.key)).toEqual(['status']);
+    expect(table.sortState()).toEqual({ key: 'status', direction: 'asc' });
+    expect(JSON.parse(localStorage.getItem('leads-table-visible-columns') ?? '[]')).toEqual(['status']);
+
+    table.resetColumnVisibility();
+
+    expect(table.visibleLeadColumns().map(column => column.key)).toEqual([
+      'name',
+      'phone',
+      'status',
+      'budgetRange',
+      'interestedIn',
+      'followUpDate',
+      'realtorName',
+    ]);
   });
 });

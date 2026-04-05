@@ -6,6 +6,12 @@ import { TranslationService } from '../../services/translation.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { applySearch } from '../../utils/csv.utils';
 import {
+  loadVisibleColumnKeys,
+  persistVisibleColumnKeys,
+  toggleVisibleColumnKey,
+  usesDefaultVisibleColumns,
+} from '../../utils/column-visibility.utils';
+import {
   compareValues,
   DateRangeFilter,
   matchesDateRange,
@@ -18,6 +24,25 @@ import {
 } from '../../utils/table.utils';
 
 type LeadSortKey = 'name' | 'phone' | 'status' | 'budgetRange' | 'interestedIn' | 'followUpDate' | 'realtorName';
+type LeadColumnKey = LeadSortKey;
+
+interface LeadColumnDefinition {
+  key: LeadColumnKey;
+  label: string;
+}
+
+const LEAD_COLUMNS: LeadColumnDefinition[] = [
+  { key: 'name', label: 'col.name' },
+  { key: 'phone', label: 'col.phone' },
+  { key: 'status', label: 'col.status' },
+  { key: 'budgetRange', label: 'col.budgetRange' },
+  { key: 'interestedIn', label: 'col.interestedIn' },
+  { key: 'followUpDate', label: 'col.followUp' },
+  { key: 'realtorName', label: 'col.realtor' },
+];
+
+const LEAD_COLUMN_KEYS = LEAD_COLUMNS.map(column => column.key) as LeadColumnKey[];
+const LEAD_COLUMN_STORAGE_KEY = 'leads-table-visible-columns';
 
 @Component({
   selector: 'app-leads-table',
@@ -36,11 +61,27 @@ export class LeadsTable {
   readonly expandedRowId = signal<string | null>(null);
   readonly deletingId = signal<string | null>(null);
   readonly leadStatuses: LeadStatus[] = ['new', 'contacted', 'negotiating', 'lost'];
-  readonly sortState = signal<SortState<LeadSortKey>>({ key: 'followUpDate', direction: 'asc' });
+  readonly leadColumns = LEAD_COLUMNS;
+  readonly visibleColumnKeys = signal<LeadColumnKey[]>(
+    loadVisibleColumnKeys(LEAD_COLUMN_STORAGE_KEY, LEAD_COLUMN_KEYS)
+  );
+  readonly sortState = signal<SortState<LeadSortKey>>({
+    key: this.visibleColumnKeys().includes('followUpDate') ? 'followUpDate' : (this.visibleColumnKeys()[0] ?? 'name'),
+    direction: 'asc',
+  });
   readonly statusFilters = signal<LeadStatus[]>([]);
   readonly realtorFilters = signal<string[]>([]);
   readonly followUpDateRange = signal<DateRangeFilter>({ from: '', to: '' });
   readonly budgetRange = signal<NumberRangeFilter>({ min: '', max: '' });
+
+  readonly visibleLeadColumns = computed(() =>
+    this.leadColumns.filter(column => this.visibleColumnKeys().includes(column.key))
+  );
+
+  readonly detailColspan = computed(() => this.visibleLeadColumns().length + 1);
+  readonly hasCustomColumnVisibility = computed(() =>
+    !usesDefaultVisibleColumns(this.visibleColumnKeys(), LEAD_COLUMN_KEYS)
+  );
 
   readonly availableRealtors = computed(() =>
     uniqueValues(this.leadService.leads().map(lead => lead.realtorName))
@@ -154,6 +195,30 @@ export class LeadsTable {
 
   toggleSort(key: LeadSortKey) {
     this.sortState.update(current => nextSortState(current, key));
+  }
+
+  toggleColumnVisibility(key: LeadColumnKey) {
+    const next = toggleVisibleColumnKey(this.visibleColumnKeys(), key, LEAD_COLUMN_KEYS);
+    this.visibleColumnKeys.set(next);
+    persistVisibleColumnKeys(LEAD_COLUMN_STORAGE_KEY, next);
+
+    if (!next.includes(this.sortState().key)) {
+      this.sortState.set({ key: next[0] ?? 'name', direction: 'asc' });
+    }
+  }
+
+  resetColumnVisibility() {
+    const next = [...LEAD_COLUMN_KEYS];
+    this.visibleColumnKeys.set(next);
+    persistVisibleColumnKeys(LEAD_COLUMN_STORAGE_KEY, next);
+  }
+
+  canToggleColumn(key: LeadColumnKey): boolean {
+    return !this.visibleColumnKeys().includes(key) || this.visibleColumnKeys().length > 1;
+  }
+
+  isColumnVisible(key: LeadColumnKey): boolean {
+    return this.visibleColumnKeys().includes(key);
   }
 
   sortDirection(key: LeadSortKey): SortDirection | null {

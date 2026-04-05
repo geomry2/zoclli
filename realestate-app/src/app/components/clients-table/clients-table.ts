@@ -6,6 +6,12 @@ import { TranslationService } from '../../services/translation.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { applySearch } from '../../utils/csv.utils';
 import { formatCommissionValue, getCommissionAmount } from '../../utils/commission.utils';
+import {
+  loadVisibleColumnKeys,
+  persistVisibleColumnKeys,
+  toggleVisibleColumnKey,
+  usesDefaultVisibleColumns,
+} from '../../utils/column-visibility.utils';
 import { openPrintableDocument } from '../../utils/pdf.utils';
 import {
   compareValues,
@@ -21,6 +27,24 @@ import {
 } from '../../utils/table.utils';
 
 type ClientSortKey = 'name' | 'phone' | 'propertyType' | 'status' | 'dealValue' | 'realtorName';
+type ClientColumnKey = ClientSortKey;
+
+interface ClientColumnDefinition {
+  key: ClientColumnKey;
+  label: string;
+}
+
+const CLIENT_COLUMNS: ClientColumnDefinition[] = [
+  { key: 'name', label: 'col.name' },
+  { key: 'phone', label: 'col.phone' },
+  { key: 'propertyType', label: 'col.propertyType' },
+  { key: 'status', label: 'col.status' },
+  { key: 'dealValue', label: 'col.dealValue' },
+  { key: 'realtorName', label: 'col.realtor' },
+];
+
+const CLIENT_COLUMN_KEYS = CLIENT_COLUMNS.map(column => column.key) as ClientColumnKey[];
+const CLIENT_COLUMN_STORAGE_KEY = 'clients-table-visible-columns';
 
 @Component({
   selector: 'app-clients-table',
@@ -39,12 +63,28 @@ export class ClientsTable {
   readonly deletingId = signal<string | null>(null);
   readonly propertyTypes: PropertyType[] = ['apartment', 'house', 'villa', 'commercial', 'land'];
   readonly clientStatuses: ClientStatus[] = ['active', 'inactive', 'closed'];
-  readonly sortState = signal<SortState<ClientSortKey>>({ key: 'name', direction: 'asc' });
+  readonly clientColumns = CLIENT_COLUMNS;
+  readonly visibleColumnKeys = signal<ClientColumnKey[]>(
+    loadVisibleColumnKeys(CLIENT_COLUMN_STORAGE_KEY, CLIENT_COLUMN_KEYS)
+  );
+  readonly sortState = signal<SortState<ClientSortKey>>({
+    key: this.visibleColumnKeys().includes('name') ? 'name' : (this.visibleColumnKeys()[0] ?? 'name'),
+    direction: 'asc',
+  });
   readonly statusFilters = signal<ClientStatus[]>([]);
   readonly propertyTypeFilters = signal<PropertyType[]>([]);
   readonly realtorFilters = signal<string[]>([]);
   readonly purchaseDateRange = signal<DateRangeFilter>({ from: '', to: '' });
   readonly dealValueRange = signal<NumberRangeFilter>({ min: '', max: '' });
+
+  readonly visibleClientColumns = computed(() =>
+    this.clientColumns.filter(column => this.visibleColumnKeys().includes(column.key))
+  );
+
+  readonly detailColspan = computed(() => this.visibleClientColumns().length + 1);
+  readonly hasCustomColumnVisibility = computed(() =>
+    !usesDefaultVisibleColumns(this.visibleColumnKeys(), CLIENT_COLUMN_KEYS)
+  );
 
   readonly availableRealtors = computed(() =>
     uniqueValues(this.clientService.clients().map(client => client.realtorName))
@@ -203,6 +243,30 @@ export class ClientsTable {
 
   toggleSort(key: ClientSortKey) {
     this.sortState.update(current => nextSortState(current, key));
+  }
+
+  toggleColumnVisibility(key: ClientColumnKey) {
+    const next = toggleVisibleColumnKey(this.visibleColumnKeys(), key, CLIENT_COLUMN_KEYS);
+    this.visibleColumnKeys.set(next);
+    persistVisibleColumnKeys(CLIENT_COLUMN_STORAGE_KEY, next);
+
+    if (!next.includes(this.sortState().key)) {
+      this.sortState.set({ key: next[0] ?? 'name', direction: 'asc' });
+    }
+  }
+
+  resetColumnVisibility() {
+    const next = [...CLIENT_COLUMN_KEYS];
+    this.visibleColumnKeys.set(next);
+    persistVisibleColumnKeys(CLIENT_COLUMN_STORAGE_KEY, next);
+  }
+
+  canToggleColumn(key: ClientColumnKey): boolean {
+    return !this.visibleColumnKeys().includes(key) || this.visibleColumnKeys().length > 1;
+  }
+
+  isColumnVisible(key: ClientColumnKey): boolean {
+    return this.visibleColumnKeys().includes(key);
   }
 
   sortDirection(key: ClientSortKey): SortDirection | null {
