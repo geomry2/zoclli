@@ -16,8 +16,31 @@
     </div>
   </div>
 
+  <!-- Toolbar -->
+  <div class="catalogue-toolbar">
+    @if (!showNewPropertyForm()) {
+      <button class="btn-new-property" (click)="openNewPropertyForm($event)">+ New Property</button>
+    } @else {
+      <div class="new-property-form">
+        <input
+          class="new-property-input"
+          type="text"
+          placeholder="Property / building name"
+          [ngModel]="newPropertyName()"
+          (ngModelChange)="newPropertyName.set($event)"
+          (keydown.enter)="createProperty()"
+          (keydown.escape)="cancelNewProperty()"
+          autofocus />
+        <button class="btn-property-save" (click)="createProperty()" [disabled]="creatingProperty() || !newPropertyName().trim()">
+          {{ creatingProperty() ? 'Saving…' : 'Create' }}
+        </button>
+        <button class="btn-property-cancel" (click)="cancelNewProperty()">Cancel</button>
+      </div>
+    }
+  </div>
+
   @if (properties().length === 0) {
-    <div class="empty-state">No properties yet — add clients with a building name to see them here.</div>
+    <div class="empty-state">No properties yet — click "+ New Property" or add clients with a building name.</div>
   } @else {
     <div class="building-list">
       @for (prop of properties(); track prop.building) {
@@ -50,6 +73,7 @@
                   <span class="dot dot-closed" [title]="prop.statusCounts['closed'] + ' closed'"></span>
                 }
               </div>
+              <button class="btn-add-unit" title="Add unit" (click)="requestAddUnit($event, prop.building)">+ Add Unit</button>
               <span class="chevron">{{ expandedBuilding() === prop.building ? '▲' : '▼' }}</span>
             </div>
           </div>
@@ -57,33 +81,37 @@
           <!-- Expanded unit/client list -->
           @if (expandedBuilding() === prop.building) {
             <div class="unit-list">
-              <table class="unit-table">
-                <thead>
-                  <tr>
-                    <th>Unit</th>
-                    <th>Client</th>
-                    <th>Type</th>
-                    <th>Status</th>
-                    <th>Deal Value</th>
-                    <th>Realtor</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (c of prop.clients; track c.id) {
+              @if (prop.clients.length === 0) {
+                <div class="unit-empty">No units yet — click "+ Add Unit" to add the first one.</div>
+              } @else {
+                <table class="unit-table">
+                  <thead>
                     <tr>
-                      <td class="unit-num">{{ c.apartmentNumber || '—' }}</td>
-                      <td>
-                        <div class="client-name">{{ c.name }}</div>
-                        @if (c.phone) { <div class="client-sub">{{ c.phone }}</div> }
-                      </td>
-                      <td><span class="badge badge-{{ c.propertyType }}">{{ c.propertyType }}</span></td>
-                      <td><span class="badge badge-{{ c.status }}">{{ c.status }}</span></td>
-                      <td>{{ c.dealValue ? formatCurrency(c.dealValue) : '—' }}</td>
-                      <td>{{ c.realtorName || '—' }}</td>
+                      <th>Unit</th>
+                      <th>Client</th>
+                      <th>Type</th>
+                      <th>Status</th>
+                      <th>Deal Value</th>
+                      <th>Realtor</th>
                     </tr>
-                  }
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    @for (c of prop.clients; track c.id) {
+                      <tr>
+                        <td class="unit-num">{{ c.apartmentNumber || '—' }}</td>
+                        <td>
+                          <div class="client-name">{{ c.name }}</div>
+                          @if (c.phone) { <div class="client-sub">{{ c.phone }}</div> }
+                        </td>
+                        <td><span class="badge badge-{{ c.propertyType }}">{{ c.propertyType }}</span></td>
+                        <td><span class="badge badge-{{ c.status }}">{{ c.status }}</span></td>
+                        <td>{{ c.dealValue ? formatCurrency(c.dealValue) : '—' }}</td>
+                        <td>{{ c.realtorName || '—' }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              }
             </div>
           }
 

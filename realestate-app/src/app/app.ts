@@ -11,7 +11,8 @@ import { Client } from './models/client.model';
 import { Lead } from './models/lead.model';
 import { ClientService } from './services/client.service';
 import { LeadService } from './services/lead.service';
-import { exportToCsv, applySearch } from './utils/csv.utils';
+import { exportToXlsx } from './utils/xlsx.utils';
+import { applySearch } from './utils/csv.utils';
 
 @Component({
   selector: 'app-root',
@@ -27,6 +28,7 @@ export class App {
   readonly editingClient = signal<Client | null>(null);
   readonly editingLead = signal<Lead | null>(null);
   readonly convertingLead = signal<Lead | null>(null);
+  readonly prefillBuilding = signal<string | null>(null);
   /** Narrows activeTab to only the values CreateModal accepts */
   readonly modalTab = computed<'clients' | 'leads'>(() =>
     this.activeTab() === 'leads' ? 'leads' : 'clients'
@@ -74,16 +76,25 @@ export class App {
     this.editingClient.set(null);
     this.editingLead.set(null);
     this.convertingLead.set(null);
+    this.prefillBuilding.set(null);
   }
 
-  exportCsv() {
+  openAddUnit(buildingName: string) {
+    this.editingClient.set(null);
+    this.editingLead.set(null);
+    this.convertingLead.set(null);
+    this.prefillBuilding.set(buildingName);
+    this.showModal.set(true);
+  }
+
+  exportXlsx() {
     const q = this.searchQuery();
     if (this.activeTab() === 'clients') {
       const rows = applySearch(this.clientService.clients() as unknown as Record<string, unknown>[], q);
-      exportToCsv('clients.csv', rows);
+      exportToXlsx('clients.xlsx', rows);
     } else {
       const rows = applySearch(this.leadService.leads() as unknown as Record<string, unknown>[], q);
-      exportToCsv('leads.csv', rows);
+      exportToXlsx('leads.xlsx', rows);
     }
   }
 }
