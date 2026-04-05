@@ -24,7 +24,7 @@
               class="field-input"
               [ngModel]="draft[field.key]"
               (ngModelChange)="draft[field.key] = $event" />
-          } @else if (field.type === 'currency') {
+          } @else if (field.type === 'currency' || field.type === 'commission') {
             <input
               type="number"
               class="field-input"

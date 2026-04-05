@@ -5,10 +5,11 @@ import { ClientService } from '../../services/client.service';
 import { LeadService } from '../../services/lead.service';
 import { BuildingService } from '../../services/building.service';
 import { AgencyService } from '../../services/agency.service';
-import { Client, PropertyType, ClientStatus } from '../../models/client.model';
+import { Client, PropertyType, ClientStatus, CommissionType } from '../../models/client.model';
 import { Lead, LeadStatus } from '../../models/lead.model';
 import { ContactNotes } from '../contact-notes/contact-notes';
 import { normalizeContactNotes } from '../../utils/contact-notes.utils';
+import { getCommissionAmount, normalizeCommissionType, normalizeCommissionValue } from '../../utils/commission.utils';
 
 type Tab = 'clients' | 'leads';
 type FieldMode = 'select' | 'new';
@@ -161,7 +162,9 @@ export class CreateModal implements OnInit {
       buildingName: '', apartmentNumber: '',
       propertyType: 'apartment', status: 'active',
       purchaseDate: '', dealValue: 0,
-      realtorName: '', realtorAgency: '', notes: [],
+      realtorName: '', realtorAgency: '',
+      commissionType: 'percent', commissionValue: 0,
+      notes: [],
     };
   }
 
@@ -220,6 +223,7 @@ export class CreateModal implements OnInit {
 
   readonly propertyTypes: PropertyType[] = ['apartment', 'house', 'villa', 'commercial', 'land'];
   readonly clientStatuses: ClientStatus[] = ['active', 'inactive', 'closed'];
+  readonly commissionTypes: CommissionType[] = ['percent', 'fixed'];
   readonly leadStatuses: LeadStatus[] = ['new', 'contacted', 'negotiating', 'lost'];
 
   useLeadInterestText() {
@@ -233,6 +237,20 @@ export class CreateModal implements OnInit {
       : (this.allBuildings[0] ?? '');
   }
 
+  commissionValueLabel(): string {
+    return this.client.commissionType === 'fixed'
+      ? 'form.commissionFixedAmount'
+      : 'form.commissionRate';
+  }
+
+  commissionAmount(): number {
+    return getCommissionAmount(this.client);
+  }
+
+  formatCurrency(value: number): string {
+    return '€' + value.toLocaleString('en-US', { maximumFractionDigits: 2 });
+  }
+
   private normalizeClient(client: Omit<Client, 'id'>): Omit<Client, 'id'> {
     return {
       ...client,
@@ -243,6 +261,8 @@ export class CreateModal implements OnInit {
       apartmentNumber: this.normalizeLooseText(client.apartmentNumber),
       realtorName: this.normalizeName(client.realtorName),
       realtorAgency: this.normalizeAgency(client.realtorAgency),
+      commissionType: normalizeCommissionType(client.commissionType),
+      commissionValue: normalizeCommissionValue(client.commissionValue),
       notes: normalizeContactNotes(client.notes),
     };
   }
@@ -261,6 +281,14 @@ export class CreateModal implements OnInit {
   }
 
   private validateClient(client: Omit<Client, 'id'>, editingId?: string): string | null {
+    if (client.commissionValue < 0) {
+      return 'Commission cannot be negative.';
+    }
+
+    if (client.commissionType === 'percent' && client.commissionValue > 100) {
+      return 'Commission percent cannot exceed 100%.';
+    }
+
     const email = this.normalizeEmail(client.email);
     const phone = this.normalizePhoneForCompare(client.phone);
 

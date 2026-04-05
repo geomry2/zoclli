@@ -2,6 +2,7 @@ import { ContactNote } from './contact-note.model';
 
 export type PropertyType = 'apartment' | 'house' | 'commercial' | 'land' | 'villa';
 export type ClientStatus = 'active' | 'inactive' | 'closed';
+export type CommissionType = 'percent' | 'fixed';
 
 export interface Client {
   id: string;
@@ -16,5 +17,7 @@ export interface Client {
   dealValue: number;
   realtorName: string;
   realtorAgency: string;
+  commissionType: CommissionType;
+  commissionValue: number;
   notes: ContactNote[];
 }

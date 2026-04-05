@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { ContactNotes } from '../contact-notes/contact-notes';
 import { ContactNote } from '../../models/contact-note.model';
+import { formatCommissionValue, normalizeCommissionType } from '../../utils/commission.utils';
 
 export interface FieldDefinition {
   key: string;
   label: string;
-  type?: 'text' | 'date' | 'currency' | 'badge' | 'notes';
+  type?: 'text' | 'date' | 'currency' | 'badge' | 'notes' | 'commission';
   options?: string[];
   multiline?: boolean;
   translatePrefix?: string;
@@ -56,6 +57,11 @@ export class RowDetail {
     switch (field.type) {
       case 'currency':
         return '€' + Number(value).toLocaleString('en-US');
+      case 'commission':
+        return formatCommissionValue(
+          normalizeCommissionType(this.entry()['commissionType']),
+          Number(value),
+        );
       case 'date':
         return new Date(String(value)).toLocaleDateString('en-US', {
           year: 'numeric', month: 'long', day: 'numeric'

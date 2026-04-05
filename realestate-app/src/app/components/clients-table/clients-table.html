@@ -150,6 +150,7 @@
             <td>{{ formatDealValue(client.dealValue) }}</td>
             <td>{{ client.realtorName }}</td>
             <td class="col-actions">
+              <button class="action-btn pdf-btn" [title]="'btn.pdf' | translate" (click)="exportClientSummary($event, client)">{{ 'btn.pdf' | translate }}</button>
               <button class="action-btn edit-btn" [title]="'btn.edit' | translate" (click)="requestEdit($event, client)">✏</button>
               <button class="action-btn delete-btn" [title]="'btn.delete' | translate" (click)="startDelete($event, client.id)">✕</button>
             </td>

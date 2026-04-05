@@ -78,6 +78,9 @@
                   <span class="dot dot-closed" [title]="prop.statusCounts['closed'] + ' ' + ts.t('status.closed')"></span>
                 }
               </div>
+              <button class="btn-export-property" (click)="exportPropertySheet($event, prop)">
+                {{ 'btn.pdf' | translate }}
+              </button>
               <button class="btn-add-unit" (click)="requestAddUnit($event, prop.building)">
                 {{ 'prop.addUnit' | translate }}
               </button>
