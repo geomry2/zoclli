@@ -18,28 +18,45 @@
     </div>
 
     @if (!showNewPropertyForm()) {
-      <button class="btn-new-property" (click)="openNewPropertyForm($event)">
-        {{ 'prop.newProperty' | translate }}
+      <button
+        class="btn-new-property"
+        type="button"
+        (click)="openNewPropertyForm($event)"
+        [attr.aria-expanded]="showNewPropertyForm()"
+        aria-controls="new-property-form">
+        <span class="btn-new-property__icon" aria-hidden="true">+</span>
+        <span class="btn-new-property__content">
+          <span class="btn-new-property__title">{{ 'prop.newProperty' | translate }}</span>
+          <span class="btn-new-property__hint">{{ 'prop.newPropertyHint' | translate }}</span>
+        </span>
       </button>
     }
   </div>
 
   <!-- Inline New Property form -->
   @if (showNewPropertyForm()) {
-    <div class="new-property-form">
-      <input
-        class="new-property-input"
-        type="text"
-        [attr.placeholder]="'prop.namePlaceholder' | translate"
-        [ngModel]="newPropertyName()"
-        (ngModelChange)="newPropertyName.set($event)"
-        (keydown.enter)="createProperty()"
-        (keydown.escape)="cancelNewProperty()"
-        autofocus />
-      <button class="btn-property-save" (click)="createProperty()" [disabled]="creatingProperty() || !newPropertyName().trim()">
-        {{ creatingProperty() ? ('prop.saving' | translate) : ('prop.create' | translate) }}
-      </button>
-      <button class="btn-property-cancel" (click)="cancelNewProperty()">{{ 'btn.cancel' | translate }}</button>
+    <div class="new-property-form" id="new-property-form">
+      <div class="new-property-form__intro">
+        <div class="new-property-form__eyebrow">{{ 'prop.newPropertyLabel' | translate }}</div>
+        <div class="new-property-form__title">{{ 'prop.newPropertyTitle' | translate }}</div>
+        <div class="new-property-form__hint">{{ 'prop.newPropertyFormHint' | translate }}</div>
+      </div>
+
+      <div class="new-property-form__controls">
+        <input
+          class="new-property-input"
+          type="text"
+          [attr.placeholder]="'prop.namePlaceholder' | translate"
+          [ngModel]="newPropertyName()"
+          (ngModelChange)="newPropertyName.set($event)"
+          (keydown.enter)="createProperty()"
+          (keydown.escape)="cancelNewProperty()"
+          autofocus />
+        <button class="btn-property-save" type="button" (click)="createProperty()" [disabled]="creatingProperty() || !newPropertyName().trim()">
+          {{ creatingProperty() ? ('prop.saving' | translate) : ('prop.create' | translate) }}
+        </button>
+        <button class="btn-property-cancel" type="button" (click)="cancelNewProperty()">{{ 'btn.cancel' | translate }}</button>
+      </div>
     </div>
   }
 
