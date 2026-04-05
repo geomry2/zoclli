@@ -4,7 +4,9 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 import { ClientService } from '../../services/client.service';
 import { AgencyService } from '../../services/agency.service';
 import { BuildingService } from '../../services/building.service';
-import { Client, PropertyType, ClientStatus } from '../../models/client.model';
+import { PropertyType, ClientStatus } from '../../models/client.model';
+import { Unit } from '../../models/unit.model';
+import { UnitService } from '../../services/unit.service';
 
 type FieldMode = 'select' | 'new';
 
@@ -20,6 +22,7 @@ export class AddUnitModal {
   readonly closed = output<void>();
 
   private readonly clientService = inject(ClientService);
+  private readonly unitService = inject(UnitService);
   private readonly agencyService = inject(AgencyService);
   private readonly buildingService = inject(BuildingService);
 
@@ -27,19 +30,23 @@ export class AddUnitModal {
   readonly saveError = signal<string | null>(null);
   readonly agencyMode = signal<FieldMode>('select');
 
-  unit: Omit<Client, 'id'> = this.emptyUnit();
+  unit: Omit<Unit, 'id'> = this.emptyUnit();
 
   get allAgencies(): string[] {
-    const fromClients = this.clientService.clients().map(c => c.realtorAgency).filter(Boolean);
+    const fromUnits = this.unitService.units().map(u => u.realtorAgency).filter(Boolean);
     const fromTable = this.agencyService.agencies();
-    return [...new Set([...fromTable, ...fromClients])].sort();
+    return [...new Set([...fromTable, ...fromUnits])].sort();
   }
 
   get usedApartmentNumbers(): string[] {
-    const nums = this.clientService.clients()
-      .filter(c => c.buildingName === this.buildingName())
-      .map(c => c.apartmentNumber)
-      .filter(Boolean);
+    const nums = [
+      ...this.clientService.clients()
+        .filter(client => client.buildingName === this.buildingName())
+        .map(client => client.apartmentNumber),
+      ...this.unitService.units()
+        .filter(unit => unit.buildingName === this.buildingName())
+        .map(unit => unit.apartmentNumber),
+    ].filter(Boolean);
     return [...new Set(nums)].sort();
   }
 
@@ -56,9 +63,8 @@ export class AddUnitModal {
     }
   }
 
-  private emptyUnit(): Omit<Client, 'id'> {
+  private emptyUnit(): Omit<Unit, 'id'> {
     return {
-      name: '', phone: '', email: '',
       buildingName: '',
       apartmentNumber: '',
       propertyType: 'apartment',
@@ -71,13 +77,25 @@ export class AddUnitModal {
   }
 
   async save() {
-    if (!this.unit.name.trim()) { this.saveError.set('Client name is required.'); return; }
+    const apartmentNumber = this.unit.apartmentNumber.trim();
+    if (!apartmentNumber) { this.saveError.set('Unit number is required.'); return; }
+    if (this.usedApartmentNumbers.includes(apartmentNumber)) {
+      this.saveError.set(`Unit ${apartmentNumber} already exists in ${this.buildingName()}.`);
+      return;
+    }
     this.saving.set(true);
     this.saveError.set(null);
-    const payload = { ...this.unit, buildingName: this.buildingName() };
+    const payload = {
+      ...this.unit,
+      apartmentNumber,
+      buildingName: this.buildingName(),
+      realtorName: this.unit.realtorName.trim(),
+      realtorAgency: this.unit.realtorAgency.trim(),
+      notes: this.unit.notes.trim(),
+    };
     await this.buildingService.ensureExists(this.buildingName());
-    await this.agencyService.ensureExists(this.unit.realtorAgency);
-    const { error } = await this.clientService.add(payload);
+    await this.agencyService.ensureExists(payload.realtorAgency);
+    const { error } = await this.unitService.add(payload);
     this.saving.set(false);
     if (error) { this.saveError.set(error); } else { this.closed.emit(); }
   }

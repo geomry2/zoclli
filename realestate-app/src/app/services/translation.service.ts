@@ -103,6 +103,7 @@ const EN: Translations = {
   'prop.saving': 'Saving…',
   'prop.namePlaceholder': 'Property / building name',
   'prop.addUnit': '+ Add Unit',
+  'prop.unassigned': 'Unassigned unit',
   'prop.clients.one': '{n} client',
   'prop.clients.many': '{n} clients',
   'prop.units.one': '{n} unit',
@@ -172,6 +173,7 @@ const EN: Translations = {
   'form.followUpDate': 'Follow-up Date',
   // Add unit
   'addUnit.addBtn': 'Add Unit',
+  'addUnit.unassignedHint': 'This creates a standalone unit. You can link a client to it later by using the same building and unit number.',
 };
 
 const RU: Translations = {
@@ -273,6 +275,7 @@ const RU: Translations = {
   'prop.saving': 'Сохранение…',
   'prop.namePlaceholder': 'Название объекта / здания',
   'prop.addUnit': '+ Добавить юнит',
+  'prop.unassigned': 'Юнит без клиента',
   'prop.clients.one': '{n} клиент',
   'prop.clients.many': '{n} клиентов',
   'prop.units.one': '{n} юнит',
@@ -342,6 +345,7 @@ const RU: Translations = {
   'form.followUpDate': 'Дата следующего контакта',
   // Add unit
   'addUnit.addBtn': 'Добавить юнит',
+  'addUnit.unassignedHint': 'Это создаст отдельный юнит. Позже можно связать его с клиентом, указав то же здание и номер юнита.',
 };
 
 const DICTS: Record<Lang, Translations> = { en: EN, ru: RU };

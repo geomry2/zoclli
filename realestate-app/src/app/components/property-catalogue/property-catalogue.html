@@ -85,7 +85,7 @@
 
           @if (expandedBuilding() === prop.building) {
             <div class="unit-list">
-              @if (prop.clients.length === 0) {
+              @if (prop.entries.length === 0) {
                 <div class="unit-empty">{{ 'empty.units' | translate }}</div>
               } @else {
                 <table class="unit-table">
@@ -100,17 +100,17 @@
                     </tr>
                   </thead>
                   <tbody>
-                    @for (c of prop.clients; track c.id) {
+                    @for (entry of prop.entries; track entry.id) {
                       <tr>
-                        <td class="unit-num">{{ c.apartmentNumber || '—' }}</td>
+                        <td class="unit-num">{{ entry.apartmentNumber || '—' }}</td>
                         <td>
-                          <div class="client-name">{{ c.name }}</div>
-                          @if (c.phone) { <div class="client-sub">{{ c.phone }}</div> }
+                          <div class="client-name">{{ entry.clientName || ('prop.unassigned' | translate) }}</div>
+                          @if (entry.phone) { <div class="client-sub">{{ entry.phone }}</div> }
                         </td>
-                        <td><span class="badge badge-{{ c.propertyType }}">{{ c.propertyType }}</span></td>
-                        <td><span class="badge badge-{{ c.status }}">{{ c.status }}</span></td>
-                        <td>{{ c.dealValue ? formatCurrency(c.dealValue) : '—' }}</td>
-                        <td>{{ c.realtorName || '—' }}</td>
+                        <td><span class="badge badge-{{ entry.propertyType }}">{{ entry.propertyType }}</span></td>
+                        <td><span class="badge badge-{{ entry.status }}">{{ entry.status }}</span></td>
+                        <td>{{ entry.dealValue ? formatCurrency(entry.dealValue) : '—' }}</td>
+                        <td>{{ entry.realtorName || '—' }}</td>
                       </tr>
                     }
                   </tbody>
