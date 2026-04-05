@@ -7,6 +7,24 @@
     </div>
     <div class="header-right">
       @if (activeTab() !== 'dashboard' && activeTab() !== 'properties') {
+        @if (activeTab() === 'leads') {
+          <div class="view-toggle" role="tablist" [attr.aria-label]="'leadBoard.title' | translate">
+            <button
+              class="view-toggle__btn"
+              type="button"
+              [class.active]="leadsViewMode() === 'board'"
+              (click)="setLeadsViewMode('board')">
+              {{ 'view.board' | translate }}
+            </button>
+            <button
+              class="view-toggle__btn"
+              type="button"
+              [class.active]="leadsViewMode() === 'table'"
+              (click)="setLeadsViewMode('table')">
+              {{ 'view.table' | translate }}
+            </button>
+          </div>
+        }
         <app-search-bar (queryChange)="onQueryChange($event)" />
         <button class="btn-export" (click)="exportXlsx()">{{ 'btn.xlsx' | translate }}</button>
         <button class="btn-add" (click)="openCreate()">{{ 'btn.add' | translate }}</button>
@@ -25,7 +43,11 @@
     } @else if (activeTab() === 'clients') {
       <app-clients-table [searchQuery]="searchQuery()" (editRequest)="openEditClient($event)" />
     } @else if (activeTab() === 'leads') {
-      <app-leads-table [searchQuery]="searchQuery()" (editRequest)="openEditLead($event)" (convertRequest)="openConvertLead($event)" />
+      @if (leadsViewMode() === 'board') {
+        <app-leads-board [searchQuery]="searchQuery()" (editRequest)="openEditLead($event)" (convertRequest)="openConvertLead($event)" />
+      } @else {
+        <app-leads-table [searchQuery]="searchQuery()" (editRequest)="openEditLead($event)" (convertRequest)="openConvertLead($event)" />
+      }
     } @else {
       <app-property-catalogue (addUnitRequest)="openAddUnit($event)" (editUnitRequest)="openEditUnit($event)" />
     }

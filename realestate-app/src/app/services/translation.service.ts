@@ -17,6 +17,7 @@ const EN: Translations = {
   'btn.add': '+ Add',
   'btn.xlsx': '↓ XLSX',
   'btn.edit': 'Edit',
+  'btn.convert': 'Convert',
   'btn.save': 'Save',
   'btn.saveChanges': 'Save Changes',
   'btn.saving': 'Saving…',
@@ -65,6 +66,8 @@ const EN: Translations = {
   'empty.units': 'No units yet — click "+ Add Unit" to add the first one.',
   // Search
   'search.placeholder': 'Search by any field…',
+  'view.board': 'Board',
+  'view.table': 'Table',
   // Filters
   'filter.status': 'Status',
   'filter.propertyType': 'Property Type',
@@ -128,6 +131,16 @@ const EN: Translations = {
   'prop.clients.many': '{n} clients',
   'prop.units.one': '{n} unit',
   'prop.units.many': '{n} units',
+  // Leads board
+  'leadBoard.title': 'Pipeline Board',
+  'leadBoard.subtitle': 'Drag leads across stages to keep the funnel current.',
+  'leadBoard.emptyColumn': 'No leads in this stage.',
+  'leadBoard.dropHere': 'Drop lead here',
+  'leadBoard.followUp': 'Follow-up',
+  'leadBoard.noFollowUp': 'No follow-up',
+  'leadBoard.noInterest': 'No property preference yet',
+  'leadBoard.noRealtor': 'No realtor assigned',
+  'leadBoard.saving': 'Saving stage…',
   // Property types
   'proptype.apartment': 'Apartment',
   'proptype.house': 'House',
@@ -214,6 +227,7 @@ const RU: Translations = {
   'btn.add': '+ Добавить',
   'btn.xlsx': '↓ XLSX',
   'btn.edit': 'Изменить',
+  'btn.convert': 'Конвертировать',
   'btn.save': 'Сохранить',
   'btn.saveChanges': 'Сохранить изменения',
   'btn.saving': 'Сохранение…',
@@ -262,6 +276,8 @@ const RU: Translations = {
   'empty.units': 'Юнитов пока нет — нажмите «+ Добавить юнит».',
   // Search
   'search.placeholder': 'Поиск по любому полю…',
+  'view.board': 'Доска',
+  'view.table': 'Таблица',
   // Filters
   'filter.status': 'Статус',
   'filter.propertyType': 'Тип объекта',
@@ -325,6 +341,16 @@ const RU: Translations = {
   'prop.clients.many': '{n} клиентов',
   'prop.units.one': '{n} юнит',
   'prop.units.many': '{n} юнитов',
+  // Leads board
+  'leadBoard.title': 'Воронка',
+  'leadBoard.subtitle': 'Перетаскивайте лиды между этапами, чтобы воронка оставалась актуальной.',
+  'leadBoard.emptyColumn': 'На этом этапе пока нет лидов.',
+  'leadBoard.dropHere': 'Перенесите лид сюда',
+  'leadBoard.followUp': 'Контакт',
+  'leadBoard.noFollowUp': 'Без даты',
+  'leadBoard.noInterest': 'Пока без предпочтений по объекту',
+  'leadBoard.noRealtor': 'Риелтор не назначен',
+  'leadBoard.saving': 'Сохраняем этап…',
   // Property types
   'proptype.apartment': 'Квартира',
   'proptype.house': 'Дом',

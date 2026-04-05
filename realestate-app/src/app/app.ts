@@ -8,6 +8,7 @@ import { PasswordGate } from './components/password-gate/password-gate';
 import { Dashboard } from './components/dashboard/dashboard';
 import { PropertyCatalogue } from './components/property-catalogue/property-catalogue';
 import { AddUnitModal } from './components/add-unit-modal/add-unit-modal';
+import { LeadsBoard } from './components/leads-board/leads-board';
 import { Client } from './models/client.model';
 import { Lead } from './models/lead.model';
 import { Unit } from './models/unit.model';
@@ -18,16 +19,19 @@ import { TranslatePipe } from './pipes/translate.pipe';
 import { exportToXlsx } from './utils/xlsx.utils';
 import { applySearch } from './utils/csv.utils';
 
+type LeadViewMode = 'board' | 'table';
+
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [SearchBar, TabNav, ClientsTable, LeadsTable, CreateModal, AddUnitModal, PasswordGate, Dashboard, PropertyCatalogue, TranslatePipe],
+  imports: [SearchBar, TabNav, ClientsTable, LeadsTable, LeadsBoard, CreateModal, AddUnitModal, PasswordGate, Dashboard, PropertyCatalogue, TranslatePipe],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
 export class App {
   readonly ts = inject(TranslationService);
   readonly activeTab = signal<TabType>('clients');
+  readonly leadsViewMode = signal<LeadViewMode>('board');
   readonly searchQuery = signal<string>('');
   readonly showModal = signal(false);
   readonly editingClient = signal<Client | null>(null);
@@ -48,6 +52,10 @@ export class App {
   switchTab(tab: TabType) {
     this.activeTab.set(tab);
     this.searchQuery.set('');
+  }
+
+  setLeadsViewMode(mode: LeadViewMode) {
+    this.leadsViewMode.set(mode);
   }
 
   onQueryChange(query: string) { this.searchQuery.set(query); }
