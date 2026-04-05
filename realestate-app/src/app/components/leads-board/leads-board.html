@@ -1,4 +1,4 @@
-<div class="board-shell">
+<div class="board-shell" [class.drag-active]="!!draggedLeadId()">
   <div class="board-header">
     <div class="board-intro">
       <div class="board-title">{{ 'leadBoard.title' | translate }}</div>
@@ -19,7 +19,7 @@
           class="board-column board-column-{{ column.status }}"
           [class.drop-target]="isDropTarget(column.status)"
           (dragover)="onDragOver($event, column.status)"
-          (dragleave)="onDragLeave(column.status)"
+          (dragleave)="onDragLeave($event, column.status)"
           (drop)="onDrop($event, column.status)">
           <header class="column-header">
             <div class="column-title-wrap">
@@ -30,12 +30,16 @@
           </header>
 
           <div class="column-body">
-            @if (isDropTarget(column.status)) {
-              <div class="drop-zone">{{ 'leadBoard.dropHere' | translate }}</div>
-            }
-
             @if (column.leads.length === 0) {
-              <div class="column-empty">{{ 'leadBoard.emptyColumn' | translate }}</div>
+              <div
+                class="column-empty"
+                [class.column-empty-drop-target]="isDropTarget(column.status)">
+                @if (isDropTarget(column.status)) {
+                  {{ 'leadBoard.dropHere' | translate }}
+                } @else {
+                  {{ 'leadBoard.emptyColumn' | translate }}
+                }
+              </div>
             } @else {
               @for (lead of column.leads; track lead.id) {
                 <article
@@ -46,7 +50,7 @@
                   (dragstart)="onDragStart($event, lead)"
                   (dragend)="onDragEnd()">
                   <div class="lead-card__top">
-                    <div>
+                    <div class="lead-card__identity">
                       <h4 class="lead-name">{{ lead.name }}</h4>
                       <div class="lead-phone">{{ lead.phone || '-' }}</div>
                     </div>

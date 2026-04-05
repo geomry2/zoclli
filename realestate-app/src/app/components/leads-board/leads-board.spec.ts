@@ -135,4 +135,31 @@ describe('LeadsBoard', () => {
     expect(board.errorFor(lead)).toBe('Update failed.');
     expect(leadService.leads()[0].status).toBe('new');
   });
+
+  it('keeps the drop target active when dragleave fires inside the same column bounds', () => {
+    const { board, injector: createdInjector } = createLeadsBoard([]);
+    injector = createdInjector;
+
+    const column = document.createElement('section');
+    vi.spyOn(column, 'getBoundingClientRect').mockReturnValue({
+      x: 0,
+      y: 0,
+      top: 0,
+      left: 0,
+      right: 240,
+      bottom: 400,
+      width: 240,
+      height: 400,
+      toJSON: () => ({}),
+    });
+
+    board.dropTargetStatus.set('contacted');
+    board.onDragLeave({
+      currentTarget: column,
+      clientX: 120,
+      clientY: 160,
+    } as DragEvent, 'contacted');
+
+    expect(board.dropTargetStatus()).toBe('contacted');
+  });
 });

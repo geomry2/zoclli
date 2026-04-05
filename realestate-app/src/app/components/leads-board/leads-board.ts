@@ -96,8 +96,24 @@ export class LeadsBoard {
     }
   }
 
-  onDragLeave(status: LeadStatus) {
-    if (this.dropTargetStatus() === status) {
+  onDragLeave(event: DragEvent, status: LeadStatus) {
+    if (this.dropTargetStatus() !== status) return;
+
+    const currentTarget = event.currentTarget;
+    if (!(currentTarget instanceof HTMLElement)) {
+      this.dropTargetStatus.set(null);
+      return;
+    }
+
+    const { clientX, clientY } = event;
+    const bounds = currentTarget.getBoundingClientRect();
+    const isStillInside =
+      clientX >= bounds.left &&
+      clientX <= bounds.right &&
+      clientY >= bounds.top &&
+      clientY <= bounds.bottom;
+
+    if (!isStillInside) {
       this.dropTargetStatus.set(null);
     }
   }
