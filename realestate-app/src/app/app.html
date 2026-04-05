@@ -29,6 +29,13 @@
   </main>
 </div>
 
+@if (showAddUnitModal()) {
+  <app-add-unit-modal
+    [buildingName]="addUnitBuilding()"
+    (closed)="closeAddUnitModal()"
+  />
+}
+
 @if (showModal()) {
   <app-create-modal
     [tab]="modalTab()"

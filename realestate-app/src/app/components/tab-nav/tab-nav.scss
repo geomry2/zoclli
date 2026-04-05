@@ -1,32 +1,30 @@
 .tab-nav {
   display: flex;
-  gap: 6px;
-  padding: 12px 16px 8px;
-  border-bottom: 1px solid #efefef;
-  margin-bottom: 0;
+  gap: 0;
+  padding: 0 20px;
+  border-bottom: 1px solid #efefed;
   background: #ffffff;
 }
 
 .tab-btn {
-  padding: 8px 14px;
+  padding: 13px 16px 11px;
   font-family: inherit;
   font-size: 13px;
   font-weight: 500;
-  color: #6f767c;
+  color: #9ca3a9;
   background: transparent;
   border: none;
-  border-radius: 8px;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
   cursor: pointer;
-  transition: color 0.15s, background-color 0.15s;
+  transition: color 0.15s, border-color 0.15s;
+  white-space: nowrap;
 
-  &:hover {
-    color: #2f3437;
-    background: #f4f4f4;
-  }
+  &:hover { color: #2f3437; }
 
   &.active {
-    color: #2f3437;
-    background: #f1f1f0;
+    color: #1a1a1a;
+    border-bottom-color: #1a1a1a;
     font-weight: 600;
   }
 }
