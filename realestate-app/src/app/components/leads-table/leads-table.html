@@ -70,6 +70,27 @@
       </div>
     </div>
 
+    <div class="filter-group filter-group-columns">
+      <span class="filter-label">{{ 'columns.title' | translate }}</span>
+      <div class="filter-chip-row">
+        @for (column of leadColumns; track column.key) {
+          <button
+            class="filter-chip"
+            type="button"
+            [class.active]="isColumnVisible(column.key)"
+            [disabled]="!canToggleColumn(column.key)"
+            (click)="toggleColumnVisibility(column.key)">
+            {{ column.label | translate }}
+          </button>
+        }
+        @if (hasCustomColumnVisibility()) {
+          <button class="filter-reset" type="button" (click)="resetColumnVisibility()">
+            {{ 'columns.reset' | translate }}
+          </button>
+        }
+      </div>
+    </div>
+
     @if (hasActiveFilters()) {
       <button class="filter-reset" type="button" (click)="clearFilters()">
         {{ 'filter.clear' | translate }}
@@ -86,71 +107,43 @@
     <table class="data-table">
       <thead>
         <tr>
-          <th [attr.aria-sort]="ariaSort('name')">
-            <button class="sort-button" type="button" [class.active]="sortDirection('name') !== null" (click)="toggleSort('name')">
-              <span>{{ 'col.name' | translate }}</span>
-              <span class="sort-indicator">{{ sortDirection('name') === 'asc' ? '▲' : sortDirection('name') === 'desc' ? '▼' : '↕' }}</span>
-            </button>
-          </th>
-          <th [attr.aria-sort]="ariaSort('phone')">
-            <button class="sort-button" type="button" [class.active]="sortDirection('phone') !== null" (click)="toggleSort('phone')">
-              <span>{{ 'col.phone' | translate }}</span>
-              <span class="sort-indicator">{{ sortDirection('phone') === 'asc' ? '▲' : sortDirection('phone') === 'desc' ? '▼' : '↕' }}</span>
-            </button>
-          </th>
-          <th [attr.aria-sort]="ariaSort('status')">
-            <button class="sort-button" type="button" [class.active]="sortDirection('status') !== null" (click)="toggleSort('status')">
-              <span>{{ 'col.status' | translate }}</span>
-              <span class="sort-indicator">{{ sortDirection('status') === 'asc' ? '▲' : sortDirection('status') === 'desc' ? '▼' : '↕' }}</span>
-            </button>
-          </th>
-          <th [attr.aria-sort]="ariaSort('budgetRange')">
-            <button class="sort-button" type="button" [class.active]="sortDirection('budgetRange') !== null" (click)="toggleSort('budgetRange')">
-              <span>{{ 'col.budgetRange' | translate }}</span>
-              <span class="sort-indicator">{{ sortDirection('budgetRange') === 'asc' ? '▲' : sortDirection('budgetRange') === 'desc' ? '▼' : '↕' }}</span>
-            </button>
-          </th>
-          <th [attr.aria-sort]="ariaSort('interestedIn')">
-            <button class="sort-button" type="button" [class.active]="sortDirection('interestedIn') !== null" (click)="toggleSort('interestedIn')">
-              <span>{{ 'col.interestedIn' | translate }}</span>
-              <span class="sort-indicator">{{ sortDirection('interestedIn') === 'asc' ? '▲' : sortDirection('interestedIn') === 'desc' ? '▼' : '↕' }}</span>
-            </button>
-          </th>
-          <th [attr.aria-sort]="ariaSort('followUpDate')">
-            <button class="sort-button" type="button" [class.active]="sortDirection('followUpDate') !== null" (click)="toggleSort('followUpDate')">
-              <span>{{ 'col.followUp' | translate }}</span>
-              <span class="sort-indicator">{{ sortDirection('followUpDate') === 'asc' ? '▲' : sortDirection('followUpDate') === 'desc' ? '▼' : '↕' }}</span>
-            </button>
-          </th>
-          <th [attr.aria-sort]="ariaSort('realtorName')">
-            <button class="sort-button" type="button" [class.active]="sortDirection('realtorName') !== null" (click)="toggleSort('realtorName')">
-              <span>{{ 'col.realtor' | translate }}</span>
-              <span class="sort-indicator">{{ sortDirection('realtorName') === 'asc' ? '▲' : sortDirection('realtorName') === 'desc' ? '▼' : '↕' }}</span>
-            </button>
-          </th>
+          @for (column of visibleLeadColumns(); track column.key) {
+            <th [attr.aria-sort]="ariaSort(column.key)">
+              <button class="sort-button" type="button" [class.active]="sortDirection(column.key) !== null" (click)="toggleSort(column.key)">
+                <span>{{ column.label | translate }}</span>
+                <span class="sort-indicator">{{ sortDirection(column.key) === 'asc' ? '▲' : sortDirection(column.key) === 'desc' ? '▼' : '↕' }}</span>
+              </button>
+            </th>
+          }
           <th></th>
         </tr>
       </thead>
       <tbody>
         @for (lead of filteredLeads(); track lead.id) {
           <tr class="data-row" [class.expanded]="expandedRowId() === lead.id" (click)="toggleRow(lead.id)">
-            <td class="col-name">{{ lead.name }}</td>
-            <td>{{ lead.phone }}</td>
-            <td><span class="badge badge-{{ lead.status }}">{{ ('status.' + lead.status) | translate }}</span></td>
-            <td>{{ formatBudget(lead) }}</td>
-            <td class="col-interest">{{ lead.interestedIn }}</td>
-            <td>
-              @if (lead.followUpDate) {
-                <span class="follow-up-date"
-                  [class.overdue]="isOverdue(lead.followUpDate)"
-                  [class.due-today]="isDueToday(lead.followUpDate)">
-                  {{ formatFollowUp(lead.followUpDate) }}
-                </span>
-              } @else {
-                <span class="no-date">—</span>
-              }
-            </td>
-            <td>{{ lead.realtorName }}</td>
+            @for (column of visibleLeadColumns(); track column.key) {
+              <td [class.col-name]="column.key === 'name'" [class.col-interest]="column.key === 'interestedIn'">
+                @switch (column.key) {
+                  @case ('name') { {{ lead.name }} }
+                  @case ('phone') { {{ lead.phone }} }
+                  @case ('status') { <span class="badge badge-{{ lead.status }}">{{ ('status.' + lead.status) | translate }}</span> }
+                  @case ('budgetRange') { {{ formatBudget(lead) }} }
+                  @case ('interestedIn') { {{ lead.interestedIn }} }
+                  @case ('followUpDate') {
+                    @if (lead.followUpDate) {
+                      <span class="follow-up-date"
+                        [class.overdue]="isOverdue(lead.followUpDate)"
+                        [class.due-today]="isDueToday(lead.followUpDate)">
+                        {{ formatFollowUp(lead.followUpDate) }}
+                      </span>
+                    } @else {
+                      <span class="no-date">—</span>
+                    }
+                  }
+                  @case ('realtorName') { {{ lead.realtorName }} }
+                }
+              </td>
+            }
             <td class="col-actions">
               <button class="action-btn convert-btn" [title]="'btn.convert' | translate" (click)="requestConvert($event, lead)">→</button>
               <button class="action-btn edit-btn" [title]="'btn.edit' | translate" (click)="requestEdit($event, lead)">✏</button>
@@ -159,7 +152,7 @@
           </tr>
           @if (deletingId() === lead.id) {
             <tr class="confirm-row">
-              <td colspan="8">
+              <td [attr.colspan]="detailColspan()">
                 <div class="delete-confirm">
                   @if (deleteError()) {
                     <span class="delete-err">{{ deleteError() }}</span>
@@ -174,7 +167,7 @@
           }
           @if (expandedRowId() === lead.id) {
             <tr class="detail-row">
-              <td colspan="8">
+              <td [attr.colspan]="detailColspan()">
                 <app-row-detail [entry]="asRecord(lead)" [fields]="leadFields" (entrySave)="onLeadSave($event)" />
               </td>
             </tr>

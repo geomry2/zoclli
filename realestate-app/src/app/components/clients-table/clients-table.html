@@ -85,6 +85,27 @@
       </div>
     </div>
 
+    <div class="filter-group filter-group-columns">
+      <span class="filter-label">{{ 'columns.title' | translate }}</span>
+      <div class="filter-chip-row">
+        @for (column of clientColumns; track column.key) {
+          <button
+            class="filter-chip"
+            type="button"
+            [class.active]="isColumnVisible(column.key)"
+            [disabled]="!canToggleColumn(column.key)"
+            (click)="toggleColumnVisibility(column.key)">
+            {{ column.label | translate }}
+          </button>
+        }
+        @if (hasCustomColumnVisibility()) {
+          <button class="filter-reset" type="button" (click)="resetColumnVisibility()">
+            {{ 'columns.reset' | translate }}
+          </button>
+        }
+      </div>
+    </div>
+
     @if (hasActiveFilters()) {
       <button class="filter-reset" type="button" (click)="clearFilters()">
         {{ 'filter.clear' | translate }}
@@ -101,54 +122,32 @@
     <table class="data-table">
       <thead>
         <tr>
-          <th [attr.aria-sort]="ariaSort('name')">
-            <button class="sort-button" type="button" [class.active]="sortDirection('name') !== null" (click)="toggleSort('name')">
-              <span>{{ 'col.name' | translate }}</span>
-              <span class="sort-indicator">{{ sortDirection('name') === 'asc' ? '▲' : sortDirection('name') === 'desc' ? '▼' : '↕' }}</span>
-            </button>
-          </th>
-          <th [attr.aria-sort]="ariaSort('phone')">
-            <button class="sort-button" type="button" [class.active]="sortDirection('phone') !== null" (click)="toggleSort('phone')">
-              <span>{{ 'col.phone' | translate }}</span>
-              <span class="sort-indicator">{{ sortDirection('phone') === 'asc' ? '▲' : sortDirection('phone') === 'desc' ? '▼' : '↕' }}</span>
-            </button>
-          </th>
-          <th [attr.aria-sort]="ariaSort('propertyType')">
-            <button class="sort-button" type="button" [class.active]="sortDirection('propertyType') !== null" (click)="toggleSort('propertyType')">
-              <span>{{ 'col.propertyType' | translate }}</span>
-              <span class="sort-indicator">{{ sortDirection('propertyType') === 'asc' ? '▲' : sortDirection('propertyType') === 'desc' ? '▼' : '↕' }}</span>
-            </button>
-          </th>
-          <th [attr.aria-sort]="ariaSort('status')">
-            <button class="sort-button" type="button" [class.active]="sortDirection('status') !== null" (click)="toggleSort('status')">
-              <span>{{ 'col.status' | translate }}</span>
-              <span class="sort-indicator">{{ sortDirection('status') === 'asc' ? '▲' : sortDirection('status') === 'desc' ? '▼' : '↕' }}</span>
-            </button>
-          </th>
-          <th [attr.aria-sort]="ariaSort('dealValue')">
-            <button class="sort-button" type="button" [class.active]="sortDirection('dealValue') !== null" (click)="toggleSort('dealValue')">
-              <span>{{ 'col.dealValue' | translate }}</span>
-              <span class="sort-indicator">{{ sortDirection('dealValue') === 'asc' ? '▲' : sortDirection('dealValue') === 'desc' ? '▼' : '↕' }}</span>
-            </button>
-          </th>
-          <th [attr.aria-sort]="ariaSort('realtorName')">
-            <button class="sort-button" type="button" [class.active]="sortDirection('realtorName') !== null" (click)="toggleSort('realtorName')">
-              <span>{{ 'col.realtor' | translate }}</span>
-              <span class="sort-indicator">{{ sortDirection('realtorName') === 'asc' ? '▲' : sortDirection('realtorName') === 'desc' ? '▼' : '↕' }}</span>
-            </button>
-          </th>
+          @for (column of visibleClientColumns(); track column.key) {
+            <th [attr.aria-sort]="ariaSort(column.key)">
+              <button class="sort-button" type="button" [class.active]="sortDirection(column.key) !== null" (click)="toggleSort(column.key)">
+                <span>{{ column.label | translate }}</span>
+                <span class="sort-indicator">{{ sortDirection(column.key) === 'asc' ? '▲' : sortDirection(column.key) === 'desc' ? '▼' : '↕' }}</span>
+              </button>
+            </th>
+          }
           <th></th>
         </tr>
       </thead>
       <tbody>
         @for (client of filteredClients(); track client.id) {
           <tr class="data-row" [class.expanded]="expandedRowId() === client.id" (click)="toggleRow(client.id)">
-            <td class="col-name">{{ client.name }}</td>
-            <td>{{ client.phone }}</td>
-            <td><span class="badge badge-{{ client.propertyType }}">{{ ('proptype.' + client.propertyType) | translate }}</span></td>
-            <td><span class="badge badge-{{ client.status }}">{{ ('status.' + client.status) | translate }}</span></td>
-            <td>{{ formatDealValue(client.dealValue) }}</td>
-            <td>{{ client.realtorName }}</td>
+            @for (column of visibleClientColumns(); track column.key) {
+              <td [class.col-name]="column.key === 'name'">
+                @switch (column.key) {
+                  @case ('name') { {{ client.name }} }
+                  @case ('phone') { {{ client.phone }} }
+                  @case ('propertyType') { <span class="badge badge-{{ client.propertyType }}">{{ ('proptype.' + client.propertyType) | translate }}</span> }
+                  @case ('status') { <span class="badge badge-{{ client.status }}">{{ ('status.' + client.status) | translate }}</span> }
+                  @case ('dealValue') { {{ formatDealValue(client.dealValue) }} }
+                  @case ('realtorName') { {{ client.realtorName }} }
+                }
+              </td>
+            }
             <td class="col-actions">
               <button class="action-btn pdf-btn" [title]="'btn.pdf' | translate" (click)="exportClientSummary($event, client)">{{ 'btn.pdf' | translate }}</button>
               <button class="action-btn edit-btn" [title]="'btn.edit' | translate" (click)="requestEdit($event, client)">✏</button>
@@ -157,7 +156,7 @@
           </tr>
           @if (deletingId() === client.id) {
             <tr class="confirm-row">
-              <td colspan="7">
+              <td [attr.colspan]="detailColspan()">
                 <div class="delete-confirm">
                   @if (deleteError()) {
                     <span class="delete-err">{{ deleteError() }}</span>
@@ -172,7 +171,7 @@
           }
           @if (expandedRowId() === client.id) {
             <tr class="detail-row">
-              <td colspan="7">
+              <td [attr.colspan]="detailColspan()">
                 <app-row-detail [entry]="asRecord(client)" [fields]="clientFields" (entrySave)="onClientSave($event)" />
               </td>
             </tr>

@@ -84,6 +84,8 @@ const EN: Translations = {
   'filter.max': 'Max',
   'filter.to': 'to',
   'filter.clear': 'Clear Filters',
+  'columns.title': 'Columns',
+  'columns.reset': 'Reset Columns',
   // Results
   'results.one': '1 result',
   'results.many': '{n} results',
@@ -338,6 +340,8 @@ const RU: Translations = {
   'filter.max': 'До',
   'filter.to': 'до',
   'filter.clear': 'Сбросить фильтры',
+  'columns.title': 'Колонки',
+  'columns.reset': 'Сбросить колонки',
   // Results
   'results.one': '1 результат',
   'results.many': '{n} результатов',

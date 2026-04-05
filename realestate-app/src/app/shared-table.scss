@@ -24,6 +24,10 @@
   min-width: 240px;
 }
 
+.filter-group-columns {
+  min-width: min(100%, 320px);
+}
+
 .filter-label {
   font-size: 10.5px;
   font-weight: 700;
@@ -61,6 +65,11 @@
     border-color: #1f2933;
     background: #1f2933;
     color: #fff;
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
   }
 }
 

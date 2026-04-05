@@ -49,6 +49,7 @@ describe('ClientsTable', () => {
   afterEach(() => {
     injector?.destroy();
     injector = undefined;
+    localStorage.clear();
   });
 
   it('applies combined status, property type, realtor, date, and value filters', () => {
@@ -133,5 +134,59 @@ describe('ClientsTable', () => {
     table.toggleSort('dealValue');
     expect(table.filteredClients().map(client => client.id)).toEqual(['c1', 'c3', 'c2']);
     expect(table.ariaSort('dealValue')).toBe('descending');
+  });
+
+  it('persists column visibility choices and keeps at least one client column visible', () => {
+    const { table, injector: createdInjector } = createClientsTable([
+      buildClient({ id: 'c1', name: 'Anna' }),
+    ]);
+    injector = createdInjector;
+
+    expect(table.visibleClientColumns().map(column => column.key)).toEqual([
+      'name',
+      'phone',
+      'propertyType',
+      'status',
+      'dealValue',
+      'realtorName',
+    ]);
+
+    table.toggleSort('dealValue');
+    table.toggleColumnVisibility('dealValue');
+
+    expect(table.visibleClientColumns().map(column => column.key)).toEqual([
+      'name',
+      'phone',
+      'propertyType',
+      'status',
+      'realtorName',
+    ]);
+    expect(table.sortState()).toEqual({ key: 'name', direction: 'asc' });
+    expect(JSON.parse(localStorage.getItem('clients-table-visible-columns') ?? '[]')).toEqual([
+      'name',
+      'phone',
+      'propertyType',
+      'status',
+      'realtorName',
+    ]);
+
+    table.toggleColumnVisibility('phone');
+    table.toggleColumnVisibility('propertyType');
+    table.toggleColumnVisibility('status');
+    table.toggleColumnVisibility('realtorName');
+    table.toggleColumnVisibility('name');
+
+    expect(table.visibleClientColumns().map(column => column.key)).toEqual(['name']);
+
+    table.resetColumnVisibility();
+
+    expect(table.visibleClientColumns().map(column => column.key)).toEqual([
+      'name',
+      'phone',
+      'propertyType',
+      'status',
+      'dealValue',
+      'realtorName',
+    ]);
   });
 });
