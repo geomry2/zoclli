@@ -2,15 +2,18 @@
 <div class="app-container">
   <header class="app-header">
     <div class="header-left">
-      <h1 class="app-title">Real Estate</h1>
-      <span class="app-subtitle">Client &amp; Lead Management</span>
+      <h1 class="app-title">{{ 'app.title' | translate }}</h1>
+      <span class="app-subtitle">{{ 'app.subtitle' | translate }}</span>
     </div>
     <div class="header-right">
       @if (activeTab() !== 'dashboard' && activeTab() !== 'properties') {
         <app-search-bar (queryChange)="onQueryChange($event)" />
-        <button class="btn-export" (click)="exportXlsx()">↓ XLSX</button>
-        <button class="btn-add" (click)="openCreate()">+ Add</button>
+        <button class="btn-export" (click)="exportXlsx()">{{ 'btn.xlsx' | translate }}</button>
+        <button class="btn-add" (click)="openCreate()">{{ 'btn.add' | translate }}</button>
       }
+      <button class="btn-lang" (click)="ts.toggle()">
+        {{ ts.lang() === 'en' ? 'RU' : 'EN' }}
+      </button>
     </div>
   </header>
 

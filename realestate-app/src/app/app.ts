@@ -12,17 +12,20 @@ import { Client } from './models/client.model';
 import { Lead } from './models/lead.model';
 import { ClientService } from './services/client.service';
 import { LeadService } from './services/lead.service';
+import { TranslationService } from './services/translation.service';
+import { TranslatePipe } from './pipes/translate.pipe';
 import { exportToXlsx } from './utils/xlsx.utils';
 import { applySearch } from './utils/csv.utils';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [SearchBar, TabNav, ClientsTable, LeadsTable, CreateModal, AddUnitModal, PasswordGate, Dashboard, PropertyCatalogue],
+  imports: [SearchBar, TabNav, ClientsTable, LeadsTable, CreateModal, AddUnitModal, PasswordGate, Dashboard, PropertyCatalogue, TranslatePipe],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
 export class App {
+  readonly ts = inject(TranslationService);
   readonly activeTab = signal<TabType>('clients');
   readonly searchQuery = signal<string>('');
   readonly showModal = signal(false);

@@ -1,5 +1,6 @@
 import { Component, OnInit, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 import { ClientService } from '../../services/client.service';
 import { LeadService } from '../../services/lead.service';
 import { BuildingService } from '../../services/building.service';
@@ -13,7 +14,7 @@ type FieldMode = 'select' | 'new';
 @Component({
   selector: 'app-create-modal',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, TranslatePipe],
   templateUrl: './create-modal.html',
   styleUrl: './create-modal.scss',
 })

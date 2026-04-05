@@ -1,8 +1,10 @@
 import { Component, output } from '@angular/core';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-search-bar',
   standalone: true,
+  imports: [TranslatePipe],
   templateUrl: './search-bar.html',
   styleUrl: './search-bar.scss'
 })

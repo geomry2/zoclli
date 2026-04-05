@@ -2,11 +2,13 @@ import { Component, computed, inject, input, output, signal } from '@angular/cor
 import { ClientService } from '../../services/client.service';
 import { Client } from '../../models/client.model';
 import { RowDetail, FieldDefinition } from '../row-detail/row-detail';
+import { TranslationService } from '../../services/translation.service';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-clients-table',
   standalone: true,
-  imports: [RowDetail],
+  imports: [RowDetail, TranslatePipe],
   templateUrl: './clients-table.html',
   styleUrl: './clients-table.scss'
 })
@@ -14,6 +16,7 @@ export class ClientsTable {
   readonly searchQuery = input<string>('');
   readonly editRequest = output<Client>();
 
+  readonly ts = inject(TranslationService);
   private readonly clientService = inject(ClientService);
   readonly expandedRowId = signal<string | null>(null);
   readonly deletingId = signal<string | null>(null);
@@ -66,18 +69,18 @@ export class ClientsTable {
   }
 
   readonly clientFields: FieldDefinition[] = [
-    { key: 'name', label: 'Full Name' },
-    { key: 'phone', label: 'Phone' },
-    { key: 'email', label: 'Email' },
-    { key: 'buildingName', label: 'Building / Project' },
-    { key: 'apartmentNumber', label: 'Apartment / Unit' },
-    { key: 'propertyType', label: 'Property Type', type: 'badge', options: ['apartment', 'house', 'commercial', 'land', 'villa'] },
-    { key: 'status', label: 'Status', type: 'badge', options: ['active', 'inactive', 'closed'] },
-    { key: 'purchaseDate', label: 'Purchase Date', type: 'date' },
-    { key: 'dealValue', label: 'Deal Value', type: 'currency' },
-    { key: 'realtorName', label: 'Realtor' },
-    { key: 'realtorAgency', label: 'Agency' },
-    { key: 'notes', label: 'Notes', multiline: true },
+    { key: 'name', label: 'field.fullName' },
+    { key: 'phone', label: 'field.phone' },
+    { key: 'email', label: 'field.email' },
+    { key: 'buildingName', label: 'field.building' },
+    { key: 'apartmentNumber', label: 'field.apartmentNumber' },
+    { key: 'propertyType', label: 'field.propertyType', type: 'badge', options: ['apartment', 'house', 'commercial', 'land', 'villa'] },
+    { key: 'status', label: 'field.status', type: 'badge', options: ['active', 'inactive', 'closed'] },
+    { key: 'purchaseDate', label: 'field.purchaseDate', type: 'date' },
+    { key: 'dealValue', label: 'field.dealValue', type: 'currency' },
+    { key: 'realtorName', label: 'field.realtorName' },
+    { key: 'realtorAgency', label: 'field.realtorAgency' },
+    { key: 'notes', label: 'field.notes', multiline: true },
   ];
 
   formatDealValue(value: number): string {

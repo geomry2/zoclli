@@ -1,19 +1,19 @@
 <div class="table-wrapper">
   @if (searchQuery()) {
-    <div class="result-count">{{ filteredClients().length }} {{ filteredClients().length === 1 ? 'result' : 'results' }}</div>
+    <div class="result-count">{{ ts.results(filteredClients().length) }}</div>
   }
   @if (filteredClients().length === 0) {
-    <div class="empty-state">No clients match your search.</div>
+    <div class="empty-state">{{ 'empty.clients' | translate }}</div>
   } @else {
     <table class="data-table">
       <thead>
         <tr>
-          <th>Name</th>
-          <th>Phone</th>
-          <th>Property Type</th>
-          <th>Status</th>
-          <th>Deal Value</th>
-          <th>Realtor</th>
+          <th>{{ 'col.name' | translate }}</th>
+          <th>{{ 'col.phone' | translate }}</th>
+          <th>{{ 'col.propertyType' | translate }}</th>
+          <th>{{ 'col.status' | translate }}</th>
+          <th>{{ 'col.dealValue' | translate }}</th>
+          <th>{{ 'col.realtor' | translate }}</th>
           <th></th>
         </tr>
       </thead>
@@ -27,8 +27,8 @@
             <td>{{ formatDealValue(client.dealValue) }}</td>
             <td>{{ client.realtorName }}</td>
             <td class="col-actions">
-              <button class="action-btn edit-btn" title="Edit" (click)="requestEdit($event, client)">✏</button>
-              <button class="action-btn delete-btn" title="Delete" (click)="startDelete($event, client.id)">✕</button>
+              <button class="action-btn edit-btn" [title]="'btn.edit' | translate" (click)="requestEdit($event, client)">✏</button>
+              <button class="action-btn delete-btn" [title]="'btn.delete' | translate" (click)="startDelete($event, client.id)">✕</button>
             </td>
           </tr>
           @if (deletingId() === client.id) {
@@ -38,10 +38,10 @@
                   @if (deleteError()) {
                     <span class="delete-err">{{ deleteError() }}</span>
                   } @else {
-                    <span>Delete <strong>{{ client.name }}</strong>?</span>
+                    <span [innerHTML]="('delete.title' | translate : {name: client.name})"></span>
                   }
-                  <button class="btn-confirm-delete" (click)="confirmDelete(client.id)">Delete</button>
-                  <button class="btn-cancel-delete" (click)="cancelDelete()">Cancel</button>
+                  <button class="btn-confirm-delete" (click)="confirmDelete(client.id)">{{ 'btn.confirmDelete' | translate }}</button>
+                  <button class="btn-cancel-delete" (click)="cancelDelete()">{{ 'btn.cancelDelete' | translate }}</button>
                 </div>
               </td>
             </tr>

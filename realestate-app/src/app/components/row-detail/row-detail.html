@@ -2,7 +2,7 @@
   <div class="detail-panel">
     @for (field of fields(); track field.key) {
       <div class="field-block">
-        <span class="field-label">{{ field.label }}</span>
+        <span class="field-label">{{ field.label | translate }}</span>
         @if (editMode()) {
           @if (isBadge(field) && field.options) {
             <select
@@ -54,10 +54,10 @@
       <span class="detail-save-error">{{ saveError() }}</span>
     }
     @if (!editMode()) {
-      <button class="detail-btn detail-edit-btn" (click)="startEdit($event)">Edit</button>
+      <button class="detail-btn detail-edit-btn" (click)="startEdit($event)">{{ 'btn.edit' | translate }}</button>
     } @else {
-      <button class="detail-btn detail-save-btn" (click)="saveDraft($event)">Save</button>
-      <button class="detail-btn detail-cancel-btn" (click)="cancelEdit($event)">Cancel</button>
+      <button class="detail-btn detail-save-btn" (click)="saveDraft($event)">{{ 'btn.save' | translate }}</button>
+      <button class="detail-btn detail-cancel-btn" (click)="cancelEdit($event)">{{ 'btn.cancel' | translate }}</button>
     }
   </div>
 </div>
