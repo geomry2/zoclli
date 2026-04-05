@@ -54,6 +54,15 @@ export class LeadsTable {
 
   cancelDelete() { this.deletingId.set(null); this.deleteError.set(null); }
 
+  readonly saveError = signal<string | null>(null);
+
+  async onLeadSave(record: Record<string, unknown>) {
+    const lead = record as unknown as Lead;
+    const { error } = await this.leadService.update(lead);
+    if (error) this.saveError.set(error);
+    else this.saveError.set(null);
+  }
+
   async confirmDelete(id: string) {
     const { error } = await this.leadService.remove(id);
     if (error) { this.deleteError.set(error); return; }
@@ -66,14 +75,14 @@ export class LeadsTable {
     { key: 'phone', label: 'Phone' },
     { key: 'email', label: 'Email' },
     { key: 'interestedIn', label: 'Interested In' },
-    { key: 'status', label: 'Status', type: 'badge' },
+    { key: 'status', label: 'Status', type: 'badge', options: ['new', 'contacted', 'negotiating', 'lost'] },
     { key: 'budgetMin', label: 'Budget Min', type: 'currency' },
     { key: 'budgetMax', label: 'Budget Max', type: 'currency' },
     { key: 'followUpDate', label: 'Follow-up Date', type: 'date' },
     { key: 'realtorName', label: 'Realtor' },
     { key: 'realtorAgency', label: 'Agency' },
     { key: 'firstInteractionDate', label: 'First Contact', type: 'date' },
-    { key: 'notes', label: 'Notes' },
+    { key: 'notes', label: 'Notes', multiline: true },
   ];
 
   formatBudget(lead: Lead): string {

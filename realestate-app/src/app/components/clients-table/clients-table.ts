@@ -48,6 +48,15 @@ export class ClientsTable {
 
   cancelDelete() { this.deletingId.set(null); this.deleteError.set(null); }
 
+  readonly saveError = signal<string | null>(null);
+
+  async onClientSave(record: Record<string, unknown>) {
+    const client = record as unknown as Client;
+    const { error } = await this.clientService.update(client);
+    if (error) this.saveError.set(error);
+    else this.saveError.set(null);
+  }
+
   async confirmDelete(id: string) {
     const { error } = await this.clientService.remove(id);
     if (error) { this.deleteError.set(error); return; }
@@ -62,13 +71,13 @@ export class ClientsTable {
     { key: 'email', label: 'Email' },
     { key: 'buildingName', label: 'Building / Project' },
     { key: 'apartmentNumber', label: 'Apartment / Unit' },
-    { key: 'propertyType', label: 'Property Type', type: 'badge' },
-    { key: 'status', label: 'Status', type: 'badge' },
+    { key: 'propertyType', label: 'Property Type', type: 'badge', options: ['apartment', 'house', 'commercial', 'land', 'villa'] },
+    { key: 'status', label: 'Status', type: 'badge', options: ['active', 'inactive', 'closed'] },
     { key: 'purchaseDate', label: 'Purchase Date', type: 'date' },
     { key: 'dealValue', label: 'Deal Value', type: 'currency' },
     { key: 'realtorName', label: 'Realtor' },
     { key: 'realtorAgency', label: 'Agency' },
-    { key: 'notes', label: 'Notes' },
+    { key: 'notes', label: 'Notes', multiline: true },
   ];
 
   formatDealValue(value: number): string {
