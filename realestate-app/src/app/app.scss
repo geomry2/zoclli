@@ -1,18 +1,28 @@
 .app-container {
-  max-width: 1120px;
-  margin: 24px auto;
-  padding: 0 24px 48px;
+  max-width: 1160px;
+  margin: 32px auto;
+  padding: 0 24px 64px;
 }
 
 .app-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 26px 28px 18px;
-  border-bottom: 1px solid #ececec;
-  margin-bottom: 0;
+  padding: 20px 28px;
   background: #ffffff;
   border-radius: 12px 12px 0 0;
+  border-bottom: 1px solid #ececec;
+  position: relative;
+  overflow: hidden;
+
+  /* Gradient accent strip across the top */
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #3aaa6e 0%, #4a90d9 55%, #7c5cbf 100%);
+  }
 }
 
 .header-left {
@@ -22,82 +32,83 @@
 }
 
 .app-title {
-  font-size: 22px;
-  font-weight: 600;
-  color: #2f3437;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a1a;
   margin: 0;
-  letter-spacing: -0.2px;
+  letter-spacing: -0.3px;
 }
 
 .app-subtitle {
-  font-size: 13px;
-  color: #6f767c;
+  font-size: 12px;
+  color: #9ca3a9;
   font-weight: 400;
 }
 
 .header-right {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .btn-export {
-  height: 36px;
-  padding: 0 14px;
+  height: 34px;
+  padding: 0 13px;
   background: none;
-  color: #555;
-  border: 1px solid #e0e0e0;
-  border-radius: 6px;
+  color: #5a6370;
+  border: 1px solid #dde1e5;
+  border-radius: 7px;
   font-family: inherit;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.15s, border-color 0.15s;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
 
-  &:hover { background: #f5f5f5; border-color: #ccc; }
+  &:hover {
+    background: #f4f4f2;
+    border-color: #c8cdd3;
+    color: #2f3437;
+  }
 }
 
 .btn-add {
-  height: 36px;
+  height: 34px;
   padding: 0 16px;
   background: #1a1a1a;
   color: #fff;
   border: none;
-  border-radius: 6px;
+  border-radius: 7px;
   font-family: inherit;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
-  transition: opacity 0.15s;
+  letter-spacing: 0.01em;
+  transition: background 0.15s;
 
-  &:hover { opacity: 0.8; }
+  &:hover { background: #333; }
 }
 
 .tab-content {
   background: #ffffff;
   border-radius: 0 0 12px 12px;
-  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.05);
-  border: 1px solid #ececec;
+  box-shadow: 0 4px 24px rgba(15, 23, 42, 0.07), 0 1px 4px rgba(0, 0, 0, 0.04);
+  border: 1px solid #e8e8e6;
   border-top: none;
   overflow: hidden;
 }
 
 @media (max-width: 760px) {
   .app-container {
-    margin: 16px auto;
-    padding: 0 12px 24px;
+    margin: 12px auto;
+    padding: 0 12px 32px;
   }
 
   .app-header {
-    padding: 18px 16px 14px;
+    padding: 16px 18px;
     gap: 12px;
     flex-direction: column;
     align-items: flex-start;
-  }
-
-  .tab-content {
-    border-radius: 0 0 12px 12px;
   }
 }

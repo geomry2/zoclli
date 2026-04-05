@@ -77,6 +77,39 @@ export class Dashboard {
     }));
   });
 
+  readonly activeClientsCount = computed(() =>
+    this.clientService.clients().filter(c => c.status === 'active').length
+  );
+
+  readonly winRate = computed((): number | null => {
+    const won = this.clientService.clients().length;
+    const lost = this.leadService.leads().filter(l => l.status === 'lost').length;
+    const total = won + lost;
+    return total === 0 ? null : Math.round(won / total * 100);
+  });
+
+  readonly propertyMix = computed(() => {
+    const clients = this.clientService.clients();
+    const total = clients.length || 1;
+    const types = ['apartment', 'house', 'villa', 'commercial', 'land'];
+    const colors: Record<string, string> = {
+      apartment: '#4a90d9',
+      house: '#3aaa6e',
+      villa: '#7c5cbf',
+      commercial: '#f0a500',
+      land: '#b87333',
+    };
+    return types
+      .map(t => ({
+        label: t.charAt(0).toUpperCase() + t.slice(1),
+        count: clients.filter(c => c.propertyType === t).length,
+        color: colors[t],
+        pct: Math.round(clients.filter(c => c.propertyType === t).length / total * 100),
+      }))
+      .filter(r => r.count > 0)
+      .sort((a, b) => b.count - a.count);
+  });
+
   readonly topRealtors = computed(() => {
     const map = new Map<string, { deals: number; revenue: number }>();
     for (const c of this.clientService.clients()) {
@@ -97,7 +130,7 @@ export class Dashboard {
   formatCurrency(value: number): string {
     if (value >= 1_000_000) return '€' + (value / 1_000_000).toFixed(1) + 'M';
     if (value >= 1_000) return '€' + (value / 1_000).toFixed(0) + 'K';
-    return '€' + value.toLocaleString('en-EU');
+    return '€' + value.toLocaleString('en-US');
   }
 
   pct(count: number, total: number): number {

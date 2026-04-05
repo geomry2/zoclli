@@ -51,7 +51,7 @@ export class RowDetail {
 
     switch (field.type) {
       case 'currency':
-        return '€' + Number(value).toLocaleString('en-EU');
+        return '€' + Number(value).toLocaleString('en-US');
       case 'date':
         return new Date(String(value)).toLocaleDateString('en-US', {
           year: 'numeric', month: 'long', day: 'numeric'
