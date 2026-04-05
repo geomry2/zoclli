@@ -15,11 +15,11 @@ If you are a new agent entering this codebase, start there. The repo root may al
 
 ## Working Directory
 
-Use `/Users/gmryasov/Desktop/zoclli/realestate-app` as the main app working directory for installs, builds, tests, and most code changes.
+Use `realestate-app` as the main app working directory for installs, builds, tests, and most code changes.
 
 ## Dev Commands
 
-Run these from `/Users/gmryasov/Desktop/zoclli/realestate-app`:
+Run these from `realestate-app`:
 
 ```bash
 npm install
