@@ -1,6 +1,6 @@
 # Agent Context
 
-This repository contains a single frontend app in `/Users/gmryasov/Desktop/zoclli/realestate-app`.
+This repository contains a single frontend app in `realestate-app`.
 
 If you are a new agent entering this codebase, start there. The repo root may also contain workflow or repo-level files, but the product code lives in `realestate-app/`.
 
