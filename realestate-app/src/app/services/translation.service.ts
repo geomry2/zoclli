@@ -65,6 +65,18 @@ const EN: Translations = {
   'empty.units': 'No units yet — click "+ Add Unit" to add the first one.',
   // Search
   'search.placeholder': 'Search by any field…',
+  // Filters
+  'filter.status': 'Status',
+  'filter.propertyType': 'Property Type',
+  'filter.realtor': 'Realtor',
+  'filter.purchaseDate': 'Purchase Date',
+  'filter.followUpDate': 'Follow-up Date',
+  'filter.dealValue': 'Deal Value',
+  'filter.budgetRange': 'Budget Range',
+  'filter.min': 'Min',
+  'filter.max': 'Max',
+  'filter.to': 'to',
+  'filter.clear': 'Clear Filters',
   // Results
   'results.one': '1 result',
   'results.many': '{n} results',
@@ -250,6 +262,18 @@ const RU: Translations = {
   'empty.units': 'Юнитов пока нет — нажмите «+ Добавить юнит».',
   // Search
   'search.placeholder': 'Поиск по любому полю…',
+  // Filters
+  'filter.status': 'Статус',
+  'filter.propertyType': 'Тип объекта',
+  'filter.realtor': 'Риелтор',
+  'filter.purchaseDate': 'Дата покупки',
+  'filter.followUpDate': 'Дата контакта',
+  'filter.dealValue': 'Сумма сделки',
+  'filter.budgetRange': 'Бюджет',
+  'filter.min': 'От',
+  'filter.max': 'До',
+  'filter.to': 'до',
+  'filter.clear': 'Сбросить фильтры',
   // Results
   'results.one': '1 результат',
   'results.many': '{n} результатов',

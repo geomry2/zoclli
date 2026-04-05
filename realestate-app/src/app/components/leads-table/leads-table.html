@@ -1,5 +1,83 @@
 <div class="table-wrapper">
-  @if (searchQuery()) {
+  <div class="table-filters">
+    <div class="filter-group">
+      <span class="filter-label">{{ 'filter.status' | translate }}</span>
+      <div class="filter-chip-row">
+        @for (status of leadStatuses; track status) {
+          <button
+            class="filter-chip"
+            type="button"
+            [class.active]="isStatusSelected(status)"
+            (click)="toggleStatus(status)">
+            {{ ('status.' + status) | translate }}
+          </button>
+        }
+      </div>
+    </div>
+
+    @if (availableRealtors().length) {
+      <div class="filter-group">
+        <span class="filter-label">{{ 'filter.realtor' | translate }}</span>
+        <div class="filter-chip-row">
+          @for (realtor of availableRealtors(); track realtor) {
+            <button
+              class="filter-chip"
+              type="button"
+              [class.active]="isRealtorSelected(realtor)"
+              (click)="toggleRealtor(realtor)">
+              {{ realtor }}
+            </button>
+          }
+        </div>
+      </div>
+    }
+
+    <div class="filter-group filter-group-range">
+      <span class="filter-label">{{ 'filter.followUpDate' | translate }}</span>
+      <div class="filter-range-row">
+        <input
+          class="filter-input"
+          type="date"
+          [value]="followUpDateRange().from"
+          (input)="setFollowUpDate('from', $any($event.target).value)" />
+        <span class="filter-separator">{{ 'filter.to' | translate }}</span>
+        <input
+          class="filter-input"
+          type="date"
+          [value]="followUpDateRange().to"
+          (input)="setFollowUpDate('to', $any($event.target).value)" />
+      </div>
+    </div>
+
+    <div class="filter-group filter-group-range">
+      <span class="filter-label">{{ 'filter.budgetRange' | translate }}</span>
+      <div class="filter-range-row">
+        <input
+          class="filter-input"
+          type="number"
+          min="0"
+          [attr.placeholder]="'filter.min' | translate"
+          [value]="budgetRange().min"
+          (input)="setBudgetRange('min', $any($event.target).value)" />
+        <span class="filter-separator">{{ 'filter.to' | translate }}</span>
+        <input
+          class="filter-input"
+          type="number"
+          min="0"
+          [attr.placeholder]="'filter.max' | translate"
+          [value]="budgetRange().max"
+          (input)="setBudgetRange('max', $any($event.target).value)" />
+      </div>
+    </div>
+
+    @if (hasActiveFilters()) {
+      <button class="filter-reset" type="button" (click)="clearFilters()">
+        {{ 'filter.clear' | translate }}
+      </button>
+    }
+  </div>
+
+  @if (showResultCount()) {
     <div class="result-count">{{ ts.results(filteredLeads().length) }}</div>
   }
   @if (filteredLeads().length === 0) {
@@ -8,13 +86,48 @@
     <table class="data-table">
       <thead>
         <tr>
-          <th>{{ 'col.name' | translate }}</th>
-          <th>{{ 'col.phone' | translate }}</th>
-          <th>{{ 'col.status' | translate }}</th>
-          <th>{{ 'col.budgetRange' | translate }}</th>
-          <th>{{ 'col.interestedIn' | translate }}</th>
-          <th>{{ 'col.followUp' | translate }}</th>
-          <th>{{ 'col.realtor' | translate }}</th>
+          <th [attr.aria-sort]="ariaSort('name')">
+            <button class="sort-button" type="button" [class.active]="sortDirection('name') !== null" (click)="toggleSort('name')">
+              <span>{{ 'col.name' | translate }}</span>
+              <span class="sort-indicator">{{ sortDirection('name') === 'asc' ? '▲' : sortDirection('name') === 'desc' ? '▼' : '↕' }}</span>
+            </button>
+          </th>
+          <th [attr.aria-sort]="ariaSort('phone')">
+            <button class="sort-button" type="button" [class.active]="sortDirection('phone') !== null" (click)="toggleSort('phone')">
+              <span>{{ 'col.phone' | translate }}</span>
+              <span class="sort-indicator">{{ sortDirection('phone') === 'asc' ? '▲' : sortDirection('phone') === 'desc' ? '▼' : '↕' }}</span>
+            </button>
+          </th>
+          <th [attr.aria-sort]="ariaSort('status')">
+            <button class="sort-button" type="button" [class.active]="sortDirection('status') !== null" (click)="toggleSort('status')">
+              <span>{{ 'col.status' | translate }}</span>
+              <span class="sort-indicator">{{ sortDirection('status') === 'asc' ? '▲' : sortDirection('status') === 'desc' ? '▼' : '↕' }}</span>
+            </button>
+          </th>
+          <th [attr.aria-sort]="ariaSort('budgetRange')">
+            <button class="sort-button" type="button" [class.active]="sortDirection('budgetRange') !== null" (click)="toggleSort('budgetRange')">
+              <span>{{ 'col.budgetRange' | translate }}</span>
+              <span class="sort-indicator">{{ sortDirection('budgetRange') === 'asc' ? '▲' : sortDirection('budgetRange') === 'desc' ? '▼' : '↕' }}</span>
+            </button>
+          </th>
+          <th [attr.aria-sort]="ariaSort('interestedIn')">
+            <button class="sort-button" type="button" [class.active]="sortDirection('interestedIn') !== null" (click)="toggleSort('interestedIn')">
+              <span>{{ 'col.interestedIn' | translate }}</span>
+              <span class="sort-indicator">{{ sortDirection('interestedIn') === 'asc' ? '▲' : sortDirection('interestedIn') === 'desc' ? '▼' : '↕' }}</span>
+            </button>
+          </th>
+          <th [attr.aria-sort]="ariaSort('followUpDate')">
+            <button class="sort-button" type="button" [class.active]="sortDirection('followUpDate') !== null" (click)="toggleSort('followUpDate')">
+              <span>{{ 'col.followUp' | translate }}</span>
+              <span class="sort-indicator">{{ sortDirection('followUpDate') === 'asc' ? '▲' : sortDirection('followUpDate') === 'desc' ? '▼' : '↕' }}</span>
+            </button>
+          </th>
+          <th [attr.aria-sort]="ariaSort('realtorName')">
+            <button class="sort-button" type="button" [class.active]="sortDirection('realtorName') !== null" (click)="toggleSort('realtorName')">
+              <span>{{ 'col.realtor' | translate }}</span>
+              <span class="sort-indicator">{{ sortDirection('realtorName') === 'asc' ? '▲' : sortDirection('realtorName') === 'desc' ? '▼' : '↕' }}</span>
+            </button>
+          </th>
           <th></th>
         </tr>
       </thead>
