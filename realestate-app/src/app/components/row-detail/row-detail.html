@@ -10,7 +10,7 @@
               [ngModel]="draft[field.key]"
               (ngModelChange)="draft[field.key] = $event">
               @for (opt of field.options; track opt) {
-                <option [value]="opt">{{ opt }}</option>
+                <option [value]="opt">{{ getTranslatedOption(field, opt) | translate }}</option>
               }
             </select>
           } @else if (field.type === 'date') {
@@ -40,7 +40,7 @@
         } @else {
           @if (isBadge(field)) {
             <span class="field-badge" [ngClass]="'badge-' + getBadgeValue(entry()[field.key])">
-              {{ getBadgeValue(entry()[field.key]) || '—' }}
+              {{ getDisplayBadgeValue(field, entry()[field.key]) | translate }}
             </span>
           } @else {
             <span class="field-value">{{ formatValue(field, entry()[field.key]) }}</span>

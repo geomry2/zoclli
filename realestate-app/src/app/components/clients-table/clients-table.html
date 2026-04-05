@@ -22,8 +22,8 @@
           <tr class="data-row" [class.expanded]="expandedRowId() === client.id" (click)="toggleRow(client.id)">
             <td class="col-name">{{ client.name }}</td>
             <td>{{ client.phone }}</td>
-            <td><span class="badge badge-{{ client.propertyType }}">{{ client.propertyType }}</span></td>
-            <td><span class="badge badge-{{ client.status }}">{{ client.status }}</span></td>
+            <td><span class="badge badge-{{ client.propertyType }}">{{ ('proptype.' + client.propertyType) | translate }}</span></td>
+            <td><span class="badge badge-{{ client.status }}">{{ ('status.' + client.status) | translate }}</span></td>
             <td>{{ formatDealValue(client.dealValue) }}</td>
             <td>{{ client.realtorName }}</td>
             <td class="col-actions">

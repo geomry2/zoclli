@@ -18,17 +18,8 @@
     </div>
 
     @if (!showNewPropertyForm()) {
-      <button
-        class="btn-new-property"
-        type="button"
-        (click)="openNewPropertyForm($event)"
-        [attr.aria-expanded]="showNewPropertyForm()"
-        aria-controls="new-property-form">
-        <span class="btn-new-property__icon" aria-hidden="true">+</span>
-        <span class="btn-new-property__content">
-          <span class="btn-new-property__title">{{ 'prop.newProperty' | translate }}</span>
-          <span class="btn-new-property__hint">{{ 'prop.newPropertyHint' | translate }}</span>
-        </span>
+      <button class="btn-new-property" type="button" (click)="openNewPropertyForm($event)">
+        {{ 'prop.newProperty' | translate }}
       </button>
     }
   </div>
@@ -36,12 +27,6 @@
   <!-- Inline New Property form -->
   @if (showNewPropertyForm()) {
     <div class="new-property-form" id="new-property-form">
-      <div class="new-property-form__intro">
-        <div class="new-property-form__eyebrow">{{ 'prop.newPropertyLabel' | translate }}</div>
-        <div class="new-property-form__title">{{ 'prop.newPropertyTitle' | translate }}</div>
-        <div class="new-property-form__hint">{{ 'prop.newPropertyFormHint' | translate }}</div>
-      </div>
-
       <div class="new-property-form__controls">
         <input
           class="new-property-input"
@@ -84,17 +69,20 @@
               }
               <div class="status-dots">
                 @if (prop.statusCounts['active']) {
-                  <span class="dot dot-active" [title]="prop.statusCounts['active'] + ' active'"></span>
+                  <span class="dot dot-active" [title]="prop.statusCounts['active'] + ' ' + ts.t('status.active')"></span>
                 }
                 @if (prop.statusCounts['inactive']) {
-                  <span class="dot dot-inactive" [title]="prop.statusCounts['inactive'] + ' inactive'"></span>
+                  <span class="dot dot-inactive" [title]="prop.statusCounts['inactive'] + ' ' + ts.t('status.inactive')"></span>
                 }
                 @if (prop.statusCounts['closed']) {
-                  <span class="dot dot-closed" [title]="prop.statusCounts['closed'] + ' closed'"></span>
+                  <span class="dot dot-closed" [title]="prop.statusCounts['closed'] + ' ' + ts.t('status.closed')"></span>
                 }
               </div>
               <button class="btn-add-unit" (click)="requestAddUnit($event, prop.building)">
                 {{ 'prop.addUnit' | translate }}
+              </button>
+              <button class="btn-delete-property" (click)="startDeleteProperty($event, prop)">
+                {{ 'prop.deleteProperty' | translate }}
               </button>
               <span class="chevron">{{ expandedBuilding() === prop.building ? '▲' : '▼' }}</span>
             </div>
@@ -102,6 +90,18 @@
 
           @if (expandedBuilding() === prop.building) {
             <div class="unit-list">
+              @if (deletePropertyPending() === prop.building || propertyActionErrorBuilding() === prop.building) {
+                <div class="property-delete-banner">
+                  @if (propertyActionErrorBuilding() === prop.building && propertyActionError()) {
+                    <span class="property-delete-error">{{ propertyActionError() }}</span>
+                    <button class="btn-mini-muted" (click)="cancelDeleteProperty($event)">{{ 'btn.cancelDelete' | translate }}</button>
+                  } @else {
+                    <span>{{ 'prop.deletePropertyConfirm' | translate : { name: prop.building } }}</span>
+                    <button class="btn-mini-danger" (click)="confirmDeleteProperty($event, prop)">{{ 'btn.confirmDelete' | translate }}</button>
+                    <button class="btn-mini-muted" (click)="cancelDeleteProperty($event)">{{ 'btn.cancelDelete' | translate }}</button>
+                  }
+                </div>
+              }
               @if (prop.entries.length === 0) {
                 <div class="unit-empty">{{ 'empty.units' | translate }}</div>
               } @else {
@@ -125,7 +125,7 @@
                           <div class="client-name">{{ entry.clientName || ('prop.unassigned' | translate) }}</div>
                           @if (entry.phone) { <div class="client-sub">{{ entry.phone }}</div> }
                         </td>
-                        <td><span class="badge badge-{{ entry.propertyType }}">{{ entry.propertyType }}</span></td>
+                        <td><span class="badge badge-{{ entry.propertyType }}">{{ ('proptype.' + entry.propertyType) | translate }}</span></td>
                         <td>
                           @if (entry.isStandalone && entry.unitId) {
                             <select
@@ -133,12 +133,12 @@
                               [ngModel]="currentStatus(entry)"
                               (ngModelChange)="setQuickStatus(entry, $event)"
                               (click)="$event.stopPropagation()">
-                              <option value="active">active</option>
-                              <option value="inactive">inactive</option>
-                              <option value="closed">closed</option>
+                              <option value="active">{{ 'status.active' | translate }}</option>
+                              <option value="inactive">{{ 'status.inactive' | translate }}</option>
+                              <option value="closed">{{ 'status.closed' | translate }}</option>
                             </select>
                           } @else {
-                            <span class="badge badge-{{ entry.status }}">{{ entry.status }}</span>
+                            <span class="badge badge-{{ entry.status }}">{{ ('status.' + entry.status) | translate }}</span>
                           }
                         </td>
                         <td>

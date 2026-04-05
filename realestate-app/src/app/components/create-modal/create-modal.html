@@ -66,7 +66,7 @@
           <label>{{ 'form.propertyType' | translate }}</label>
           <select [(ngModel)]="client.propertyType">
             @for (t of propertyTypes; track t) {
-              <option [value]="t">{{ t }}</option>
+              <option [value]="t">{{ ('proptype.' + t) | translate }}</option>
             }
           </select>
         </div>
@@ -74,7 +74,7 @@
           <label>{{ 'form.status' | translate }}</label>
           <select [(ngModel)]="client.status">
             @for (s of clientStatuses; track s) {
-              <option [value]="s">{{ s }}</option>
+              <option [value]="s">{{ ('status.' + s) | translate }}</option>
             }
           </select>
         </div>
@@ -137,13 +137,45 @@
 
         <div class="field-group full">
           <label>{{ 'form.interestedIn' | translate }}</label>
-          <input [(ngModel)]="lead.interestedIn" [attr.placeholder]="'form.interestedInPlaceholder' | translate" />
+          <div class="interest-mode-toggle">
+            <button
+              class="interest-mode-btn"
+              type="button"
+              [class.active]="leadInterestMode() === 'text'"
+              (click)="useLeadInterestText()">
+              {{ 'form.interestManual' | translate }}
+            </button>
+            <button
+              class="interest-mode-btn"
+              type="button"
+              [class.active]="leadInterestMode() === 'building'"
+              (click)="useLeadInterestBuilding()">
+              {{ 'form.interestPickExisting' | translate }}
+            </button>
+          </div>
+
+          @if (leadInterestMode() === 'text') {
+            <input [(ngModel)]="lead.interestedIn" [attr.placeholder]="'form.interestedInPlaceholder' | translate" />
+          } @else {
+            <div class="interest-select-wrap">
+              <select [(ngModel)]="selectedInterestBuilding">
+                @if (!allBuildings.length) {
+                  <option value="">{{ 'form.noExistingBuildings' | translate }}</option>
+                } @else {
+                  @for (b of allBuildings; track b) {
+                    <option [value]="b">{{ b }}</option>
+                  }
+                }
+              </select>
+              <div class="field-hint">{{ 'form.interestPickHint' | translate }}</div>
+            </div>
+          }
         </div>
         <div class="field-group">
           <label>{{ 'form.status' | translate }}</label>
           <select [(ngModel)]="lead.status">
             @for (s of leadStatuses; track s) {
-              <option [value]="s">{{ s }}</option>
+              <option [value]="s">{{ ('status.' + s) | translate }}</option>
             }
           </select>
         </div>
