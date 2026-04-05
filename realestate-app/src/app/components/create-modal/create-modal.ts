@@ -165,15 +165,33 @@ export class CreateModal implements OnInit {
     let result: { error: string | null };
 
     if (this.tab() === 'clients') {
+      const ec = this.editClient();
+      const normalizedClient = this.normalizeClient(this.client);
+      const clientValidationError = this.validateClient(normalizedClient, ec?.id);
+      if (clientValidationError) {
+        this.saving.set(false);
+        this.saveError.set(clientValidationError);
+        return;
+      }
+
+      this.client = normalizedClient;
       await this.buildingService.ensureExists(this.client.buildingName);
       await this.agencyService.ensureExists(this.client.realtorAgency);
-      const ec = this.editClient();
       result = ec
         ? await this.clientService.update({ ...this.client, id: ec.id })
         : await this.clientService.add(this.client, this.isConvert ? 'converted' : 'created');
     } else {
-      await this.agencyService.ensureExists(this.lead.realtorAgency);
       const el = this.editLead();
+      const normalizedLead = this.normalizeLead(this.lead);
+      const leadValidationError = this.validateLead(normalizedLead, el?.id);
+      if (leadValidationError) {
+        this.saving.set(false);
+        this.saveError.set(leadValidationError);
+        return;
+      }
+
+      this.lead = normalizedLead;
+      await this.agencyService.ensureExists(this.lead.realtorAgency);
       result = el
         ? await this.leadService.update({ ...this.lead, id: el.id })
         : await this.leadService.add(this.lead);
@@ -188,4 +206,93 @@ export class CreateModal implements OnInit {
   readonly propertyTypes: PropertyType[] = ['apartment', 'house', 'villa', 'commercial', 'land'];
   readonly clientStatuses: ClientStatus[] = ['active', 'inactive', 'closed'];
   readonly leadStatuses: LeadStatus[] = ['new', 'contacted', 'negotiating', 'lost'];
+
+  private normalizeClient(client: Omit<Client, 'id'>): Omit<Client, 'id'> {
+    return {
+      ...client,
+      name: this.normalizeName(client.name),
+      phone: this.normalizeLooseText(client.phone),
+      email: this.normalizeEmail(client.email),
+      buildingName: this.normalizeLooseText(client.buildingName),
+      apartmentNumber: this.normalizeLooseText(client.apartmentNumber),
+      realtorName: this.normalizeName(client.realtorName),
+      realtorAgency: this.normalizeAgency(client.realtorAgency),
+      notes: this.normalizeLooseText(client.notes),
+    };
+  }
+
+  private normalizeLead(lead: Omit<Lead, 'id'>): Omit<Lead, 'id'> {
+    return {
+      ...lead,
+      name: this.normalizeName(lead.name),
+      phone: this.normalizeLooseText(lead.phone),
+      email: this.normalizeEmail(lead.email),
+      interestedIn: this.normalizeLooseText(lead.interestedIn),
+      realtorName: this.normalizeName(lead.realtorName),
+      realtorAgency: this.normalizeAgency(lead.realtorAgency),
+      notes: this.normalizeLooseText(lead.notes),
+    };
+  }
+
+  private validateClient(client: Omit<Client, 'id'>, editingId?: string): string | null {
+    const email = this.normalizeEmail(client.email);
+    const phone = this.normalizePhoneForCompare(client.phone);
+
+    const duplicate = this.clientService.clients().find(existing => {
+      if (editingId && existing.id === editingId) return false;
+      const existingEmail = this.normalizeEmail(existing.email);
+      const existingPhone = this.normalizePhoneForCompare(existing.phone);
+      return (email && existingEmail === email) || (phone && existingPhone === phone);
+    });
+
+    if (duplicate) {
+      return `Potential duplicate client found: ${duplicate.name}. Matching phone/email already exists.`;
+    }
+
+    return null;
+  }
+
+  private validateLead(lead: Omit<Lead, 'id'>, editingId?: string): string | null {
+    if (lead.status !== 'lost' && !lead.followUpDate) {
+      return 'Follow-up date is required for leads that are not marked as lost.';
+    }
+
+    const email = this.normalizeEmail(lead.email);
+    const phone = this.normalizePhoneForCompare(lead.phone);
+    const duplicate = this.leadService.leads().find(existing => {
+      if (editingId && existing.id === editingId) return false;
+      const existingEmail = this.normalizeEmail(existing.email);
+      const existingPhone = this.normalizePhoneForCompare(existing.phone);
+      return (email && existingEmail === email) || (phone && existingPhone === phone);
+    });
+
+    if (duplicate) {
+      return `Potential duplicate lead found: ${duplicate.name}. Matching phone/email already exists.`;
+    }
+
+    return null;
+  }
+
+  private normalizeLooseText(value: string): string {
+    return value.trim().replace(/\s+/g, ' ');
+  }
+
+  private normalizeEmail(value: string): string {
+    return this.normalizeLooseText(value).toLowerCase();
+  }
+
+  private normalizeName(value: string): string {
+    return this.normalizeLooseText(value)
+      .split(' ')
+      .map(part => part ? part.charAt(0).toUpperCase() + part.slice(1).toLowerCase() : part)
+      .join(' ');
+  }
+
+  private normalizeAgency(value: string): string {
+    return this.normalizeName(value);
+  }
+
+  private normalizePhoneForCompare(value: string): string {
+    return value.replace(/[^\d+]/g, '');
+  }
 }
