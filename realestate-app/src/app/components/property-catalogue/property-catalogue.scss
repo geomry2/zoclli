@@ -202,7 +202,8 @@
   &.dot-closed   { background: #e05252; }
 }
 
-.btn-add-unit {
+.btn-add-unit,
+.btn-export-property {
   font-size: 11px;
   font-weight: 500;
   padding: 4px 10px;
@@ -215,6 +216,12 @@
   transition: opacity 0.15s, background 0.1s;
 
   &:hover { background: #f3f3f2; }
+}
+
+.btn-export-property {
+  color: #3858a6;
+  border-color: #d4ddf5;
+  background: #f8fbff;
 }
 
 .btn-delete-property {
@@ -233,6 +240,7 @@
 }
 
 .building-header:hover .btn-add-unit,
+.building-header:hover .btn-export-property,
 .building-header:hover .btn-delete-property { opacity: 1; }
 
 .chevron {
@@ -261,6 +269,7 @@
     min-width: 100%;
   }
   .btn-add-unit,
+  .btn-export-property,
   .btn-delete-property {
     opacity: 1;
   }

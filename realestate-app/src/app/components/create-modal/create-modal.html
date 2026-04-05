@@ -112,6 +112,29 @@
           }
         </div>
 
+        <div class="field-group">
+          <label>{{ 'form.commissionType' | translate }}</label>
+          <select [(ngModel)]="client.commissionType">
+            @for (type of commissionTypes; track type) {
+              <option [value]="type">{{ ('commissionType.' + type) | translate }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label>{{ commissionValueLabel() | translate }}</label>
+          <input
+            [(ngModel)]="client.commissionValue"
+            type="number"
+            min="0"
+            step="0.01"
+            [attr.max]="client.commissionType === 'percent' ? 100 : null"
+            placeholder="0" />
+          @if (client.commissionValue > 0) {
+            <div class="field-hint">{{ 'form.commissionPayout' | translate }}: {{ formatCurrency(commissionAmount()) }}</div>
+          }
+        </div>
+
         <div class="field-group full">
           <label>{{ 'form.notes' | translate }}</label>
           <app-contact-notes [notes]="client.notes" [editable]="true" (notesChange)="client.notes = $event" />

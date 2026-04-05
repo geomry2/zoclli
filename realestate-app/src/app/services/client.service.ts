@@ -4,6 +4,7 @@ import { ActivityService } from './activity.service';
 import { Client } from '../models/client.model';
 import { toCamelCase, toSnakeCase } from './case.utils';
 import { deserializeContactNotes, serializeContactNotes } from '../utils/contact-notes.utils';
+import { normalizeCommissionType, normalizeCommissionValue } from '../utils/commission.utils';
 
 @Injectable({ providedIn: 'root' })
 export class ClientService {
@@ -65,9 +66,15 @@ export class ClientService {
   }
 
   private hydrateClient(row: Record<string, unknown>): Client {
-    const camelRow = toCamelCase(row) as unknown as Omit<Client, 'notes'> & { notes?: unknown };
+    const camelRow = toCamelCase(row) as unknown as Omit<Client, 'notes' | 'commissionType' | 'commissionValue'> & {
+      notes?: unknown;
+      commissionType?: unknown;
+      commissionValue?: unknown;
+    };
     return {
       ...camelRow,
+      commissionType: normalizeCommissionType(camelRow.commissionType),
+      commissionValue: normalizeCommissionValue(camelRow.commissionValue),
       notes: deserializeContactNotes(camelRow.notes),
     };
   }

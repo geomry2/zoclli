@@ -5,6 +5,7 @@ import { ActivityService, ActivityEntry } from '../../services/activity.service'
 import { TranslationService } from '../../services/translation.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { countByFollowUpFilter, FollowUpFilter } from '../../utils/follow-up.utils';
+import { getCommissionAmount } from '../../utils/commission.utils';
 
 interface StatRow { label: string; count: number; color: string; }
 
@@ -111,19 +112,22 @@ export class Dashboard {
   });
 
   readonly topRealtors = computed(() => {
-    const map = new Map<string, { deals: number; revenue: number }>();
+    const map = new Map<string, { deals: number; earnings: number }>();
     for (const c of this.clientService.clients()) {
       if (!c.realtorName) continue;
-      const existing = map.get(c.realtorName) ?? { deals: 0, revenue: 0 };
-      map.set(c.realtorName, { deals: existing.deals + 1, revenue: existing.revenue + (c.dealValue ?? 0) });
+      const existing = map.get(c.realtorName) ?? { deals: 0, earnings: 0 };
+      map.set(c.realtorName, {
+        deals: existing.deals + 1,
+        earnings: existing.earnings + getCommissionAmount(c),
+      });
     }
     for (const l of this.leadService.leads()) {
       if (!l.realtorName) continue;
-      if (!map.has(l.realtorName)) map.set(l.realtorName, { deals: 0, revenue: 0 });
+      if (!map.has(l.realtorName)) map.set(l.realtorName, { deals: 0, earnings: 0 });
     }
     return [...map.entries()]
       .map(([name, stats]) => ({ name, ...stats }))
-      .sort((a, b) => b.revenue - a.revenue || b.deals - a.deals)
+      .sort((a, b) => b.earnings - a.earnings || b.deals - a.deals)
       .slice(0, 5);
   });
 

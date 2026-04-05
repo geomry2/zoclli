@@ -5,6 +5,8 @@ import { RowDetail, FieldDefinition } from '../row-detail/row-detail';
 import { TranslationService } from '../../services/translation.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { applySearch } from '../../utils/csv.utils';
+import { formatCommissionValue, getCommissionAmount } from '../../utils/commission.utils';
+import { openPrintableDocument } from '../../utils/pdf.utils';
 import {
   compareValues,
   DateRangeFilter,
@@ -128,11 +130,75 @@ export class ClientsTable {
     { key: 'dealValue', label: 'field.dealValue', type: 'currency' },
     { key: 'realtorName', label: 'field.realtorName' },
     { key: 'realtorAgency', label: 'field.realtorAgency' },
+    { key: 'commissionType', label: 'field.commissionType', type: 'badge', options: ['percent', 'fixed'], translatePrefix: 'commissionType.' },
+    { key: 'commissionValue', label: 'field.commissionValue', type: 'commission' },
     { key: 'notes', label: 'field.notes', type: 'notes' },
   ];
 
   formatDealValue(value: number): string {
     return '€' + value.toLocaleString('en-US');
+  }
+
+  exportClientSummary(event: Event, client: Client) {
+    event.stopPropagation();
+
+    openPrintableDocument({
+      title: `${this.ts.t('pdf.clientSummary')} - ${client.name}`,
+      subtitle: [client.buildingName, client.apartmentNumber ? `${this.ts.t('col.unit')} ${client.apartmentNumber}` : '']
+        .filter(Boolean)
+        .join(' / '),
+      meta: [
+        {
+          label: this.ts.t('pdf.generatedOn'),
+          value: this.formatDateTime(new Date().toISOString()),
+        },
+      ],
+      sections: [
+        {
+          title: this.ts.t('pdf.sectionContact'),
+          fields: [
+            { label: this.ts.t('field.fullName'), value: client.name || '-' },
+            { label: this.ts.t('field.phone'), value: client.phone || '-' },
+            { label: this.ts.t('field.email'), value: client.email || '-' },
+          ],
+        },
+        {
+          title: this.ts.t('form.sectionProperty'),
+          fields: [
+            { label: this.ts.t('field.building'), value: client.buildingName || '-' },
+            { label: this.ts.t('field.apartmentNumber'), value: client.apartmentNumber || '-' },
+            { label: this.ts.t('field.propertyType'), value: this.ts.t(`proptype.${client.propertyType}`) },
+            { label: this.ts.t('field.status'), value: this.ts.t(`status.${client.status}`) },
+            { label: this.ts.t('field.purchaseDate'), value: this.formatDate(client.purchaseDate) },
+            { label: this.ts.t('field.dealValue'), value: this.formatDealValue(client.dealValue) },
+          ],
+        },
+        {
+          title: this.ts.t('form.sectionRealtor'),
+          fields: [
+            { label: this.ts.t('field.realtorName'), value: client.realtorName || '-' },
+            { label: this.ts.t('field.realtorAgency'), value: client.realtorAgency || '-' },
+            {
+              label: this.ts.t('field.commissionValue'),
+              value: formatCommissionValue(client.commissionType, client.commissionValue),
+            },
+            {
+              label: this.ts.t('dash.earnings'),
+              value: this.formatDealValue(getCommissionAmount(client)),
+            },
+          ],
+        },
+        {
+          title: this.ts.t('field.notes'),
+          notes: client.notes.length > 0
+            ? client.notes.map(note => ({
+                meta: this.formatDateTime(note.createdAt),
+                body: note.body,
+              }))
+            : [{ body: this.ts.t('pdf.noNotes') }],
+        },
+      ],
+    });
   }
 
   toggleSort(key: ClientSortKey) {
@@ -193,6 +259,30 @@ export class ClientsTable {
 
   asRecord(client: Client): Record<string, unknown> {
     return client as unknown as Record<string, unknown>;
+  }
+
+  private formatDate(value: string): string {
+    if (!value) return '-';
+
+    return new Date(value).toLocaleDateString(this.locale(), {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  }
+
+  private formatDateTime(value: string): string {
+    return new Date(value).toLocaleString(this.locale(), {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  }
+
+  private locale(): string {
+    return this.ts.lang() === 'ru' ? 'ru-RU' : 'en-GB';
   }
 
   private readonly sortAccessors: Record<ClientSortKey, (client: Client) => unknown> = {

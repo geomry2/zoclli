@@ -133,7 +133,7 @@
               <th>#</th>
               <th>{{ 'col.realtor' | translate }}</th>
               <th>{{ 'dash.deals' | translate }}</th>
-              <th>{{ 'dash.revenue' | translate }}</th>
+              <th>{{ 'dash.earnings' | translate }}</th>
             </tr>
           </thead>
           <tbody>
@@ -142,7 +142,7 @@
                 <td class="realtor-rank">{{ i + 1 }}</td>
                 <td class="realtor-name">{{ r.name }}</td>
                 <td class="realtor-deals">{{ r.deals }}</td>
-                <td class="realtor-revenue">{{ formatCurrency(r.revenue) }}</td>
+                <td class="realtor-revenue">{{ formatCurrency(r.earnings) }}</td>
               </tr>
             }
           </tbody>

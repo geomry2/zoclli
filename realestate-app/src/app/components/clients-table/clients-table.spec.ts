@@ -18,6 +18,8 @@ function buildClient(overrides: Partial<Client>): Client {
     dealValue: 0,
     realtorName: '',
     realtorAgency: '',
+    commissionType: 'percent',
+    commissionValue: 0,
     notes: [],
     ...overrides,
   };

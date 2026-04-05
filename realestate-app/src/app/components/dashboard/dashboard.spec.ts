@@ -21,6 +21,8 @@ function buildClient(overrides: Partial<Client>): Client {
     dealValue: 0,
     realtorName: '',
     realtorAgency: '',
+    commissionType: 'percent',
+    commissionValue: 0,
     notes: [],
     ...overrides,
   };
@@ -113,9 +115,30 @@ describe('Dashboard', () => {
   it('builds property mix and top realtor summaries in the expected order', () => {
     const { dashboard, injector: createdInjector } = createDashboard({
       clients: [
-        buildClient({ id: 'c1', propertyType: 'apartment', dealValue: 300000, realtorName: 'Alex' }),
-        buildClient({ id: 'c2', propertyType: 'apartment', dealValue: 150000, realtorName: 'Bella' }),
-        buildClient({ id: 'c3', propertyType: 'villa', dealValue: 500000, realtorName: 'Bella' }),
+        buildClient({
+          id: 'c1',
+          propertyType: 'apartment',
+          dealValue: 300000,
+          realtorName: 'Alex',
+          commissionType: 'percent',
+          commissionValue: 5,
+        }),
+        buildClient({
+          id: 'c2',
+          propertyType: 'apartment',
+          dealValue: 150000,
+          realtorName: 'Bella',
+          commissionType: 'fixed',
+          commissionValue: 7000,
+        }),
+        buildClient({
+          id: 'c3',
+          propertyType: 'villa',
+          dealValue: 500000,
+          realtorName: 'Bella',
+          commissionType: 'percent',
+          commissionValue: 3,
+        }),
       ],
       leads: [
         buildLead({ id: 'l1', status: 'new', realtorName: 'Chris' }),
@@ -129,9 +152,9 @@ describe('Dashboard', () => {
       { label: 'villa', count: 1, color: '#7c5cbf', pct: 33 },
     ]);
     expect(dashboard.topRealtors()).toEqual([
-      { name: 'Bella', deals: 2, revenue: 650000 },
-      { name: 'Alex', deals: 1, revenue: 300000 },
-      { name: 'Chris', deals: 0, revenue: 0 },
+      { name: 'Bella', deals: 2, earnings: 22000 },
+      { name: 'Alex', deals: 1, earnings: 15000 },
+      { name: 'Chris', deals: 0, earnings: 0 },
     ]);
   });
 

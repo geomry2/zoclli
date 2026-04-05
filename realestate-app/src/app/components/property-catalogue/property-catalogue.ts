@@ -7,6 +7,7 @@ import { BuildingService } from '../../services/building.service';
 import { Client } from '../../models/client.model';
 import { Unit } from '../../models/unit.model';
 import { UnitService } from '../../services/unit.service';
+import { openPrintableDocument } from '../../utils/pdf.utils';
 
 interface PropertyEntry {
   id: string;
@@ -164,6 +165,65 @@ export class PropertyCatalogue {
   requestAddUnit(event: Event, buildingName: string) {
     event.stopPropagation();
     this.addUnitRequest.emit(buildingName);
+  }
+
+  exportPropertySheet(event: Event, prop: PropertyRow) {
+    event.stopPropagation();
+
+    openPrintableDocument({
+      title: `${this.ts.t('pdf.propertySheet')} - ${prop.building}`,
+      subtitle: this.ts.t('pdf.propertySubtitle'),
+      meta: [
+        {
+          label: this.ts.t('pdf.generatedOn'),
+          value: this.formatDateTime(new Date().toISOString()),
+        },
+      ],
+      sections: [
+        {
+          title: this.ts.t('pdf.sectionOverview'),
+          fields: [
+            { label: this.ts.t('form.building'), value: prop.building || '-' },
+            { label: this.ts.t('pdf.totalUnits'), value: String(prop.units.length) },
+            { label: this.ts.t('pdf.clientCount'), value: String(prop.clients.length) },
+            { label: this.ts.t('pdf.standaloneUnits'), value: String(prop.standaloneUnitCount) },
+            { label: this.ts.t('pdf.totalValue'), value: this.formatPdfCurrency(prop.totalValue) },
+          ],
+        },
+        {
+          title: this.ts.t('pdf.sectionUnits'),
+          table: {
+            headers: [
+              this.ts.t('col.unit'),
+              this.ts.t('col.client'),
+              this.ts.t('col.type'),
+              this.ts.t('col.status'),
+              this.ts.t('col.dealValue'),
+              this.ts.t('col.realtor'),
+            ],
+            rows: prop.entries.map(entry => [
+              entry.apartmentNumber || '-',
+              [entry.clientName || this.ts.t('prop.unassigned'), entry.phone].filter(Boolean).join(' / '),
+              this.ts.t(`proptype.${entry.propertyType}`),
+              this.ts.t(`status.${entry.status}`),
+              entry.dealValue ? this.formatPdfCurrency(entry.dealValue) : '-',
+              [entry.realtorName, entry.realtorAgency].filter(Boolean).join(' / ') || '-',
+            ]),
+          },
+        },
+        ...(prop.entries.some(entry => Boolean(entry.notes?.trim()))
+          ? [{
+              title: this.ts.t('field.notes'),
+              notes: prop.entries
+                .filter(entry => Boolean(entry.notes?.trim()))
+                .map(entry => ({
+                  meta: entry.apartmentNumber ? `${this.ts.t('col.unit')} ${entry.apartmentNumber}` : prop.building,
+                  body: entry.notes!.trim(),
+                })),
+            }]
+          : []),
+      ],
+    });
   }
 
   requestEditUnit(event: Event, entry: PropertyEntry) {
@@ -325,6 +385,20 @@ export class PropertyCatalogue {
     if (value >= 1_000_000) return '€' + (value / 1_000_000).toFixed(2) + 'M';
     if (value >= 1_000) return '€' + (value / 1_000).toFixed(0) + 'K';
     return '€' + value.toLocaleString('en-US');
+  }
+
+  private formatPdfCurrency(value: number): string {
+    return '€' + value.toLocaleString('en-US');
+  }
+
+  private formatDateTime(value: string): string {
+    return new Date(value).toLocaleString(this.ts.lang() === 'ru' ? 'ru-RU' : 'en-GB', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
   }
 
   private findUnit(id?: string): Unit | undefined {
