@@ -23,6 +23,13 @@
               (click)="setLeadsViewMode('table')">
               {{ 'view.table' | translate }}
             </button>
+            <button
+              class="view-toggle__btn"
+              type="button"
+              [class.active]="leadsViewMode() === 'followups'"
+              (click)="openLeadFollowUps()">
+              {{ 'view.followUps' | translate }}
+            </button>
           </div>
         }
         <app-search-bar (queryChange)="onQueryChange($event)" />
@@ -39,12 +46,17 @@
 
   <main class="tab-content">
     @if (activeTab() === 'dashboard') {
-      <app-dashboard />
+      <app-dashboard (followUpsRequest)="openLeadFollowUps($event)" />
     } @else if (activeTab() === 'clients') {
       <app-clients-table [searchQuery]="searchQuery()" (editRequest)="openEditClient($event)" />
     } @else if (activeTab() === 'leads') {
       @if (leadsViewMode() === 'board') {
         <app-leads-board [searchQuery]="searchQuery()" (editRequest)="openEditLead($event)" (convertRequest)="openConvertLead($event)" />
+      } @else if (leadsViewMode() === 'followups') {
+        <app-lead-follow-ups
+          [searchQuery]="searchQuery()"
+          [filterMode]="leadFollowUpFilter()"
+          (filterModeChange)="setLeadFollowUpFilter($event)" />
       } @else {
         <app-leads-table [searchQuery]="searchQuery()" (editRequest)="openEditLead($event)" (convertRequest)="openConvertLead($event)" />
       }

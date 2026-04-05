@@ -1,0 +1,78 @@
+<div class="followups-shell">
+  <div class="followups-header">
+    <div>
+      <div class="followups-title">{{ 'followUps.title' | translate }}</div>
+      <div class="followups-subtitle">{{ 'followUps.subtitle' | translate }}</div>
+    </div>
+
+    <div class="followups-filter-row">
+      @for (option of filterOptions(); track option.value) {
+        <button
+          class="followups-filter-chip"
+          type="button"
+          [class.active]="filterMode() === option.value"
+          (click)="selectFilter(option.value)">
+          <span>{{ option.label | translate }}</span>
+          <span class="followups-filter-chip__count">{{ option.count }}</span>
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (visibleLeads().length === 0) {
+    <div class="followups-empty">{{ 'followUps.empty' | translate }}</div>
+  } @else {
+    <div class="followups-list">
+      @for (lead of visibleLeads(); track lead.id) {
+        <article class="followups-item">
+          <div class="followups-item__main">
+            <div class="followups-item__top">
+              <div>
+                <h3 class="followups-name">{{ lead.name }}</h3>
+                <div class="followups-interest">{{ lead.interestedIn || ('followUps.noInterest' | translate) }}</div>
+              </div>
+              <span class="followups-status badge badge-{{ lead.status }}">{{ ('status.' + lead.status) | translate }}</span>
+            </div>
+
+            <div class="followups-meta">
+              <span class="followups-meta__label">{{ 'col.phone' | translate }}: {{ lead.phone || '-' }}</span>
+              <span class="followups-meta__label">{{ 'col.realtor' | translate }}: {{ lead.realtorName || ('followUps.noRealtor' | translate) }}</span>
+              <span class="followups-date-pill followups-date-pill--{{ followUpState(lead) }}">
+                {{ 'col.followUp' | translate }}: {{ formatFollowUpDate(lead.followUpDate) }}
+              </span>
+            </div>
+          </div>
+
+          <div class="followups-actions">
+            <button
+              class="followups-btn followups-btn-primary"
+              type="button"
+              [disabled]="!canMarkContacted(lead)"
+              (click)="markContacted(lead)">
+              {{ isSaving(lead) ? ('btn.saving' | translate) : ('followUps.markContacted' | translate) }}
+            </button>
+
+            <div class="followups-reschedule">
+              <input
+                class="followups-date-input"
+                type="date"
+                [value]="currentRescheduleDate(lead)"
+                (input)="setRescheduleDate(lead.id, $any($event.target).value)" />
+              <button
+                class="followups-btn"
+                type="button"
+                [disabled]="!canReschedule(lead)"
+                (click)="reschedule(lead)">
+                {{ 'followUps.reschedule' | translate }}
+              </button>
+            </div>
+
+            @if (errorFor(lead)) {
+              <div class="followups-error">{{ errorFor(lead) }}</div>
+            }
+          </div>
+        </article>
+      }
+    </div>
+  }
+</div>

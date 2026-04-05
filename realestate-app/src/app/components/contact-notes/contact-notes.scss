@@ -1,0 +1,130 @@
+.notes-box {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.notes-composer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid #e3e7eb;
+  border-radius: 12px;
+  background: #fbfcfd;
+}
+
+.notes-input {
+  width: 100%;
+  min-height: 86px;
+  padding: 10px 12px;
+  border: 1px solid #d3dae2;
+  border-radius: 10px;
+  background: #fff;
+  color: #1f2933;
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.45;
+  resize: vertical;
+  box-sizing: border-box;
+
+  &:focus {
+    outline: none;
+    border-color: #8893a0;
+  }
+}
+
+.notes-composer__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.notes-helper {
+  font-size: 12px;
+  color: #7a8592;
+}
+
+.notes-add-btn {
+  height: 32px;
+  padding: 0 12px;
+  border: none;
+  border-radius: 999px;
+  background: #1f2937;
+  color: #fff;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+}
+
+.notes-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.notes-empty {
+  padding: 18px 14px;
+  border: 1px dashed #d6dde5;
+  border-radius: 12px;
+  background: #fafbfd;
+  color: #8893a0;
+  font-size: 12px;
+}
+
+.notes-entry {
+  position: relative;
+  padding: 12px 14px 12px 18px;
+  border: 1px solid #e3e7eb;
+  border-radius: 12px;
+  background: #fff;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 14px;
+    left: 8px;
+    bottom: 14px;
+    width: 3px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #4a90d9 0%, #3aaa6e 100%);
+  }
+}
+
+.notes-entry__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.notes-entry__timestamp {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #667282;
+}
+
+.notes-entry__body {
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: #24303b;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+@media (max-width: 640px) {
+  .notes-composer__footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

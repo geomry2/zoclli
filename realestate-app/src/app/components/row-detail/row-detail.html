@@ -1,10 +1,15 @@
 <div class="detail-wrap">
   <div class="detail-panel">
     @for (field of fields(); track field.key) {
-      <div class="field-block">
+      <div class="field-block" [class.field-block-full]="isNotes(field)">
         <span class="field-label">{{ field.label | translate }}</span>
         @if (editMode()) {
-          @if (isBadge(field) && field.options) {
+          @if (isNotes(field)) {
+            <app-contact-notes
+              [notes]="getNotes(draft[field.key])"
+              [editable]="true"
+              (notesChange)="setDraftNotes(field.key, $event)" />
+          } @else if (isBadge(field) && field.options) {
             <select
               class="field-input field-select"
               [ngModel]="draft[field.key]"
@@ -38,7 +43,9 @@
               (ngModelChange)="draft[field.key] = $event" />
           }
         } @else {
-          @if (isBadge(field)) {
+          @if (isNotes(field)) {
+            <app-contact-notes [notes]="getNotes(entry()[field.key])" />
+          } @else if (isBadge(field)) {
             <span class="field-badge" [ngClass]="'badge-' + getBadgeValue(entry()[field.key])">
               {{ getDisplayBadgeValue(field, entry()[field.key]) | translate }}
             </span>

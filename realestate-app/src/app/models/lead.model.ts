@@ -1,3 +1,5 @@
+import { ContactNote } from './contact-note.model';
+
 export type LeadStatus = 'new' | 'contacted' | 'negotiating' | 'lost';
 
 export interface Lead {
@@ -13,5 +15,5 @@ export interface Lead {
   budgetMin: number;
   budgetMax: number;
   followUpDate: string;
-  notes: string;
+  notes: ContactNote[];
 }

@@ -130,7 +130,7 @@ export class LeadsTable {
     { key: 'realtorName', label: 'field.realtorName' },
     { key: 'realtorAgency', label: 'field.realtorAgency' },
     { key: 'firstInteractionDate', label: 'field.firstContact', type: 'date' },
-    { key: 'notes', label: 'field.notes', multiline: true },
+    { key: 'notes', label: 'field.notes', type: 'notes' },
   ];
 
   formatBudget(lead: Lead): string {

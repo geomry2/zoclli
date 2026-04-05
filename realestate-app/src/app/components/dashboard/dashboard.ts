@@ -1,9 +1,10 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, output } from '@angular/core';
 import { ClientService } from '../../services/client.service';
 import { LeadService } from '../../services/lead.service';
 import { ActivityService, ActivityEntry } from '../../services/activity.service';
 import { TranslationService } from '../../services/translation.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { countByFollowUpFilter, FollowUpFilter } from '../../utils/follow-up.utils';
 
 interface StatRow { label: string; count: number; color: string; }
 
@@ -15,6 +16,7 @@ interface StatRow { label: string; count: number; color: string; }
   styleUrl: './dashboard.scss'
 })
 export class Dashboard {
+  readonly followUpsRequest = output<FollowUpFilter>();
   readonly ts = inject(TranslationService);
   private readonly clientService = inject(ClientService);
   private readonly leadService = inject(LeadService);
@@ -35,17 +37,11 @@ export class Dashboard {
   });
 
   readonly overdueCount = computed(() => {
-    const today = new Date(new Date().toDateString());
-    return this.leadService.leads().filter(l =>
-      l.followUpDate && new Date(l.followUpDate) < today
-    ).length;
+    return countByFollowUpFilter(this.leadService.leads(), 'overdue');
   });
 
   readonly dueTodayCount = computed(() => {
-    const today = new Date().toDateString();
-    return this.leadService.leads().filter(l =>
-      l.followUpDate && new Date(l.followUpDate).toDateString() === today
-    ).length;
+    return countByFollowUpFilter(this.leadService.leads(), 'today');
   });
 
   readonly leadsByStatus = computed((): StatRow[] => {
@@ -171,5 +167,8 @@ export class Dashboard {
     if (diffHrs < 24) return `${diffHrs}h ago`;
     return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
   }
-}
 
+  openFollowUps(filter: FollowUpFilter) {
+    this.followUpsRequest.emit(filter);
+  }
+}

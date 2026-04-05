@@ -3,13 +3,26 @@ import { applySearch, exportToCsv } from './csv.utils';
 describe('csv utils', () => {
   it('filters across fields using every search term case-insensitively', () => {
     const rows = [
-      { name: 'Anna Stone', status: 'active', building: 'Palm Tower' },
+      {
+        name: 'Anna Stone',
+        status: 'active',
+        building: 'Palm Tower',
+        notes: [{ body: 'Called about unit 204', createdAt: '2026-04-03T09:00:00.000Z' }],
+      },
       { name: 'Boris Lake', status: 'inactive', building: 'River Park' },
       { name: 'Clara Moss', status: 'active', building: 'River Park' },
     ];
 
     expect(applySearch(rows, 'clara river')).toEqual([
       { name: 'Clara Moss', status: 'active', building: 'River Park' },
+    ]);
+    expect(applySearch(rows, 'called 204')).toEqual([
+      {
+        name: 'Anna Stone',
+        status: 'active',
+        building: 'Palm Tower',
+        notes: [{ body: 'Called about unit 204', createdAt: '2026-04-03T09:00:00.000Z' }],
+      },
     ]);
     expect(applySearch(rows, '   ')).toBe(rows);
   });

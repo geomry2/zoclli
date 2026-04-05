@@ -18,7 +18,7 @@ function buildClient(overrides: Partial<Client>): Client {
     dealValue: 0,
     realtorName: '',
     realtorAgency: '',
-    notes: '',
+    notes: [],
     ...overrides,
   };
 }

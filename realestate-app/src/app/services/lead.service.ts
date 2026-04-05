@@ -3,6 +3,7 @@ import { SupabaseService } from './supabase.service';
 import { ActivityService } from './activity.service';
 import { Lead } from '../models/lead.model';
 import { toCamelCase, toSnakeCase } from './case.utils';
+import { deserializeContactNotes, serializeContactNotes } from '../utils/contact-notes.utils';
 
 @Injectable({ providedIn: 'root' })
 export class LeadService {
@@ -22,7 +23,7 @@ export class LeadService {
     this.loading.set(true);
     const { data, error } = await this.supabase.from('leads').select('*').order('name');
     if (error) { this.error.set(error.message); } else {
-      this.leads.set((data ?? []).map(row => toCamelCase(row) as unknown as Lead));
+      this.leads.set((data ?? []).map(row => this.hydrateLead(row)));
     }
     this.loading.set(false);
   }
@@ -30,10 +31,10 @@ export class LeadService {
   async add(lead: Omit<Lead, 'id'>): Promise<{ error: string | null }> {
     if (!this.supabase) return { error: 'Supabase not configured.' };
     const { data, error } = await this.supabase
-      .from('leads').insert(toSnakeCase(lead as unknown as Record<string, unknown>))
+      .from('leads').insert(this.serializeLead(lead))
       .select().single();
     if (error) return { error: error.message };
-    this.leads.update(list => [...list, toCamelCase(data) as unknown as Lead]);
+    this.leads.update(list => [...list, this.hydrateLead(data)]);
     this.activity.log('created', 'lead', lead.name);
     return { error: null };
   }
@@ -42,7 +43,7 @@ export class LeadService {
     if (!this.supabase) return { error: 'Supabase not configured.' };
     const { id, ...rest } = lead;
     const { data, error } = await this.supabase
-      .from('leads').update(toSnakeCase(rest as unknown as Record<string, unknown>))
+      .from('leads').update(this.serializeLead(rest))
       .eq('id', id).select();
     if (error) return { error: error.message };
     if (!data || data.length === 0) return { error: 'Update blocked — missing UPDATE policy in Supabase RLS.' };
@@ -62,5 +63,19 @@ export class LeadService {
     this.activity.log('deleted', 'lead', name);
     return { error: null };
   }
-}
 
+  private hydrateLead(row: Record<string, unknown>): Lead {
+    const camelRow = toCamelCase(row) as unknown as Omit<Lead, 'notes'> & { notes?: unknown };
+    return {
+      ...camelRow,
+      notes: deserializeContactNotes(camelRow.notes),
+    };
+  }
+
+  private serializeLead(lead: Omit<Lead, 'id'>): Record<string, unknown> {
+    return toSnakeCase({
+      ...lead,
+      notes: serializeContactNotes(lead.notes),
+    } as unknown as Record<string, unknown>);
+  }
+}

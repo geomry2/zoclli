@@ -7,6 +7,8 @@ import { BuildingService } from '../../services/building.service';
 import { AgencyService } from '../../services/agency.service';
 import { Client, PropertyType, ClientStatus } from '../../models/client.model';
 import { Lead, LeadStatus } from '../../models/lead.model';
+import { ContactNotes } from '../contact-notes/contact-notes';
+import { normalizeContactNotes } from '../../utils/contact-notes.utils';
 
 type Tab = 'clients' | 'leads';
 type FieldMode = 'select' | 'new';
@@ -15,7 +17,7 @@ type InterestMode = 'text' | 'building';
 @Component({
   selector: 'app-create-modal',
   standalone: true,
-  imports: [FormsModule, TranslatePipe],
+  imports: [FormsModule, TranslatePipe, ContactNotes],
   templateUrl: './create-modal.html',
   styleUrl: './create-modal.scss',
 })
@@ -122,14 +124,14 @@ export class CreateModal implements OnInit {
     const ec = this.editClient();
     if (ec) {
       const { id, ...rest } = ec;
-      this.client = { ...rest };
+      this.client = structuredClone(rest);
       if (ec.buildingName) this.buildingMode.set('select');
       if (ec.realtorAgency) this.agencyMode.set('select');
     }
     const el = this.editLead();
     if (el) {
       const { id, ...rest } = el;
-      this.lead = { ...rest };
+      this.lead = structuredClone(rest);
       if (el.realtorAgency) this.agencyMode.set('select');
       if (el.interestedIn && this.allBuildings.includes(el.interestedIn)) {
         this.leadInterestMode.set('building');
@@ -143,7 +145,7 @@ export class CreateModal implements OnInit {
       this.client.realtorName = cl.realtorName;
       this.client.realtorAgency = cl.realtorAgency;
       this.client.dealValue = cl.budgetMax || cl.budgetMin || 0;
-      this.client.notes = cl.notes;
+      this.client.notes = structuredClone(cl.notes);
       if (cl.realtorAgency) this.agencyMode.set('select');
     }
     const pb = this.prefillBuilding();
@@ -159,7 +161,7 @@ export class CreateModal implements OnInit {
       buildingName: '', apartmentNumber: '',
       propertyType: 'apartment', status: 'active',
       purchaseDate: '', dealValue: 0,
-      realtorName: '', realtorAgency: '', notes: '',
+      realtorName: '', realtorAgency: '', notes: [],
     };
   }
 
@@ -168,7 +170,7 @@ export class CreateModal implements OnInit {
       name: '', phone: '', email: '',
       interestedIn: '', realtorName: '', realtorAgency: '',
       firstInteractionDate: '', status: 'new',
-      budgetMin: 0, budgetMax: 0, followUpDate: '', notes: '',
+      budgetMin: 0, budgetMax: 0, followUpDate: '', notes: [],
     };
   }
 
@@ -241,7 +243,7 @@ export class CreateModal implements OnInit {
       apartmentNumber: this.normalizeLooseText(client.apartmentNumber),
       realtorName: this.normalizeName(client.realtorName),
       realtorAgency: this.normalizeAgency(client.realtorAgency),
-      notes: this.normalizeLooseText(client.notes),
+      notes: normalizeContactNotes(client.notes),
     };
   }
 
@@ -254,7 +256,7 @@ export class CreateModal implements OnInit {
       interestedIn: this.normalizeLooseText(lead.interestedIn),
       realtorName: this.normalizeName(lead.realtorName),
       realtorAgency: this.normalizeAgency(lead.realtorAgency),
-      notes: this.normalizeLooseText(lead.notes),
+      notes: normalizeContactNotes(lead.notes),
     };
   }
 

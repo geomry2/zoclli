@@ -88,6 +88,21 @@
   color: #c0c4c8;
 }
 
+.panel-link-btn {
+  padding: 0;
+  border: none;
+  background: none;
+  color: #4a90d9;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    color: #2f6fb2;
+  }
+}
+
 /* ── Section row (pipeline / status / follow-ups) ── */
 .section-row {
   display: grid;
@@ -159,9 +174,18 @@
 }
 
 .followup-card {
+  width: 100%;
+  border: none;
   border-radius: 8px;
   padding: 16px 12px;
   text-align: center;
+  cursor: pointer;
+  transition: transform 0.12s, box-shadow 0.12s;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+  }
 
   &.overdue {
     background: #fdf1f0;

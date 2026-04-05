@@ -21,7 +21,7 @@ function buildClient(overrides: Partial<Client>): Client {
     dealValue: 0,
     realtorName: '',
     realtorAgency: '',
-    notes: '',
+    notes: [],
     ...overrides,
   };
 }
@@ -40,7 +40,7 @@ function buildLead(overrides: Partial<Lead>): Lead {
     budgetMin: 0,
     budgetMax: 0,
     followUpDate: '',
-    notes: '',
+    notes: [],
     ...overrides,
   };
 }
@@ -73,6 +73,8 @@ describe('Dashboard', () => {
   afterEach(() => {
     injector?.destroy();
     injector = undefined;
+    vi.useRealTimers();
+    vi.restoreAllMocks();
   });
 
   it('computes totals, follow-up counters, and win rate from reactive service state', () => {
@@ -158,5 +160,16 @@ describe('Dashboard', () => {
     expect(dashboard.activityKey({ action: 'updated', entityType: 'lead' } as ActivityEntry)).toBe('act.updatedLead');
     expect(dashboard.formatTime('2026-04-05T11:15:00.000Z')).toBe('45m ago');
     expect(dashboard.formatTime('2026-04-03T12:00:00.000Z')).toBe('3 Apr');
+  });
+
+  it('emits the requested follow-up filter when a dashboard shortcut is used', () => {
+    const { dashboard, injector: createdInjector } = createDashboard();
+    injector = createdInjector;
+
+    const emitSpy = vi.spyOn(dashboard.followUpsRequest, 'emit');
+
+    dashboard.openFollowUps('today');
+
+    expect(emitSpy).toHaveBeenCalledWith('today');
   });
 });

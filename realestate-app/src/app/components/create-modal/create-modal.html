@@ -114,7 +114,7 @@
 
         <div class="field-group full">
           <label>{{ 'form.notes' | translate }}</label>
-          <textarea [(ngModel)]="client.notes" rows="3" [attr.placeholder]="'form.notesPlaceholder' | translate"></textarea>
+          <app-contact-notes [notes]="client.notes" [editable]="true" (notesChange)="client.notes = $event" />
         </div>
       </div>
 
@@ -223,7 +223,7 @@
 
         <div class="field-group full">
           <label>{{ 'form.notes' | translate }}</label>
-          <textarea [(ngModel)]="lead.notes" rows="3" [attr.placeholder]="'form.notesPlaceholder' | translate"></textarea>
+          <app-contact-notes [notes]="lead.notes" [editable]="true" (notesChange)="lead.notes = $event" />
         </div>
       </div>
     }

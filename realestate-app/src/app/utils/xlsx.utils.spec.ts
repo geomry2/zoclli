@@ -16,12 +16,17 @@ vi.mock('xlsx', () => {
 describe('xlsx utils', () => {
   it('exports rows without the id field', () => {
     exportToXlsx('clients.xlsx', [
-      { id: '1', name: 'Anna', dealValue: 120000 },
+      {
+        id: '1',
+        name: 'Anna',
+        dealValue: 120000,
+        notes: [{ id: 'n1', body: 'Sent contract', createdAt: '2026-04-03T10:00:00.000Z' }],
+      },
       { id: '2', name: 'Boris', dealValue: 90000 },
     ]);
 
     expect(XLSX.utils.json_to_sheet).toHaveBeenCalledWith([
-      { name: 'Anna', dealValue: 120000 },
+      { name: 'Anna', dealValue: 120000, notes: '[2026-04-03] Sent contract' },
       { name: 'Boris', dealValue: 90000 },
     ]);
     expect(XLSX.utils.book_new).toHaveBeenCalledTimes(1);

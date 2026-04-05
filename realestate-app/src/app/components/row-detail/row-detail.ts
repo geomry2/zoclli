@@ -2,11 +2,13 @@ import { Component, inject, input, output, signal } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { ContactNotes } from '../contact-notes/contact-notes';
+import { ContactNote } from '../../models/contact-note.model';
 
 export interface FieldDefinition {
   key: string;
   label: string;
-  type?: 'text' | 'date' | 'currency' | 'badge';
+  type?: 'text' | 'date' | 'currency' | 'badge' | 'notes';
   options?: string[];
   multiline?: boolean;
   translatePrefix?: string;
@@ -15,7 +17,7 @@ export interface FieldDefinition {
 @Component({
   selector: 'app-row-detail',
   standalone: true,
-  imports: [NgClass, FormsModule, TranslatePipe],
+  imports: [NgClass, FormsModule, TranslatePipe, ContactNotes],
   templateUrl: './row-detail.html',
   styleUrl: './row-detail.scss'
 })
@@ -31,7 +33,7 @@ export class RowDetail {
 
   startEdit(event: Event) {
     event.stopPropagation();
-    this.draft = { ...this.entry() };
+    this.draft = structuredClone(this.entry());
     this.saveError.set(null);
     this.editMode.set(true);
   }
@@ -67,6 +69,10 @@ export class RowDetail {
     return field.type === 'badge';
   }
 
+  isNotes(field: FieldDefinition): boolean {
+    return field.type === 'notes';
+  }
+
   getBadgeValue(value: unknown): string {
     return String(value ?? '');
   }
@@ -84,5 +90,13 @@ export class RowDetail {
   setDraftNumber(key: string, val: unknown) {
     const n = Number(val);
     this.draft[key] = isNaN(n) ? 0 : n;
+  }
+
+  getNotes(value: unknown): ContactNote[] {
+    return Array.isArray(value) ? value as ContactNote[] : [];
+  }
+
+  setDraftNotes(key: string, notes: ContactNote[]) {
+    this.draft[key] = notes;
   }
 }
