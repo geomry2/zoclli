@@ -6,7 +6,7 @@
   <input
     type="text"
     class="search-input"
-    placeholder="Search by any field..."
+    [attr.placeholder]="'search.placeholder' | translate"
     (input)="onInput($event)"
   />
 </div>

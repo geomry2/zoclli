@@ -3,7 +3,7 @@
 <div class="modal">
   <div class="modal-header">
     <div class="modal-header-info">
-      <h2 class="modal-title">Add Unit</h2>
+      <h2 class="modal-title">{{ 'modal.addUnit' | translate }}</h2>
       <span class="modal-building">{{ buildingName() }}</span>
     </div>
     <button class="close-btn" (click)="close()">✕</button>
@@ -22,15 +22,14 @@
 
     <div class="form-grid">
 
-      <!-- Unit details -->
-      <div class="field-group section-divider full"><span>Unit Details</span></div>
+      <div class="field-group section-divider full"><span>{{ 'form.sectionUnitDetails' | translate }}</span></div>
 
       <div class="field-group">
-        <label>Unit / Apartment No.</label>
+        <label>{{ 'form.unitNo' | translate }}</label>
         <input [(ngModel)]="unit.apartmentNumber" list="unit-apt-list" placeholder="e.g. 204" />
       </div>
       <div class="field-group">
-        <label>Property Type</label>
+        <label>{{ 'form.propertyType' | translate }}</label>
         <select [(ngModel)]="unit.propertyType">
           @for (t of propertyTypes; track t) {
             <option [value]="t">{{ t }}</option>
@@ -38,7 +37,7 @@
         </select>
       </div>
       <div class="field-group">
-        <label>Status</label>
+        <label>{{ 'form.status' | translate }}</label>
         <select [(ngModel)]="unit.status">
           @for (s of clientStatuses; track s) {
             <option [value]="s">{{ s }}</option>
@@ -46,67 +45,65 @@
         </select>
       </div>
       <div class="field-group">
-        <label>Purchase Date</label>
+        <label>{{ 'form.purchaseDate' | translate }}</label>
         <input [(ngModel)]="unit.purchaseDate" type="date" />
       </div>
       <div class="field-group full">
-        <label>Deal Value (€)</label>
+        <label>{{ 'form.dealValue' | translate }}</label>
         <input [(ngModel)]="unit.dealValue" type="number" placeholder="0" />
       </div>
 
-      <!-- Client details -->
-      <div class="field-group section-divider full"><span>Client</span></div>
+      <div class="field-group section-divider full"><span>{{ 'form.sectionClient' | translate }}</span></div>
 
       <div class="field-group full">
-        <label>Full Name *</label>
+        <label>{{ 'form.fullName' | translate }}</label>
         <input [(ngModel)]="unit.name" placeholder="e.g. Jane Smith" />
       </div>
       <div class="field-group">
-        <label>Phone</label>
+        <label>{{ 'form.phone' | translate }}</label>
         <input [(ngModel)]="unit.phone" placeholder="+1-555-0100" />
       </div>
       <div class="field-group">
-        <label>Email</label>
+        <label>{{ 'form.email' | translate }}</label>
         <input [(ngModel)]="unit.email" type="email" placeholder="jane@email.com" />
       </div>
 
-      <!-- Realtor -->
-      <div class="field-group section-divider full"><span>Realtor</span></div>
+      <div class="field-group section-divider full"><span>{{ 'form.sectionRealtor' | translate }}</span></div>
 
       <div class="field-group">
-        <label>Realtor Name</label>
+        <label>{{ 'form.realtorName' | translate }}</label>
         <input [(ngModel)]="unit.realtorName" placeholder="e.g. Sandra Liu" />
       </div>
       <div class="field-group">
-        <label>Agency</label>
+        <label>{{ 'form.agency' | translate }}</label>
         @if (agencyMode() === 'select') {
           <select [(ngModel)]="selectedAgency">
-            <option value="">— Select agency —</option>
+            <option value="">{{ 'form.selectAgency' | translate }}</option>
             @for (a of allAgencies; track a) {
               <option [value]="a">{{ a }}</option>
             }
-            <option value="__new__">＋ Add new agency</option>
+            <option value="__new__">{{ 'form.addNewAgency' | translate }}</option>
           </select>
         } @else {
           <div class="inline-new">
-            <input [(ngModel)]="unit.realtorAgency" placeholder="New agency name" autofocus />
+            <input [(ngModel)]="unit.realtorAgency" [attr.placeholder]="'form.newAgencyPlaceholder' | translate" autofocus />
             <button class="btn-back" type="button" (click)="agencyMode.set('select')">↩</button>
           </div>
         }
       </div>
 
       <div class="field-group full">
-        <label>Notes</label>
-        <textarea [(ngModel)]="unit.notes" rows="3" placeholder="Any additional notes..."></textarea>
+        <label>{{ 'form.notes' | translate }}</label>
+        <textarea [(ngModel)]="unit.notes" rows="3" [attr.placeholder]="'form.notesPlaceholder' | translate"></textarea>
       </div>
 
     </div>
   </div>
 
   <div class="modal-footer">
-    <button class="btn-cancel" (click)="close()">Cancel</button>
+    <button class="btn-cancel" (click)="close()">{{ 'btn.cancel' | translate }}</button>
     <button class="btn-save" (click)="save()" [disabled]="saving()">
-      {{ saving() ? 'Saving…' : 'Add Unit' }}
+      {{ saving() ? ('btn.saving' | translate) : ('addUnit.addBtn' | translate) }}
     </button>
   </div>
 </div>

@@ -1,6 +1,7 @@
-import { Component, input, output, signal } from '@angular/core';
+import { Component, inject, input, output, signal } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 export interface FieldDefinition {
   key: string;
@@ -13,7 +14,7 @@ export interface FieldDefinition {
 @Component({
   selector: 'app-row-detail',
   standalone: true,
-  imports: [NgClass, FormsModule],
+  imports: [NgClass, FormsModule, TranslatePipe],
   templateUrl: './row-detail.html',
   styleUrl: './row-detail.scss'
 })

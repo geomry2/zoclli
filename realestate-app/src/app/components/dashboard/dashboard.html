@@ -3,34 +3,34 @@
   <!-- KPI cards -->
   <div class="kpi-row">
     <div class="kpi-card kpi-clients">
-      <div class="kpi-label">Total Clients</div>
+      <div class="kpi-label">{{ 'dash.totalClients' | translate }}</div>
       <div class="kpi-value">{{ totalClients() }}</div>
-      <div class="kpi-sub">{{ activeClientsCount() }} active</div>
+      <div class="kpi-sub">{{ ts.t('dash.active', {n: activeClientsCount()}) }}</div>
     </div>
     <div class="kpi-card kpi-leads">
-      <div class="kpi-label">Total Leads</div>
+      <div class="kpi-label">{{ 'dash.totalLeads' | translate }}</div>
       <div class="kpi-value">{{ totalLeads() }}</div>
       @if (overdueCount() + dueTodayCount() > 0) {
-        <div class="kpi-sub kpi-sub--warn">{{ overdueCount() + dueTodayCount() }} need attention</div>
+        <div class="kpi-sub kpi-sub--warn">{{ ts.t('dash.needAttention', {n: overdueCount() + dueTodayCount()}) }}</div>
       } @else {
-        <div class="kpi-sub">in pipeline</div>
+        <div class="kpi-sub">{{ 'dash.inPipeline' | translate }}</div>
       }
     </div>
     <div class="kpi-card kpi-revenue">
-      <div class="kpi-label">Portfolio Value</div>
+      <div class="kpi-label">{{ 'dash.portfolioValue' | translate }}</div>
       <div class="kpi-value">{{ formatCurrency(totalRevenue()) }}</div>
-      <div class="kpi-sub">total closed</div>
+      <div class="kpi-sub">{{ 'dash.totalClosed' | translate }}</div>
     </div>
     <div class="kpi-card kpi-avg">
-      <div class="kpi-label">Avg Deal Value</div>
+      <div class="kpi-label">{{ 'dash.avgDeal' | translate }}</div>
       <div class="kpi-value">{{ formatCurrency(avgDeal()) }}</div>
-      <div class="kpi-sub">per client</div>
+      <div class="kpi-sub">{{ 'dash.perClient' | translate }}</div>
     </div>
     @if (winRate() !== null) {
       <div class="kpi-card kpi-winrate">
-        <div class="kpi-label">Win Rate</div>
+        <div class="kpi-label">{{ 'dash.winRate' | translate }}</div>
         <div class="kpi-value">{{ winRate() }}<span class="kpi-unit">%</span></div>
-        <div class="kpi-sub">clients vs lost leads</div>
+        <div class="kpi-sub">{{ 'dash.clientsVsLost' | translate }}</div>
       </div>
     }
   </div>
@@ -38,16 +38,15 @@
   <!-- Stats row -->
   <div class="section-row">
 
-    <!-- Lead Pipeline -->
     <div class="panel">
       <div class="panel-header">
-        <span class="panel-title">Lead Pipeline</span>
-        <span class="panel-total">{{ totalLeads() }} total</span>
+        <span class="panel-title">{{ 'dash.leadPipeline' | translate }}</span>
+        <span class="panel-total">{{ ts.t('dash.total', {n: totalLeads()}) }}</span>
       </div>
       @for (row of leadsByStatus(); track row.label) {
         <div class="stat-row">
           <span class="stat-dot" [style.background]="row.color"></span>
-          <span class="stat-label">{{ row.label }}</span>
+          <span class="stat-label">{{ ('status.' + row.label.toLowerCase()) | translate }}</span>
           <div class="bar-wrap">
             <div class="bar" [style.width.%]="pct(row.count, totalLeads())" [style.background]="row.color"></div>
           </div>
@@ -57,16 +56,15 @@
       }
     </div>
 
-    <!-- Client Status -->
     <div class="panel">
       <div class="panel-header">
-        <span class="panel-title">Client Status</span>
-        <span class="panel-total">{{ totalClients() }} total</span>
+        <span class="panel-title">{{ 'dash.clientStatus' | translate }}</span>
+        <span class="panel-total">{{ ts.t('dash.total', {n: totalClients()}) }}</span>
       </div>
       @for (row of clientsByStatus(); track row.label) {
         <div class="stat-row">
           <span class="stat-dot" [style.background]="row.color"></span>
-          <span class="stat-label">{{ row.label }}</span>
+          <span class="stat-label">{{ ('status.' + row.label.toLowerCase()) | translate }}</span>
           <div class="bar-wrap">
             <div class="bar" [style.width.%]="pct(row.count, totalClients())" [style.background]="row.color"></div>
           </div>
@@ -76,19 +74,18 @@
       }
     </div>
 
-    <!-- Follow-ups -->
     <div class="panel">
       <div class="panel-header">
-        <span class="panel-title">Follow-ups</span>
+        <span class="panel-title">{{ 'dash.followUps' | translate }}</span>
       </div>
       <div class="followup-grid">
         <div class="followup-card overdue">
           <div class="followup-num">{{ overdueCount() }}</div>
-          <div class="followup-desc">Overdue</div>
+          <div class="followup-desc">{{ 'dash.overdue' | translate }}</div>
         </div>
         <div class="followup-card due-today">
           <div class="followup-num">{{ dueTodayCount() }}</div>
-          <div class="followup-desc">Due today</div>
+          <div class="followup-desc">{{ 'dash.dueToday' | translate }}</div>
         </div>
       </div>
     </div>
@@ -99,15 +96,15 @@
   @if (propertyMix().length) {
     <div class="panel panel-wide">
       <div class="panel-header">
-        <span class="panel-title">Property Mix</span>
-        <span class="panel-total">{{ totalClients() }} clients</span>
+        <span class="panel-title">{{ 'dash.propertyMix' | translate }}</span>
+        <span class="panel-total">{{ ts.t('dash.clientsCount', {n: totalClients()}) }}</span>
       </div>
       <div class="mix-grid">
         @for (row of propertyMix(); track row.label) {
           <div class="mix-item">
             <div class="mix-top">
               <span class="mix-dot" [style.background]="row.color"></span>
-              <span class="mix-label">{{ row.label }}</span>
+              <span class="mix-label">{{ ('proptype.' + row.label) | translate }}</span>
               <span class="mix-count">{{ row.count }}</span>
             </div>
             <div class="mix-bar-wrap">
@@ -119,21 +116,21 @@
     </div>
   }
 
-  <!-- Bottom row: Top Realtors + Activity -->
+  <!-- Bottom row -->
   <div class="bottom-row">
 
     @if (topRealtors().length) {
       <div class="panel">
         <div class="panel-header">
-          <span class="panel-title">Top Realtors</span>
+          <span class="panel-title">{{ 'dash.topRealtors' | translate }}</span>
         </div>
         <table class="realtor-table">
           <thead>
             <tr>
               <th>#</th>
-              <th>Realtor</th>
-              <th>Deals</th>
-              <th>Revenue</th>
+              <th>{{ 'col.realtor' | translate }}</th>
+              <th>{{ 'dash.deals' | translate }}</th>
+              <th>{{ 'dash.revenue' | translate }}</th>
             </tr>
           </thead>
           <tbody>
@@ -150,13 +147,12 @@
       </div>
     }
 
-    <!-- Activity Timeline -->
     <div class="panel">
       <div class="panel-header">
-        <span class="panel-title">Recent Activity</span>
+        <span class="panel-title">{{ 'dash.recentActivity' | translate }}</span>
       </div>
       @if (recentActivity().length === 0) {
-        <div class="activity-empty">No activity yet.</div>
+        <div class="activity-empty">{{ 'empty.activity' | translate }}</div>
       } @else {
         <ul class="activity-list">
           @for (entry of recentActivity(); track entry.id) {
@@ -164,7 +160,7 @@
               <span class="activity-icon">{{ activityIcon(entry) }}</span>
               <div class="activity-body">
                 <span class="activity-name">{{ entry.name }}</span>
-                <span class="activity-desc">{{ activityLabel(entry) }}</span>
+                <span class="activity-desc">{{ activityKey(entry) | translate }}</span>
               </div>
               <span class="activity-time">{{ formatTime(entry.timestamp) }}</span>
             </li>

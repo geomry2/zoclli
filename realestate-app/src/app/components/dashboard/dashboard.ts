@@ -2,16 +2,20 @@ import { Component, computed, inject } from '@angular/core';
 import { ClientService } from '../../services/client.service';
 import { LeadService } from '../../services/lead.service';
 import { ActivityService, ActivityEntry } from '../../services/activity.service';
+import { TranslationService } from '../../services/translation.service';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 interface StatRow { label: string; count: number; color: string; }
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
+  imports: [TranslatePipe],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss'
 })
 export class Dashboard {
+  readonly ts = inject(TranslationService);
   private readonly clientService = inject(ClientService);
   private readonly leadService = inject(LeadService);
   private readonly activityService = inject(ActivityService);
@@ -101,7 +105,7 @@ export class Dashboard {
     };
     return types
       .map(t => ({
-        label: t.charAt(0).toUpperCase() + t.slice(1),
+        label: t,
         count: clients.filter(c => c.propertyType === t).length,
         color: colors[t],
         pct: Math.round(clients.filter(c => c.propertyType === t).length / total * 100),
@@ -145,15 +149,15 @@ export class Dashboard {
     return '·';
   }
 
-  activityLabel(entry: ActivityEntry): string {
-    const type = entry.entityType === 'client' ? 'client' : 'lead';
-    const labels: Record<string, string> = {
-      created: `New ${type} added`,
-      updated: `${type.charAt(0).toUpperCase() + type.slice(1)} updated`,
-      deleted: `${type.charAt(0).toUpperCase() + type.slice(1)} deleted`,
-      converted: 'Lead converted to client',
+  activityKey(entry: ActivityEntry): string {
+    const t = entry.entityType;
+    if (entry.action === 'converted') return 'act.converted';
+    const map: Record<string, string> = {
+      created: t === 'client' ? 'act.createdClient' : 'act.createdLead',
+      updated: t === 'client' ? 'act.updatedClient' : 'act.updatedLead',
+      deleted: t === 'client' ? 'act.deletedClient' : 'act.deletedLead',
     };
-    return labels[entry.action] ?? entry.action;
+    return map[entry.action] ?? entry.action;
   }
 
   formatTime(iso: string): string {

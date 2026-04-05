@@ -1,5 +1,6 @@
 import { Component, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 import { ClientService } from '../../services/client.service';
 import { AgencyService } from '../../services/agency.service';
 import { BuildingService } from '../../services/building.service';
@@ -10,7 +11,7 @@ type FieldMode = 'select' | 'new';
 @Component({
   selector: 'app-add-unit-modal',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, TranslatePipe],
   templateUrl: './add-unit-modal.html',
   styleUrl: './add-unit-modal.scss',
 })

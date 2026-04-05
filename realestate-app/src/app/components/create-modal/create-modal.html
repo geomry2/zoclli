@@ -3,7 +3,11 @@
 <div class="modal">
   <div class="modal-header">
     <h2 class="modal-title">
-      {{ isConvert ? 'Convert Lead to Client' : (isEdit ? 'Edit' : 'Add') + ' ' + (tab() === 'clients' ? 'Client' : 'Lead') }}
+      @if (isConvert) { {{ 'modal.convertLead' | translate }} }
+      @else if (isEdit && tab() === 'clients') { {{ 'modal.editClient' | translate }} }
+      @else if (isEdit && tab() === 'leads') { {{ 'modal.editLead' | translate }} }
+      @else if (tab() === 'clients') { {{ 'modal.addClient' | translate }} }
+      @else { {{ 'modal.addLead' | translate }} }
     </h2>
     <button class="close-btn" (click)="close()">✕</button>
   </div>
@@ -13,7 +17,6 @@
       <div class="error-banner">{{ saveError() }}</div>
     }
 
-    <!-- Datalist for apartment number autocomplete only -->
     <datalist id="apt-list">
       @for (n of usedApartmentNumbers; track n) {
         <option [value]="n"></option>
@@ -23,45 +26,44 @@
     @if (tab() === 'clients') {
       <div class="form-grid">
         <div class="field-group full">
-          <label>Full Name *</label>
+          <label>{{ 'form.fullName' | translate }}</label>
           <input [(ngModel)]="client.name" placeholder="e.g. Jane Smith" />
         </div>
         <div class="field-group">
-          <label>Phone</label>
+          <label>{{ 'form.phone' | translate }}</label>
           <input [(ngModel)]="client.phone" placeholder="+1-555-0100" />
         </div>
         <div class="field-group">
-          <label>Email</label>
+          <label>{{ 'form.email' | translate }}</label>
           <input [(ngModel)]="client.email" type="email" placeholder="jane@email.com" />
         </div>
 
-        <div class="field-group section-divider full"><span>Property</span></div>
+        <div class="field-group section-divider full"><span>{{ 'form.sectionProperty' | translate }}</span></div>
 
-        <!-- Building: select existing or add new -->
         <div class="field-group">
-          <label>Building / Project</label>
+          <label>{{ 'form.building' | translate }}</label>
           @if (buildingMode() === 'select') {
             <select [(ngModel)]="selectedBuilding">
-              <option value="">— Select building —</option>
+              <option value="">{{ 'form.selectBuilding' | translate }}</option>
               @for (b of allBuildings; track b) {
                 <option [value]="b">{{ b }}</option>
               }
-              <option value="__new__">＋ Add new building</option>
+              <option value="__new__">{{ 'form.addNewBuilding' | translate }}</option>
             </select>
           } @else {
             <div class="inline-new">
-              <input [(ngModel)]="client.buildingName" placeholder="New building name" autofocus />
+              <input [(ngModel)]="client.buildingName" [attr.placeholder]="'form.newBuildingPlaceholder' | translate" autofocus />
               <button class="btn-back" type="button" (click)="buildingMode.set('select')">↩</button>
             </div>
           }
         </div>
 
         <div class="field-group">
-          <label>Apartment / Unit</label>
+          <label>{{ 'form.apartment' | translate }}</label>
           <input [(ngModel)]="client.apartmentNumber" list="apt-list" placeholder="e.g. 204" />
         </div>
         <div class="field-group">
-          <label>Property Type</label>
+          <label>{{ 'form.propertyType' | translate }}</label>
           <select [(ngModel)]="client.propertyType">
             @for (t of propertyTypes; track t) {
               <option [value]="t">{{ t }}</option>
@@ -69,7 +71,7 @@
           </select>
         </div>
         <div class="field-group">
-          <label>Status</label>
+          <label>{{ 'form.status' | translate }}</label>
           <select [(ngModel)]="client.status">
             @for (s of clientStatuses; track s) {
               <option [value]="s">{{ s }}</option>
@@ -77,69 +79,68 @@
           </select>
         </div>
         <div class="field-group">
-          <label>Purchase Date</label>
+          <label>{{ 'form.purchaseDate' | translate }}</label>
           <input [(ngModel)]="client.purchaseDate" type="date" />
         </div>
         <div class="field-group">
-          <label>Deal Value (€)</label>
+          <label>{{ 'form.dealValue' | translate }}</label>
           <input [(ngModel)]="client.dealValue" type="number" placeholder="0" />
         </div>
 
-        <div class="field-group section-divider full"><span>Realtor</span></div>
+        <div class="field-group section-divider full"><span>{{ 'form.sectionRealtor' | translate }}</span></div>
 
         <div class="field-group">
-          <label>Realtor Name</label>
+          <label>{{ 'form.realtorName' | translate }}</label>
           <input [(ngModel)]="client.realtorName" placeholder="e.g. Sandra Liu" />
         </div>
 
-        <!-- Agency: select existing or add new -->
         <div class="field-group">
-          <label>Agency</label>
+          <label>{{ 'form.agency' | translate }}</label>
           @if (agencyMode() === 'select') {
             <select [(ngModel)]="selectedClientAgency">
-              <option value="">— Select agency —</option>
+              <option value="">{{ 'form.selectAgency' | translate }}</option>
               @for (a of allAgencies; track a) {
                 <option [value]="a">{{ a }}</option>
               }
-              <option value="__new__">＋ Add new agency</option>
+              <option value="__new__">{{ 'form.addNewAgency' | translate }}</option>
             </select>
           } @else {
             <div class="inline-new">
-              <input [(ngModel)]="client.realtorAgency" placeholder="New agency name" autofocus />
+              <input [(ngModel)]="client.realtorAgency" [attr.placeholder]="'form.newAgencyPlaceholder' | translate" autofocus />
               <button class="btn-back" type="button" (click)="agencyMode.set('select')">↩</button>
             </div>
           }
         </div>
 
         <div class="field-group full">
-          <label>Notes</label>
-          <textarea [(ngModel)]="client.notes" rows="3" placeholder="Any additional notes..."></textarea>
+          <label>{{ 'form.notes' | translate }}</label>
+          <textarea [(ngModel)]="client.notes" rows="3" [attr.placeholder]="'form.notesPlaceholder' | translate"></textarea>
         </div>
       </div>
 
     } @else {
       <div class="form-grid">
         <div class="field-group full">
-          <label>Full Name *</label>
+          <label>{{ 'form.fullName' | translate }}</label>
           <input [(ngModel)]="lead.name" placeholder="e.g. John Doe" />
         </div>
         <div class="field-group">
-          <label>Phone</label>
+          <label>{{ 'form.phone' | translate }}</label>
           <input [(ngModel)]="lead.phone" placeholder="+1-555-0100" />
         </div>
         <div class="field-group">
-          <label>Email</label>
+          <label>{{ 'form.email' | translate }}</label>
           <input [(ngModel)]="lead.email" type="email" placeholder="john@email.com" />
         </div>
 
-        <div class="field-group section-divider full"><span>Interest</span></div>
+        <div class="field-group section-divider full"><span>{{ 'form.sectionInterest' | translate }}</span></div>
 
         <div class="field-group full">
-          <label>Interested In</label>
-          <input [(ngModel)]="lead.interestedIn" placeholder="e.g. 2-bedroom apartment near downtown" />
+          <label>{{ 'form.interestedIn' | translate }}</label>
+          <input [(ngModel)]="lead.interestedIn" [attr.placeholder]="'form.interestedInPlaceholder' | translate" />
         </div>
         <div class="field-group">
-          <label>Status</label>
+          <label>{{ 'form.status' | translate }}</label>
           <select [(ngModel)]="lead.status">
             @for (s of leadStatuses; track s) {
               <option [value]="s">{{ s }}</option>
@@ -147,60 +148,59 @@
           </select>
         </div>
         <div class="field-group">
-          <label>First Contact</label>
+          <label>{{ 'form.firstContact' | translate }}</label>
           <input [(ngModel)]="lead.firstInteractionDate" type="date" />
         </div>
         <div class="field-group">
-          <label>Budget Min (€)</label>
+          <label>{{ 'form.budgetMin' | translate }}</label>
           <input [(ngModel)]="lead.budgetMin" type="number" placeholder="0" />
         </div>
         <div class="field-group">
-          <label>Budget Max (€)</label>
+          <label>{{ 'form.budgetMax' | translate }}</label>
           <input [(ngModel)]="lead.budgetMax" type="number" placeholder="0" />
         </div>
         <div class="field-group">
-          <label>Follow-up Date {{ lead.status !== 'lost' ? '*' : '' }}</label>
+          <label>{{ 'form.followUpDate' | translate }}</label>
           <input [(ngModel)]="lead.followUpDate" type="date" />
         </div>
 
-        <div class="field-group section-divider full"><span>Source</span></div>
+        <div class="field-group section-divider full"><span>{{ 'form.sectionSource' | translate }}</span></div>
 
         <div class="field-group">
-          <label>Realtor Name</label>
+          <label>{{ 'form.realtorName' | translate }}</label>
           <input [(ngModel)]="lead.realtorName" placeholder="e.g. Carlos Mendes" />
         </div>
 
-        <!-- Agency: select existing or add new -->
         <div class="field-group">
-          <label>Agency</label>
+          <label>{{ 'form.agency' | translate }}</label>
           @if (agencyMode() === 'select') {
             <select [(ngModel)]="selectedLeadAgency">
-              <option value="">— Select agency —</option>
+              <option value="">{{ 'form.selectAgency' | translate }}</option>
               @for (a of allAgencies; track a) {
                 <option [value]="a">{{ a }}</option>
               }
-              <option value="__new__">＋ Add new agency</option>
+              <option value="__new__">{{ 'form.addNewAgency' | translate }}</option>
             </select>
           } @else {
             <div class="inline-new">
-              <input [(ngModel)]="lead.realtorAgency" placeholder="New agency name" autofocus />
+              <input [(ngModel)]="lead.realtorAgency" [attr.placeholder]="'form.newAgencyPlaceholder' | translate" autofocus />
               <button class="btn-back" type="button" (click)="agencyMode.set('select')">↩</button>
             </div>
           }
         </div>
 
         <div class="field-group full">
-          <label>Notes</label>
-          <textarea [(ngModel)]="lead.notes" rows="3" placeholder="Any additional notes..."></textarea>
+          <label>{{ 'form.notes' | translate }}</label>
+          <textarea [(ngModel)]="lead.notes" rows="3" [attr.placeholder]="'form.notesPlaceholder' | translate"></textarea>
         </div>
       </div>
     }
   </div>
 
   <div class="modal-footer">
-    <button class="btn-cancel" (click)="close()">Cancel</button>
+    <button class="btn-cancel" (click)="close()">{{ 'btn.cancel' | translate }}</button>
     <button class="btn-save" (click)="save()" [disabled]="saving()">
-      {{ saving() ? 'Saving…' : (isEdit ? 'Save Changes' : 'Save') }}
+      {{ saving() ? ('btn.saving' | translate) : (isEdit ? ('btn.saveChanges' | translate) : ('btn.save' | translate)) }}
     </button>
   </div>
 </div>

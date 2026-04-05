@@ -1,5 +1,7 @@
 import { Component, computed, inject, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { TranslationService } from '../../services/translation.service';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 import { ClientService } from '../../services/client.service';
 import { BuildingService } from '../../services/building.service';
 import { Client } from '../../models/client.model';
@@ -15,11 +17,12 @@ interface PropertyRow {
 @Component({
   selector: 'app-property-catalogue',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, TranslatePipe],
   templateUrl: './property-catalogue.html',
   styleUrl: './property-catalogue.scss'
 })
 export class PropertyCatalogue {
+  readonly ts = inject(TranslationService);
   private readonly clientService = inject(ClientService);
   private readonly buildingService = inject(BuildingService);
 
