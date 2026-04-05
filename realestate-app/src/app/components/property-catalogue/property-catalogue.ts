@@ -28,6 +28,7 @@ interface PropertyRow {
   building: string;
   units: string[];
   clients: Client[];
+  standaloneUnitCount: number;
   entries: PropertyEntry[];
   totalValue: number;
   statusCounts: Record<string, number>;
@@ -57,8 +58,11 @@ export class PropertyCatalogue {
   readonly quickEditValue = signal<Record<string, number>>({});
   readonly quickSavingId = signal<string | null>(null);
   readonly deletePendingId = signal<string | null>(null);
+  readonly deletePropertyPending = signal<string | null>(null);
   readonly actionError = signal<string | null>(null);
   readonly actionErrorId = signal<string | null>(null);
+  readonly propertyActionError = signal<string | null>(null);
+  readonly propertyActionErrorBuilding = signal<string | null>(null);
 
   readonly properties = computed((): PropertyRow[] => {
     const clientMap = new Map<string, Client[]>();
@@ -136,6 +140,7 @@ export class PropertyCatalogue {
           building,
           units,
           clients,
+          standaloneUnitCount: standaloneUnits.length,
           entries,
           totalValue: entries.reduce((sum, entry) => sum + (entry.dealValue ?? 0), 0),
           statusCounts,
@@ -181,6 +186,20 @@ export class PropertyCatalogue {
     this.deletePendingId.set(null);
     this.actionError.set(null);
     this.actionErrorId.set(null);
+  }
+
+  startDeleteProperty(event: Event, prop: PropertyRow) {
+    event.stopPropagation();
+    this.propertyActionError.set(null);
+    this.propertyActionErrorBuilding.set(null);
+    this.deletePropertyPending.set(prop.building);
+  }
+
+  cancelDeleteProperty(event?: Event) {
+    event?.stopPropagation();
+    this.deletePropertyPending.set(null);
+    this.propertyActionError.set(null);
+    this.propertyActionErrorBuilding.set(null);
   }
 
   setQuickStatus(entry: PropertyEntry, value: string) {
@@ -272,6 +291,34 @@ export class PropertyCatalogue {
     this.showNewPropertyForm.set(false);
     this.newPropertyName.set('');
     this.expandedBuilding.set(name);
+  }
+
+  async confirmDeleteProperty(event: Event, prop: PropertyRow) {
+    event.stopPropagation();
+
+    if (prop.clients.length) {
+      this.propertyActionError.set(this.ts.t('prop.deleteBlockedClients', { name: prop.clients[0].name }));
+      this.propertyActionErrorBuilding.set(prop.building);
+      return;
+    }
+
+    if (prop.standaloneUnitCount > 0) {
+      this.propertyActionError.set(this.ts.t('prop.deleteBlockedUnits'));
+      this.propertyActionErrorBuilding.set(prop.building);
+      return;
+    }
+
+    const { error } = await this.buildingService.remove(prop.building);
+    if (error) {
+      this.propertyActionError.set(error);
+      this.propertyActionErrorBuilding.set(prop.building);
+      return;
+    }
+
+    if (this.expandedBuilding() === prop.building) {
+      this.expandedBuilding.set(null);
+    }
+    this.cancelDeleteProperty();
   }
 
   formatCurrency(value: number): string {

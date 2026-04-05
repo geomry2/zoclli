@@ -32,7 +32,7 @@
         <label>{{ 'form.propertyType' | translate }}</label>
         <select [(ngModel)]="unit.propertyType">
           @for (t of propertyTypes; track t) {
-            <option [value]="t">{{ t }}</option>
+            <option [value]="t">{{ ('proptype.' + t) | translate }}</option>
           }
         </select>
       </div>
@@ -40,7 +40,7 @@
         <label>{{ 'form.status' | translate }}</label>
         <select [(ngModel)]="unit.status">
           @for (s of clientStatuses; track s) {
-            <option [value]="s">{{ s }}</option>
+            <option [value]="s">{{ ('status.' + s) | translate }}</option>
           }
         </select>
       </div>

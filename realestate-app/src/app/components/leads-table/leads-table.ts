@@ -78,7 +78,7 @@ export class LeadsTable {
     { key: 'phone', label: 'field.phone' },
     { key: 'email', label: 'field.email' },
     { key: 'interestedIn', label: 'field.interestedIn' },
-    { key: 'status', label: 'field.status', type: 'badge', options: ['new', 'contacted', 'negotiating', 'lost'] },
+    { key: 'status', label: 'field.status', type: 'badge', options: ['new', 'contacted', 'negotiating', 'lost'], translatePrefix: 'status.' },
     { key: 'budgetMin', label: 'field.budgetMin', type: 'currency' },
     { key: 'budgetMax', label: 'field.budgetMax', type: 'currency' },
     { key: 'followUpDate', label: 'field.followUpDate', type: 'date' },

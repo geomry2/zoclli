@@ -22,4 +22,12 @@ export class BuildingService {
     await this.supabase.from('buildings').upsert({ name }, { onConflict: 'name' });
     this.buildings.update(list => [...list, name].sort());
   }
+
+  async remove(name: string): Promise<{ error: string | null }> {
+    if (!name?.trim() || !this.supabase) return { error: null };
+    const { error } = await this.supabase.from('buildings').delete().eq('name', name);
+    if (error) return { error: error.message };
+    this.buildings.update(list => list.filter(item => item !== name));
+    return { error: null };
+  }
 }

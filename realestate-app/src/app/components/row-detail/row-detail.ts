@@ -9,6 +9,7 @@ export interface FieldDefinition {
   type?: 'text' | 'date' | 'currency' | 'badge';
   options?: string[];
   multiline?: boolean;
+  translatePrefix?: string;
 }
 
 @Component({
@@ -68,6 +69,16 @@ export class RowDetail {
 
   getBadgeValue(value: unknown): string {
     return String(value ?? '');
+  }
+
+  getTranslatedOption(field: FieldDefinition, value: unknown): string {
+    const raw = String(value ?? '');
+    return field.translatePrefix ? `${field.translatePrefix}${raw}` : raw;
+  }
+
+  getDisplayBadgeValue(field: FieldDefinition, value: unknown): string {
+    const raw = this.getBadgeValue(value);
+    return raw ? this.getTranslatedOption(field, raw) : '—';
   }
 
   setDraftNumber(key: string, val: unknown) {

@@ -10,6 +10,7 @@ import { Lead, LeadStatus } from '../../models/lead.model';
 
 type Tab = 'clients' | 'leads';
 type FieldMode = 'select' | 'new';
+type InterestMode = 'text' | 'building';
 
 @Component({
   selector: 'app-create-modal',
@@ -36,6 +37,7 @@ export class CreateModal implements OnInit {
 
   readonly buildingMode = signal<FieldMode>('select');
   readonly agencyMode = signal<FieldMode>('select');
+  readonly leadInterestMode = signal<InterestMode>('text');
 
   client: Omit<Client, 'id'> = this.emptyClient();
   lead: Omit<Lead, 'id'> = this.emptyLead();
@@ -108,6 +110,14 @@ export class CreateModal implements OnInit {
     }
   }
 
+  get selectedInterestBuilding(): string {
+    return this.leadInterestMode() === 'building' ? (this.lead.interestedIn || '') : '';
+  }
+  set selectedInterestBuilding(value: string) {
+    this.leadInterestMode.set('building');
+    this.lead.interestedIn = value;
+  }
+
   ngOnInit() {
     const ec = this.editClient();
     if (ec) {
@@ -121,6 +131,9 @@ export class CreateModal implements OnInit {
       const { id, ...rest } = el;
       this.lead = { ...rest };
       if (el.realtorAgency) this.agencyMode.set('select');
+      if (el.interestedIn && this.allBuildings.includes(el.interestedIn)) {
+        this.leadInterestMode.set('building');
+      }
     }
     const cl = this.convertLead();
     if (cl) {
@@ -206,6 +219,17 @@ export class CreateModal implements OnInit {
   readonly propertyTypes: PropertyType[] = ['apartment', 'house', 'villa', 'commercial', 'land'];
   readonly clientStatuses: ClientStatus[] = ['active', 'inactive', 'closed'];
   readonly leadStatuses: LeadStatus[] = ['new', 'contacted', 'negotiating', 'lost'];
+
+  useLeadInterestText() {
+    this.leadInterestMode.set('text');
+  }
+
+  useLeadInterestBuilding() {
+    this.leadInterestMode.set('building');
+    this.lead.interestedIn = this.lead.interestedIn && this.allBuildings.includes(this.lead.interestedIn)
+      ? this.lead.interestedIn
+      : (this.allBuildings[0] ?? '');
+  }
 
   private normalizeClient(client: Omit<Client, 'id'>): Omit<Client, 'id'> {
     return {
