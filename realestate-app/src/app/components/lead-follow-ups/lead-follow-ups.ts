@@ -71,7 +71,12 @@ export class LeadFollowUps {
   }
 
   currentRescheduleDate(lead: Lead): string {
-    return this.rescheduleDrafts()[lead.id] ?? '';
+    if (this.rescheduleDrafts()[lead.id] !== undefined) {
+      return this.rescheduleDrafts()[lead.id];
+    }
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return tomorrow.toISOString().slice(0, 10);
   }
 
   setRescheduleDate(leadId: string, value: string) {
