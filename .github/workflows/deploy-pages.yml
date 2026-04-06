@@ -39,7 +39,11 @@ jobs:
 
       - name: Build
         working-directory: realestate-app
-        run: npx ng build --base-href /zoclli/
+        run: npx ng build --base-href /
+
+      - name: Prepare SPA fallback
+        working-directory: realestate-app
+        run: cp dist/realestate-app/browser/index.html dist/realestate-app/browser/404.html
 
       - uses: actions/upload-pages-artifact@v3
         with:
