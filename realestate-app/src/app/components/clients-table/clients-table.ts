@@ -57,6 +57,7 @@ const CLIENT_MOBILE_HEADER_KEYS: ClientColumnKey[] = ['name', 'propertyType', 's
 export class ClientsTable {
   readonly searchQuery = input<string>('');
   readonly editRequest = output<Client>();
+  readonly createTaskRequest = output<{ type: 'client'; id: string; sourceLabel: string }>();
 
   readonly ts = inject(TranslationService);
   private readonly clientService = inject(ClientService);
@@ -134,6 +135,11 @@ export class ClientsTable {
   requestEdit(event: Event, client: Client) {
     event.stopPropagation();
     this.editRequest.emit(client);
+  }
+
+  requestTask(event: Event, client: Client) {
+    event.stopPropagation();
+    this.createTaskRequest.emit({ type: 'client', id: client.id, sourceLabel: client.name });
   }
 
   startDelete(event: Event, id: string) {

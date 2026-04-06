@@ -5,6 +5,8 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 import { ContactNotes } from '../contact-notes/contact-notes';
 import { ContactNote } from '../../models/contact-note.model';
 import { formatCommissionValue, normalizeCommissionType } from '../../utils/commission.utils';
+import { RelatedTasks } from '../related-tasks/related-tasks';
+import { TaskRelatedEntityType } from '../../models/task.model';
 
 export interface FieldDefinition {
   key: string;
@@ -18,7 +20,7 @@ export interface FieldDefinition {
 @Component({
   selector: 'app-row-detail',
   standalone: true,
-  imports: [NgClass, FormsModule, TranslatePipe, ContactNotes],
+  imports: [NgClass, FormsModule, TranslatePipe, ContactNotes, RelatedTasks],
   templateUrl: './row-detail.html',
   styleUrl: './row-detail.scss'
 })
@@ -26,6 +28,8 @@ export class RowDetail {
   readonly entry = input<Record<string, unknown>>({});
   readonly fields = input<FieldDefinition[]>([]);
   readonly entrySave = output<Record<string, unknown>>();
+  readonly relatedEntityType = input<TaskRelatedEntityType | null>(null);
+  readonly relatedEntityId = input<string>('');
 
   readonly editMode = signal(false);
   readonly saving = signal(false);

@@ -1,0 +1,116 @@
+import { Injectable, inject, signal } from '@angular/core';
+import { SupabaseService } from './supabase.service';
+import { ActivityService } from './activity.service';
+import { toCamelCase, toSnakeCase } from './case.utils';
+import { Task, TaskCreateInput, TaskRelatedEntityType } from '../models/task.model';
+
+@Injectable({ providedIn: 'root' })
+export class TaskService {
+  private readonly supabase = inject(SupabaseService).client;
+  private readonly activity = inject(ActivityService);
+
+  readonly tasks = signal<Task[]>([]);
+  readonly loading = signal(false);
+  readonly error = signal<string | null>(null);
+
+  constructor() {
+    this.load();
+  }
+
+  private async load() {
+    if (!this.supabase) { this.error.set('Supabase not configured.'); return; }
+    this.loading.set(true);
+    const { data, error } = await this.supabase
+      .from('tasks')
+      .select('*')
+      .order('updated_at', { ascending: false });
+
+    if (error) {
+      this.error.set(error.message);
+    } else {
+      this.tasks.set((data ?? []).map(row => this.hydrateTask(row)));
+    }
+    this.loading.set(false);
+  }
+
+  async add(task: TaskCreateInput): Promise<{ error: string | null }> {
+    if (!this.supabase) return { error: 'Supabase not configured.' };
+    const { data, error } = await this.supabase
+      .from('tasks')
+      .insert(this.serializeTask(task))
+      .select()
+      .single();
+
+    if (error) return { error: error.message };
+
+    this.tasks.update(list => [this.hydrateTask(data), ...list]);
+    this.activity.log('created', 'task', task.title);
+    return { error: null };
+  }
+
+  async update(task: Task): Promise<{ error: string | null }> {
+    if (!this.supabase) return { error: 'Supabase not configured.' };
+
+    const { id, createdAt, updatedAt, ...rest } = task;
+    const { data, error } = await this.supabase
+      .from('tasks')
+      .update({
+        ...this.serializeTask(rest as TaskCreateInput),
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) return { error: error.message };
+
+    const hydrated = this.hydrateTask(data);
+    this.tasks.update(list => [hydrated, ...list.filter(entry => entry.id !== id)]);
+    this.activity.log('updated', 'task', task.title);
+    return { error: null };
+  }
+
+  async remove(id: string): Promise<{ error: string | null }> {
+    if (!this.supabase) return { error: 'Supabase not configured.' };
+
+    const title = this.tasks().find(task => task.id === id)?.title ?? id;
+    const { error, count } = await this.supabase.from('tasks').delete({ count: 'exact' }).eq('id', id);
+
+    if (error) return { error: error.message };
+    if (count === 0) return { error: 'Delete blocked — missing DELETE policy in Supabase RLS.' };
+
+    this.tasks.update(list => list.filter(task => task.id !== id));
+    this.activity.log('deleted', 'task', title);
+    return { error: null };
+  }
+
+  relatedTasks(entityType: TaskRelatedEntityType, entityId: string): Task[] {
+    const cleanId = entityId.trim();
+    if (!cleanId) return [];
+
+    return this.tasks().filter(task =>
+      task.relatedEntityType === entityType
+      && task.relatedEntityId.trim().toLowerCase() === cleanId.toLowerCase()
+    );
+  }
+
+  private hydrateTask(row: Record<string, unknown>): Task {
+    const task = toCamelCase(row) as unknown as Task;
+    return {
+      ...task,
+      tags: Array.isArray(task.tags) ? task.tags : [],
+      description: String(task.description ?? ''),
+      assignee: String(task.assignee ?? ''),
+      createdBy: String(task.createdBy ?? ''),
+      relatedEntityId: String(task.relatedEntityId ?? ''),
+      dueAt: String(task.dueAt ?? ''),
+    };
+  }
+
+  private serializeTask(task: TaskCreateInput): Record<string, unknown> {
+    return toSnakeCase({
+      ...task,
+      tags: task.tags,
+    } as unknown as Record<string, unknown>);
+  }
+}

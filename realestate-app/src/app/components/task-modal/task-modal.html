@@ -1,0 +1,127 @@
+<div class="task-modal-backdrop" (click)="close()">
+  <section class="task-modal" (click)="$event.stopPropagation()">
+    <header class="task-modal__header">
+      <h2>{{ editTask() ? ('tasks.editTitle' | translate) : ('tasks.createTitle' | translate) }}</h2>
+      <button type="button" class="task-modal__close" (click)="close()">✕</button>
+    </header>
+
+    <div class="task-assist">
+      <textarea
+        [ngModel]="freeformInput()"
+        (ngModelChange)="freeformInput.set($event)"
+        [attr.placeholder]="'tasks.freeformPlaceholder' | translate"></textarea>
+      <div class="task-assist__actions">
+        <button type="button" (click)="parseFreeform('ai')" [disabled]="parsing()">
+          {{ parsing() ? ('tasks.parsing' | translate) : ('tasks.parseWithAi' | translate) }}
+        </button>
+        <button type="button" (click)="startVoiceCapture()" [disabled]="!voiceSupported || isRecording()">
+          {{ isRecording() ? ('tasks.recording' | translate) : ('tasks.voiceCapture' | translate) }}
+        </button>
+      </div>
+      @if (transcriptPreview()) {
+        <div class="assist-note">{{ 'tasks.transcript' | translate }}: {{ transcriptPreview() }}</div>
+      }
+      @if (parserPreview()) {
+        <div class="parser-preview">
+          <strong>{{ 'tasks.draftReady' | translate }}</strong>
+          <div>{{ parserPreview()?.title }}</div>
+          <button type="button" (click)="applyParserPreview()">{{ 'tasks.applyDraft' | translate }}</button>
+        </div>
+      }
+    </div>
+
+    <div class="task-form-grid">
+      <label>
+        {{ 'tasks.fieldTitle' | translate }}
+        <input [ngModel]="draft().title" (ngModelChange)="draft.update(v => ({...v, title: $event}))" />
+      </label>
+
+      <label>
+        {{ 'tasks.fieldDue' | translate }}
+        <input type="datetime-local" [ngModel]="draft().dueAt" (ngModelChange)="draft.update(v => ({...v, dueAt: $event}))" />
+      </label>
+
+      <label>
+        {{ 'tasks.fieldStatus' | translate }}
+        <select [ngModel]="draft().status" (ngModelChange)="draft.update(v => ({...v, status: $event}))">
+          @for (status of statuses; track status) {
+            <option [value]="status">{{ ('tasks.status.' + status) | translate }}</option>
+          }
+        </select>
+      </label>
+
+      <label>
+        {{ 'tasks.fieldPriority' | translate }}
+        <select [ngModel]="draft().priority" (ngModelChange)="draft.update(v => ({...v, priority: $event}))">
+          @for (priority of priorities; track priority) {
+            <option [value]="priority">{{ ('tasks.priority.' + priority) | translate }}</option>
+          }
+        </select>
+      </label>
+
+      <label>
+        {{ 'tasks.fieldAssignee' | translate }}
+        <input [ngModel]="draft().assignee" (ngModelChange)="draft.update(v => ({...v, assignee: $event}))" />
+      </label>
+
+      <label>
+        {{ 'tasks.fieldCreatedBy' | translate }}
+        <input [ngModel]="draft().createdBy" (ngModelChange)="draft.update(v => ({...v, createdBy: $event}))" />
+      </label>
+
+      <label>
+        {{ 'tasks.fieldSource' | translate }}
+        <select [ngModel]="draft().source" (ngModelChange)="draft.update(v => ({...v, source: $event}))">
+          @for (source of sources; track source) {
+            <option [value]="source">{{ ('tasks.source.' + source) | translate }}</option>
+          }
+        </select>
+      </label>
+
+      <label>
+        {{ 'tasks.fieldRelatedType' | translate }}
+        <select [ngModel]="draft().relatedEntityType" (ngModelChange)="setRelatedType($event)">
+          <option [ngValue]="null">{{ 'tasks.none' | translate }}</option>
+          @for (type of relatedTypes; track type) {
+            <option [value]="type">{{ ('tasks.related.' + type) | translate }}</option>
+          }
+        </select>
+      </label>
+
+      <label>
+        {{ 'tasks.fieldRelatedId' | translate }}
+        @if (relationOptions().length > 0) {
+          <select [ngModel]="draft().relatedEntityId" (ngModelChange)="draft.update(v => ({...v, relatedEntityId: $event}))">
+            <option value="">{{ 'tasks.none' | translate }}</option>
+            @for (option of relationOptions(); track option.id) {
+              <option [value]="option.id">{{ relationDisplayName(option) }}</option>
+            }
+          </select>
+        } @else {
+          <input [ngModel]="draft().relatedEntityId" (ngModelChange)="draft.update(v => ({...v, relatedEntityId: $event}))" />
+        }
+      </label>
+
+      <label class="task-form-grid__full">
+        {{ 'tasks.fieldTags' | translate }}
+        <input [ngModel]="draft().tagsInput" (ngModelChange)="draft.update(v => ({...v, tagsInput: $event}))" [attr.placeholder]="'tasks.tagsHint' | translate" />
+      </label>
+
+      <label class="task-form-grid__full">
+        {{ 'tasks.fieldDescription' | translate }}
+        <textarea [ngModel]="draft().description" (ngModelChange)="draft.update(v => ({...v, description: $event}))"></textarea>
+      </label>
+    </div>
+
+    @if (error()) {
+      <div class="task-error">{{ error() }}</div>
+    }
+
+    <footer class="task-modal__footer">
+      <button type="button" class="ghost" (click)="close()">{{ 'btn.cancel' | translate }}</button>
+      <button type="button" class="primary" (click)="submit()" [disabled]="saving()">
+        {{ saving() ? ('btn.saving' | translate) : (editTask() ? ('btn.saveChanges' | translate) : ('tasks.createAction' | translate)) }}
+      </button>
+    </footer>
+  </section>
+</div>
