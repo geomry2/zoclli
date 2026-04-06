@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, output, signal } from '@angular/core';
+import { Component, OnDestroy, computed, inject, input, output, signal } from '@angular/core';
 import { Lead, LeadStatus } from '../../models/lead.model';
 import { LeadService } from '../../services/lead.service';
 import { TranslationService } from '../../services/translation.service';
@@ -17,7 +17,7 @@ interface LeadBoardColumn {
   templateUrl: './leads-board.html',
   styleUrl: './leads-board.scss'
 })
-export class LeadsBoard {
+export class LeadsBoard implements OnDestroy {
   readonly searchQuery = input<string>('');
   readonly editRequest = output<Lead>();
   readonly convertRequest = output<Lead>();
@@ -32,6 +32,12 @@ export class LeadsBoard {
   readonly pendingStatuses = signal<Record<string, LeadStatus>>({});
   readonly moveError = signal<string | null>(null);
   readonly moveErrorLeadId = signal<string | null>(null);
+
+  private touchGhost: HTMLElement | null = null;
+  private touchOffsetX = 0;
+  private touchOffsetY = 0;
+  private readonly boundOnTouchMove = (e: TouchEvent) => this.onTouchMove(e);
+  private readonly boundOnTouchEnd = (e: TouchEvent) => this.onTouchEnd(e);
 
   readonly visibleLeads = computed(() => {
     const filtered = applySearch(
@@ -162,6 +168,93 @@ export class LeadsBoard {
 
     this.moveError.set(null);
     this.moveErrorLeadId.set(null);
+  }
+
+  ngOnDestroy() {
+    this.cleanupTouchListeners();
+    if (this.touchGhost) {
+      document.body.removeChild(this.touchGhost);
+      this.touchGhost = null;
+    }
+  }
+
+  onTouchStart(event: TouchEvent, lead: Lead) {
+    if (this.movingLeadId() === lead.id) return;
+
+    const touch = event.touches[0];
+    const card = event.currentTarget as HTMLElement;
+    const rect = card.getBoundingClientRect();
+
+    this.touchOffsetX = touch.clientX - rect.left;
+    this.touchOffsetY = touch.clientY - rect.top;
+
+    this.draggedLeadId.set(lead.id);
+    this.moveError.set(null);
+    this.moveErrorLeadId.set(null);
+
+    const ghost = card.cloneNode(true) as HTMLElement;
+    ghost.style.cssText = [
+      'position:fixed',
+      `width:${rect.width}px`,
+      `left:${touch.clientX - this.touchOffsetX}px`,
+      `top:${touch.clientY - this.touchOffsetY}px`,
+      'opacity:0.88',
+      'pointer-events:none',
+      'z-index:9999',
+      'border-radius:16px',
+      'box-shadow:0 20px 40px rgba(15,23,42,0.22)',
+      'transform:scale(1.03)',
+      'transition:none',
+    ].join(';');
+    document.body.appendChild(ghost);
+    this.touchGhost = ghost;
+
+    document.addEventListener('touchmove', this.boundOnTouchMove, { passive: false });
+    document.addEventListener('touchend', this.boundOnTouchEnd);
+    document.addEventListener('touchcancel', this.boundOnTouchEnd);
+  }
+
+  onTouchMove(event: TouchEvent) {
+    if (!this.touchGhost) return;
+    event.preventDefault();
+
+    const touch = event.touches[0];
+    this.touchGhost.style.left = `${touch.clientX - this.touchOffsetX}px`;
+    this.touchGhost.style.top = `${touch.clientY - this.touchOffsetY}px`;
+
+    this.touchGhost.style.visibility = 'hidden';
+    const el = document.elementFromPoint(touch.clientX, touch.clientY);
+    this.touchGhost.style.visibility = '';
+
+    const columnEl = el?.closest('[data-status]');
+    const status = (columnEl?.getAttribute('data-status') ?? null) as LeadStatus | null;
+    this.dropTargetStatus.set(status);
+  }
+
+  async onTouchEnd(_event: TouchEvent) {
+    this.cleanupTouchListeners();
+
+    if (this.touchGhost) {
+      document.body.removeChild(this.touchGhost);
+      this.touchGhost = null;
+    }
+
+    const status = this.dropTargetStatus();
+    const lead = this.findDraggedLead();
+
+    this.dropTargetStatus.set(null);
+
+    if (lead && status) {
+      await this.moveLeadToStatus(lead, status);
+    } else {
+      this.draggedLeadId.set(null);
+    }
+  }
+
+  private cleanupTouchListeners() {
+    document.removeEventListener('touchmove', this.boundOnTouchMove);
+    document.removeEventListener('touchend', this.boundOnTouchEnd);
+    document.removeEventListener('touchcancel', this.boundOnTouchEnd);
   }
 
   formatBudget(lead: Lead): string {

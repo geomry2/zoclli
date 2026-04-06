@@ -18,6 +18,7 @@
         <section
           class="board-column board-column-{{ column.status }}"
           [class.drop-target]="isDropTarget(column.status)"
+          [attr.data-status]="column.status"
           (dragover)="onDragOver($event, column.status)"
           (dragleave)="onDragLeave($event, column.status)"
           (drop)="onDrop($event, column.status)">
@@ -48,7 +49,8 @@
                   [class.saving]="isSaving(lead)"
                   draggable="true"
                   (dragstart)="onDragStart($event, lead)"
-                  (dragend)="onDragEnd()">
+                  (dragend)="onDragEnd()"
+                  (touchstart)="onTouchStart($event, lead)">
                   <div class="lead-card__top">
                     <div class="lead-card__identity">
                       <h4 class="lead-name">{{ lead.name }}</h4>
