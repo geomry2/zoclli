@@ -269,9 +269,10 @@
 }
 
 .lead-action {
-  flex: 1;
-  min-width: 0;
+  flex: 1 1 auto;
+  min-width: max-content;
   height: 32px;
+  white-space: nowrap;
   border-radius: 10px;
   border: 1px solid #d8e0e8;
   background: #fff;

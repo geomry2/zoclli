@@ -154,9 +154,6 @@ export class PropertyCatalogue {
   readonly totalUnits = computed(() =>
     this.properties().reduce((s, p) => s + p.units.length, 0)
   );
-  readonly totalPortfolioValue = computed(() =>
-    this.properties().reduce((s, p) => s + p.totalValue, 0)
-  );
 
   toggleBuilding(name: string) {
     this.expandedBuilding.set(this.expandedBuilding() === name ? null : name);
