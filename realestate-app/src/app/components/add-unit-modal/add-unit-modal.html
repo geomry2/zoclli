@@ -14,19 +14,28 @@
       <div class="error-banner">{{ saveError() }}</div>
     }
 
-    <datalist id="unit-apt-list">
-      @for (n of usedApartmentNumbers; track n) {
-        <option [value]="n"></option>
-      }
-    </datalist>
-
     <div class="form-grid">
 
       <div class="field-group section-divider full"><span>{{ 'form.sectionUnitDetails' | translate }}</span></div>
 
       <div class="field-group">
-        <label>{{ 'form.unitNo' | translate }}</label>
-        <input [(ngModel)]="unit.apartmentNumber" list="unit-apt-list" placeholder="e.g. 204" />
+        <label>{{ unitNoLabelKey | translate }}</label>
+        <div class="unit-input-wrap">
+          <input [(ngModel)]="unit.apartmentNumber" placeholder="e.g. 204"
+            (blur)="closeUnitDropdown()" />
+          @if (usedApartmentNumbers.length > 0) {
+            <button type="button" class="unit-dropdown-btn"
+              (mousedown)="$event.preventDefault()"
+              (click)="showUnitDropdown.set(!showUnitDropdown())">▾</button>
+          }
+          @if (showUnitDropdown() && usedApartmentNumbers.length > 0) {
+            <ul class="unit-dropdown-list">
+              @for (n of usedApartmentNumbers; track n) {
+                <li (mousedown)="selectUnit(n)">{{ n }}</li>
+              }
+            </ul>
+          }
+        </div>
       </div>
       <div class="field-group">
         <label>{{ 'form.propertyType' | translate }}</label>

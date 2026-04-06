@@ -30,6 +30,7 @@ export class AddUnitModal {
   readonly saving = signal(false);
   readonly saveError = signal<string | null>(null);
   readonly agencyMode = signal<FieldMode>('select');
+  readonly showUnitDropdown = signal(false);
 
   unit: Omit<Unit, 'id'> = this.emptyUnit();
 
@@ -58,6 +59,19 @@ export class AddUnitModal {
       this.agencyMode.set('select');
       this.saveError.set(null);
     });
+  }
+
+  get unitNoLabelKey(): string {
+    return `form.unitNo.${this.unit.propertyType || 'apartment'}`;
+  }
+
+  selectUnit(n: string) {
+    this.unit.apartmentNumber = n;
+    this.showUnitDropdown.set(false);
+  }
+
+  closeUnitDropdown() {
+    setTimeout(() => this.showUnitDropdown.set(false), 150);
   }
 
   get allAgencies(): string[] {
