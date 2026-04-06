@@ -71,7 +71,7 @@ export class LeadFollowUps {
   }
 
   currentRescheduleDate(lead: Lead): string {
-    return this.rescheduleDrafts()[lead.id] ?? lead.followUpDate ?? '';
+    return this.rescheduleDrafts()[lead.id] ?? '';
   }
 
   setRescheduleDate(leadId: string, value: string) {
@@ -99,7 +99,7 @@ export class LeadFollowUps {
 
   canReschedule(lead: Lead): boolean {
     const nextDate = this.currentRescheduleDate(lead);
-    return Boolean(nextDate) && nextDate !== lead.followUpDate && !this.isSaving(lead);
+    return Boolean(nextDate) && !this.isSaving(lead);
   }
 
   followUpState(lead: Lead): ReturnType<typeof getFollowUpState> {
