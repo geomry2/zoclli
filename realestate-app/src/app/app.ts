@@ -10,6 +10,7 @@ import { PropertyCatalogue } from './components/property-catalogue/property-cata
 import { AddUnitModal } from './components/add-unit-modal/add-unit-modal';
 import { LeadsBoard } from './components/leads-board/leads-board';
 import { LeadFollowUps } from './components/lead-follow-ups/lead-follow-ups';
+import { TaskBoard } from './components/task-board/task-board';
 import { Client } from './models/client.model';
 import { Lead } from './models/lead.model';
 import { Unit } from './models/unit.model';
@@ -26,13 +27,14 @@ type LeadViewMode = 'board' | 'table' | 'followups';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [SearchBar, TabNav, ClientsTable, LeadsTable, LeadsBoard, LeadFollowUps, CreateModal, AddUnitModal, PasswordGate, Dashboard, PropertyCatalogue, TranslatePipe],
+  imports: [SearchBar, TabNav, ClientsTable, LeadsTable, LeadsBoard, LeadFollowUps, TaskBoard, CreateModal, AddUnitModal, PasswordGate, Dashboard, PropertyCatalogue, TranslatePipe],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
 export class App {
   readonly ts = inject(TranslationService);
   readonly activeTab = signal<TabType>('clients');
+  readonly taskRelationPrefill = signal<{ type: 'lead' | 'client' | 'property' | 'deal'; id: string; sourceLabel?: string } | null>(null);
   readonly leadsViewMode = signal<LeadViewMode>('board');
   readonly leadFollowUpFilter = signal<FollowUpFilter>('all');
   readonly searchQuery = signal<string>('');
@@ -109,6 +111,15 @@ export class App {
     this.prefillBuilding.set(null);
   }
 
+  openCreateTask(prefill?: { type: 'lead' | 'client' | 'property' | 'deal'; id: string; sourceLabel?: string }) {
+    this.activeTab.set('tasks');
+    this.taskRelationPrefill.set(prefill ?? null);
+  }
+
+  clearTaskPrefill() {
+    this.taskRelationPrefill.set(null);
+  }
+
   openAddUnit(buildingName: string) {
     this.editingUnit.set(null);
     this.addUnitBuilding.set(buildingName);
@@ -132,7 +143,7 @@ export class App {
     if (this.activeTab() === 'clients') {
       const rows = applySearch(this.clientService.clients() as unknown as Record<string, unknown>[], q);
       exportToXlsx('clients.xlsx', rows);
-    } else {
+    } else if (this.activeTab() === 'leads') {
       let rows = applySearch(this.leadService.leads() as unknown as Record<string, unknown>[], q);
       if (this.leadsViewMode() === 'followups') {
         rows = rows.filter(row =>

@@ -3,6 +3,7 @@ type EnvConfig = {
   supabaseUrl: string;
   supabaseAnonKey: string;
   appPassword: string;
+  taskParserUrl: string;
 };
 
 declare global {
@@ -16,5 +17,6 @@ export const environment: EnvConfig = {
   supabaseUrl: 'SUPABASE_URL_PLACEHOLDER',
   supabaseAnonKey: 'SUPABASE_ANON_KEY_PLACEHOLDER',
   appPassword: 'APP_PASSWORD_PLACEHOLDER',
+  taskParserUrl: 'TASK_PARSER_URL_PLACEHOLDER',
   ...(window.__env ?? {}),
 };

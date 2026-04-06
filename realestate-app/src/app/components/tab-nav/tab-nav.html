@@ -11,4 +11,7 @@
   <button class="tab-btn" [class.active]="activeTab() === 'properties'" (click)="switchTab('properties')">
     {{ 'nav.properties' | translate }}
   </button>
+  <button class="tab-btn" [class.active]="activeTab() === 'tasks'" (click)="switchTab('tasks')">
+    {{ 'nav.tasks' | translate }}
+  </button>
 </nav>

@@ -3,7 +3,7 @@ import { Injectable, signal } from '@angular/core';
 export interface ActivityEntry {
   id: string;
   action: 'created' | 'updated' | 'deleted' | 'converted';
-  entityType: 'client' | 'lead';
+  entityType: 'client' | 'lead' | 'task';
   name: string;
   timestamp: string;
 }

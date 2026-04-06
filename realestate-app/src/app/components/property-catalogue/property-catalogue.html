@@ -84,6 +84,7 @@
               <button class="btn-add-unit" (click)="requestAddUnit($event, prop.building)">
                 {{ 'prop.addUnit' | translate }}
               </button>
+              <button class="btn-add-unit" (click)="requestPropertyTask($event, prop)">{{ 'tasks.newTaskShort' | translate }}</button>
               <button class="btn-delete-property" (click)="startDeleteProperty($event, prop)">
                 {{ 'prop.deleteProperty' | translate }}
               </button>

@@ -6,7 +6,7 @@
       <span class="app-subtitle">{{ 'app.subtitle' | translate }}</span>
     </div>
     <div class="header-right">
-      @if (activeTab() !== 'dashboard' && activeTab() !== 'properties') {
+      @if (activeTab() !== 'dashboard' && activeTab() !== 'properties' && activeTab() !== 'tasks') {
         @if (activeTab() === 'leads') {
           <div class="view-toggle" role="tablist" [attr.aria-label]="'leadBoard.title' | translate">
             <button
@@ -34,7 +34,11 @@
         }
         <app-search-bar (queryChange)="onQueryChange($event)" />
         <button class="btn-export" (click)="exportXlsx()">{{ 'btn.xlsx' | translate }}</button>
-        <button class="btn-add" (click)="openCreate()">{{ 'btn.add' | translate }}</button>
+        @if (activeTab() === 'tasks') {
+          <button class="btn-add" (click)="openCreateTask()">{{ 'tasks.newTask' | translate }}</button>
+        } @else {
+          <button class="btn-add" (click)="openCreate()">{{ 'btn.add' | translate }}</button>
+        }
       }
       <button class="btn-lang" (click)="ts.toggle()">
         {{ ts.lang() === 'en' ? 'RU' : 'EN' }}
@@ -48,7 +52,7 @@
     @if (activeTab() === 'dashboard') {
       <app-dashboard (followUpsRequest)="openLeadFollowUps($event)" />
     } @else if (activeTab() === 'clients') {
-      <app-clients-table [searchQuery]="searchQuery()" (editRequest)="openEditClient($event)" />
+      <app-clients-table [searchQuery]="searchQuery()" (editRequest)="openEditClient($event)" (createTaskRequest)="openCreateTask($event)" />
     } @else if (activeTab() === 'leads') {
       @if (leadsViewMode() === 'board') {
         <app-leads-board [searchQuery]="searchQuery()" (editRequest)="openEditLead($event)" (convertRequest)="openConvertLead($event)" />
@@ -58,10 +62,12 @@
           [filterMode]="leadFollowUpFilter()"
           (filterModeChange)="setLeadFollowUpFilter($event)" />
       } @else {
-        <app-leads-table [searchQuery]="searchQuery()" (editRequest)="openEditLead($event)" (convertRequest)="openConvertLead($event)" />
+        <app-leads-table [searchQuery]="searchQuery()" (editRequest)="openEditLead($event)" (convertRequest)="openConvertLead($event)" (createTaskRequest)="openCreateTask($event)" />
       }
+    } @else if (activeTab() === 'properties') {
+      <app-property-catalogue (addUnitRequest)="openAddUnit($event)" (editUnitRequest)="openEditUnit($event)" (createTaskRequest)="openCreateTask($event)" />
     } @else {
-      <app-property-catalogue (addUnitRequest)="openAddUnit($event)" (editUnitRequest)="openEditUnit($event)" />
+      <app-task-board [searchQuery]="searchQuery()" [relationPrefill]="taskRelationPrefill()" (prefillConsumed)="clearTaskPrefill()" />
     }
   </main>
 </div>

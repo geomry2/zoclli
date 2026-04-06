@@ -56,6 +56,7 @@ export class LeadsTable {
   readonly searchQuery = input<string>('');
   readonly editRequest = output<Lead>();
   readonly convertRequest = output<Lead>();
+  readonly createTaskRequest = output<{ type: 'lead'; id: string; sourceLabel: string }>();
 
   readonly ts = inject(TranslationService);
   private readonly leadService = inject(LeadService);
@@ -135,6 +136,11 @@ export class LeadsTable {
   requestConvert(event: Event, lead: Lead) {
     event.stopPropagation();
     this.convertRequest.emit(lead);
+  }
+
+  requestTask(event: Event, lead: Lead) {
+    event.stopPropagation();
+    this.createTaskRequest.emit({ type: 'lead', id: lead.id, sourceLabel: lead.name });
   }
 
   startDelete(event: Event, id: string) {
