@@ -53,10 +53,12 @@
           }
         </select>
       </div>
-      <div class="field-group">
-        <label>{{ 'form.purchaseDate' | translate }}</label>
-        <input [(ngModel)]="unit.purchaseDate" type="date" />
-      </div>
+      @if (unit.status !== 'inactive') {
+        <div class="field-group">
+          <label>{{ 'form.purchaseDate' | translate }}</label>
+          <input [(ngModel)]="unit.purchaseDate" type="date" />
+        </div>
+      }
       <div class="field-group full">
         <label>{{ 'form.dealValue' | translate }}</label>
         <input [(ngModel)]="unit.dealValue" type="number" placeholder="0" />
