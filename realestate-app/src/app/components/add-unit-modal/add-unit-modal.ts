@@ -61,11 +61,7 @@ export class AddUnitModal {
     });
   }
 
-  get unitNoLabelKey(): string {
-    return `form.unitNo.${this.unit.propertyType || 'apartment'}`;
-  }
-
-  selectUnit(n: string) {
+selectUnit(n: string) {
     this.unit.apartmentNumber = n;
     this.showUnitDropdown.set(false);
   }
