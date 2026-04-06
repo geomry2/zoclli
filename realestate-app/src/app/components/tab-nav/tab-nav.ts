@@ -2,7 +2,7 @@ import { Component, inject, input, output } from '@angular/core';
 import { TranslationService } from '../../services/translation.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 
-export type TabType = 'clients' | 'leads' | 'dashboard' | 'properties';
+export type TabType = 'clients' | 'leads' | 'dashboard' | 'properties' | 'tasks';
 
 @Component({
   selector: 'app-tab-nav',

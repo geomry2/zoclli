@@ -56,6 +56,10 @@
       </div>
     }
   </div>
+
+  @if (relatedEntityType() && relatedEntityId()) {
+    <app-related-tasks [entityType]="relatedEntityType()" [entityId]="relatedEntityId()" />
+  }
   <div class="detail-footer">
     @if (saveError()) {
       <span class="detail-save-error">{{ saveError() }}</span>

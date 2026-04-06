@@ -50,6 +50,7 @@ export class PropertyCatalogue {
 
   readonly addUnitRequest = output<string>();
   readonly editUnitRequest = output<Unit>();
+  readonly createTaskRequest = output<{ type: 'property'; id: string; sourceLabel: string }>();
 
   readonly expandedBuilding = signal<string | null>(null);
   readonly showNewPropertyForm = signal(false);
@@ -162,6 +163,11 @@ export class PropertyCatalogue {
   requestAddUnit(event: Event, buildingName: string) {
     event.stopPropagation();
     this.addUnitRequest.emit(buildingName);
+  }
+
+  requestPropertyTask(event: Event, prop: PropertyRow) {
+    event.stopPropagation();
+    this.createTaskRequest.emit({ type: 'property', id: prop.building, sourceLabel: prop.building });
   }
 
   exportPropertySheet(event: Event, prop: PropertyRow) {

@@ -57,3 +57,25 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+
+## CRM Module Notes
+
+### Tasks module
+
+A new **Tasks / Task Board** module is available in the main navigation. It includes:
+
+- Kanban statuses (`Inbox`, `To do`, `In progress`, `Waiting`, `Done`) with drag/drop status updates
+- Manual task create/edit
+- Contextual task creation from Clients, Leads, and Properties
+- AI-assisted freeform parsing
+- Voice-to-task MVP (browser SpeechRecognition + structured draft preview)
+
+### Supabase schema
+
+Apply the `supabase/tasks.sql` migration to create the `tasks` table and indexes.
+
+### Optional AI parser endpoint
+
+Set `taskParserUrl` in `window.__env` (see `public/env.local.example.js`) to point to an HTTP parser endpoint (for example Supabase Edge Function `task-parser`).
+
+If `taskParserUrl` is not set or unavailable, the app uses a built-in heuristic parser fallback.

@@ -180,6 +180,9 @@
               <button class="mobile-card-action mobile-card-action-edit" type="button" (click)="requestEdit($event, client)">
                 {{ 'btn.edit' | translate }}
               </button>
+              <button class="mobile-card-action" type="button" (click)="requestTask($event, client)">
+                {{ 'tasks.newTaskShort' | translate }}
+              </button>
               <button class="mobile-card-action mobile-card-action-delete" type="button" (click)="startDelete($event, client.id)">
                 {{ 'btn.delete' | translate }}
               </button>
@@ -202,7 +205,7 @@
 
           @if (expandedRowId() === client.id) {
             <div class="mobile-card-panel" (click)="$event.stopPropagation()">
-              <app-row-detail [entry]="asRecord(client)" [fields]="clientFields" (entrySave)="onClientSave($event)" />
+              <app-row-detail [entry]="asRecord(client)" [fields]="clientFields" [relatedEntityType]="'client'" [relatedEntityId]="client.id" (entrySave)="onClientSave($event)" />
             </div>
           }
         </article>
@@ -241,6 +244,7 @@
             <td class="col-actions">
               <button class="action-btn pdf-btn" [title]="'btn.pdf' | translate" (click)="exportClientSummary($event, client)">{{ 'btn.pdf' | translate }}</button>
               <button class="action-btn edit-btn" [title]="'btn.edit' | translate" (click)="requestEdit($event, client)">✏</button>
+              <button class="action-btn" [title]="'tasks.newTask' | translate" (click)="requestTask($event, client)">✓</button>
               <button class="action-btn delete-btn" [title]="'btn.delete' | translate" (click)="startDelete($event, client.id)">✕</button>
             </td>
           </tr>
@@ -262,7 +266,7 @@
           @if (expandedRowId() === client.id) {
             <tr class="detail-row">
               <td [attr.colspan]="detailColspan()">
-                <app-row-detail [entry]="asRecord(client)" [fields]="clientFields" (entrySave)="onClientSave($event)" />
+                <app-row-detail [entry]="asRecord(client)" [fields]="clientFields" [relatedEntityType]="'client'" [relatedEntityId]="client.id" (entrySave)="onClientSave($event)" />
               </td>
             </tr>
           }

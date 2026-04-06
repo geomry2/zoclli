@@ -1,0 +1,15 @@
+<section class="related-tasks">
+  <h4>{{ 'tasks.relatedTasks' | translate }}</h4>
+  @if (tasks().length === 0) {
+    <div class="related-empty">{{ 'tasks.noRelatedTasks' | translate }}</div>
+  } @else {
+    <ul>
+      @for (task of tasks(); track task.id) {
+        <li>
+          <span class="title">{{ task.title }}</span>
+          <span class="badge">{{ ('tasks.status.' + task.status) | translate }}</span>
+        </li>
+      }
+    </ul>
+  }
+</section>

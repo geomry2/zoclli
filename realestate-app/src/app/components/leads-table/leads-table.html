@@ -170,6 +170,9 @@
               <button class="mobile-card-action mobile-card-action-edit" type="button" (click)="requestEdit($event, lead)">
                 {{ 'btn.edit' | translate }}
               </button>
+              <button class="mobile-card-action" type="button" (click)="requestTask($event, lead)">
+                {{ 'tasks.newTaskShort' | translate }}
+              </button>
               <button class="mobile-card-action mobile-card-action-delete" type="button" (click)="startDelete($event, lead.id)">
                 {{ 'btn.delete' | translate }}
               </button>
@@ -192,7 +195,7 @@
 
           @if (expandedRowId() === lead.id) {
             <div class="mobile-card-panel" (click)="$event.stopPropagation()">
-              <app-row-detail [entry]="asRecord(lead)" [fields]="leadFields" (entrySave)="onLeadSave($event)" />
+              <app-row-detail [entry]="asRecord(lead)" [fields]="leadFields" [relatedEntityType]="'lead'" [relatedEntityId]="lead.id" (entrySave)="onLeadSave($event)" />
             </div>
           }
         </article>
@@ -242,6 +245,7 @@
             <td class="col-actions">
               <button class="action-btn convert-btn" [title]="'btn.convert' | translate" (click)="requestConvert($event, lead)">→</button>
               <button class="action-btn edit-btn" [title]="'btn.edit' | translate" (click)="requestEdit($event, lead)">✏</button>
+              <button class="action-btn" [title]="'tasks.newTask' | translate" (click)="requestTask($event, lead)">✓</button>
               <button class="action-btn delete-btn" [title]="'btn.delete' | translate" (click)="startDelete($event, lead.id)">✕</button>
             </td>
           </tr>
@@ -263,7 +267,7 @@
           @if (expandedRowId() === lead.id) {
             <tr class="detail-row">
               <td [attr.colspan]="detailColspan()">
-                <app-row-detail [entry]="asRecord(lead)" [fields]="leadFields" (entrySave)="onLeadSave($event)" />
+                <app-row-detail [entry]="asRecord(lead)" [fields]="leadFields" [relatedEntityType]="'lead'" [relatedEntityId]="lead.id" (entrySave)="onLeadSave($event)" />
               </td>
             </tr>
           }
