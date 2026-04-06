@@ -5,6 +5,7 @@ import { ClientService } from '../../services/client.service';
 import { LeadService } from '../../services/lead.service';
 import { BuildingService } from '../../services/building.service';
 import { AgencyService } from '../../services/agency.service';
+import { UnitService } from '../../services/unit.service';
 import { Client, PropertyType, ClientStatus, CommissionType } from '../../models/client.model';
 import { Lead, LeadStatus } from '../../models/lead.model';
 import { ContactNotes } from '../contact-notes/contact-notes';
@@ -34,6 +35,7 @@ export class CreateModal implements OnInit {
   private readonly leadService = inject(LeadService);
   private readonly buildingService = inject(BuildingService);
   private readonly agencyService = inject(AgencyService);
+  private readonly unitService = inject(UnitService);
 
   readonly saving = signal(false);
   readonly saveError = signal<string | null>(null);
@@ -67,8 +69,15 @@ export class CreateModal implements OnInit {
   }
 
   get usedApartmentNumbers(): string[] {
-    const nums = this.clientService.clients().map(c => c.apartmentNumber).filter(Boolean);
-    return [...new Set(nums)].sort();
+    const building = this.client.buildingName;
+    if (!building) return [];
+    const fromClients = this.clientService.clients()
+      .filter(c => c.buildingName === building)
+      .map(c => c.apartmentNumber);
+    const fromUnits = this.unitService.units()
+      .filter(u => u.buildingName === building)
+      .map(u => u.apartmentNumber);
+    return [...new Set([...fromClients, ...fromUnits].filter(Boolean))].sort();
   }
 
   // ----- Building select/new toggle -----
@@ -291,16 +300,39 @@ export class CreateModal implements OnInit {
 
     const email = this.normalizeEmail(client.email);
     const phone = this.normalizePhoneForCompare(client.phone);
+    const name = this.normalizeName(client.name).toLowerCase();
 
     const duplicate = this.clientService.clients().find(existing => {
       if (editingId && existing.id === editingId) return false;
       const existingEmail = this.normalizeEmail(existing.email);
       const existingPhone = this.normalizePhoneForCompare(existing.phone);
-      return (email && existingEmail === email) || (phone && existingPhone === phone);
+      const existingName = this.normalizeName(existing.name).toLowerCase();
+      return (email && existingEmail === email)
+        || (phone && existingPhone === phone)
+        || (name && existingName === name);
     });
 
     if (duplicate) {
-      return `Potential duplicate client found: ${duplicate.name}. Matching phone/email already exists.`;
+      return `Potential duplicate client found: ${duplicate.name}. Matching name, phone, or email already exists.`;
+    }
+
+    if (client.buildingName && client.apartmentNumber) {
+      const apt = client.apartmentNumber.toLowerCase();
+      const editingApt = editingId
+        ? this.clientService.clients().find(c => c.id === editingId)?.apartmentNumber?.toLowerCase()
+        : undefined;
+      const takenInBuilding = [
+        ...this.clientService.clients()
+          .filter(c => c.buildingName === client.buildingName && (!editingId || c.id !== editingId))
+          .map(c => c.apartmentNumber),
+        ...this.unitService.units()
+          .filter(u => u.buildingName === client.buildingName)
+          .map(u => u.apartmentNumber),
+      ].filter(Boolean).map(n => n.toLowerCase());
+
+      if (takenInBuilding.includes(apt) && apt !== editingApt) {
+        return `Unit ${client.apartmentNumber} is already assigned in ${client.buildingName}.`;
+      }
     }
 
     return null;
@@ -313,15 +345,20 @@ export class CreateModal implements OnInit {
 
     const email = this.normalizeEmail(lead.email);
     const phone = this.normalizePhoneForCompare(lead.phone);
+    const name = this.normalizeName(lead.name).toLowerCase();
+
     const duplicate = this.leadService.leads().find(existing => {
       if (editingId && existing.id === editingId) return false;
       const existingEmail = this.normalizeEmail(existing.email);
       const existingPhone = this.normalizePhoneForCompare(existing.phone);
-      return (email && existingEmail === email) || (phone && existingPhone === phone);
+      const existingName = this.normalizeName(existing.name).toLowerCase();
+      return (email && existingEmail === email)
+        || (phone && existingPhone === phone)
+        || (name && existingName === name);
     });
 
     if (duplicate) {
-      return `Potential duplicate lead found: ${duplicate.name}. Matching phone/email already exists.`;
+      return `Potential duplicate lead found: ${duplicate.name}. Matching name, phone, or email already exists.`;
     }
 
     return null;
