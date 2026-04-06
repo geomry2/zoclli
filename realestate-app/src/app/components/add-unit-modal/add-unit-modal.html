@@ -19,7 +19,7 @@
       <div class="field-group section-divider full"><span>{{ 'form.sectionUnitDetails' | translate }}</span></div>
 
       <div class="field-group">
-        <label>{{ unitNoLabelKey | translate }}</label>
+        <label>{{ ('form.unitNo.' + unit.propertyType) | translate }}</label>
         <div class="unit-input-wrap">
           <input [(ngModel)]="unit.apartmentNumber" placeholder="e.g. 204"
             (blur)="closeUnitDropdown()" />
