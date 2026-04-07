@@ -1,4 +1,4 @@
-import { toTaskInputDateTime, toTaskStorageDateTime } from './task.utils';
+import { extractTaskTopic, normalizeTaskTopic, serializeTaskTags, stripTaskMetaTags, toTaskInputDateTime, toTaskStorageDateTime } from './task.utils';
 
 function formatLocalDateTime(value: Date): string {
   const year = value.getFullYear();
@@ -24,5 +24,15 @@ describe('task utils', () => {
 
     const localValue = '2026-04-10T14:30';
     expect(toTaskStorageDateTime(localValue)).toBe(new Date(localValue).toISOString());
+  });
+
+  it('keeps task topics in tags without leaking meta tags into the UI', () => {
+    expect(normalizeTaskTopic('clients')).toBe('clients');
+    expect(normalizeTaskTopic('unknown')).toBe('office');
+
+    const serialized = serializeTaskTags(['follow-up', 'topic:old', ' contract '], 'documents');
+    expect(serialized).toEqual(['topic:documents', 'follow-up', 'contract']);
+    expect(extractTaskTopic(serialized)).toBe('documents');
+    expect(stripTaskMetaTags(serialized)).toEqual(['follow-up', 'contract']);
   });
 });

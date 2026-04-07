@@ -3,7 +3,7 @@ import { SupabaseService } from './supabase.service';
 import { ActivityService } from './activity.service';
 import { toCamelCase, toSnakeCase } from './case.utils';
 import { Task, TaskCreateInput, TaskRelatedEntityType } from '../models/task.model';
-import { toTaskInputDateTime, toTaskStorageDateTime } from '../utils/task.utils';
+import { extractTaskTopic, serializeTaskTags, stripTaskMetaTags, toTaskInputDateTime, toTaskStorageDateTime } from '../utils/task.utils';
 
 @Injectable({ providedIn: 'root' })
 export class TaskService {
@@ -21,71 +21,90 @@ export class TaskService {
   private async load() {
     if (!this.supabase) { this.error.set('Supabase not configured.'); return; }
     this.loading.set(true);
-    const { data, error } = await this.supabase
-      .from('tasks')
-      .select('*')
-      .order('updated_at', { ascending: false });
 
-    if (error) {
-      this.error.set(error.message);
-    } else {
-      this.error.set(null);
-      this.tasks.set((data ?? []).map(row => this.hydrateTask(row)));
+    try {
+      const { data, error } = await this.supabase
+        .from('tasks')
+        .select('*')
+        .order('updated_at', { ascending: false });
+
+      if (error) {
+        this.error.set(error.message);
+      } else {
+        this.error.set(null);
+        this.tasks.set((data ?? []).map(row => this.hydrateTask(row)));
+      }
+    } catch (error) {
+      this.error.set(error instanceof Error ? error.message : 'Unable to load tasks.');
+    } finally {
+      this.loading.set(false);
     }
-    this.loading.set(false);
   }
 
   async add(task: TaskCreateInput): Promise<{ error: string | null }> {
     if (!this.supabase) return { error: 'Supabase not configured.' };
-    const { data, error } = await this.supabase
-      .from('tasks')
-      .insert(this.serializeTask(task))
-      .select()
-      .maybeSingle();
 
-    if (error) return { error: error.message };
-    if (!data) return { error: 'Create blocked — missing INSERT policy in Supabase RLS.' };
+    try {
+      const { data, error } = await this.supabase
+        .from('tasks')
+        .insert(this.serializeTask(task))
+        .select()
+        .maybeSingle();
 
-    this.tasks.update(list => [this.hydrateTask(data), ...list]);
-    this.activity.log('created', 'task', task.title);
-    return { error: null };
+      if (error) return { error: error.message };
+      if (!data) return { error: 'Create blocked — missing INSERT policy in Supabase RLS.' };
+
+      this.tasks.update(list => [this.hydrateTask(data), ...list]);
+      this.activity.log('created', 'task', task.title);
+      return { error: null };
+    } catch (error) {
+      return { error: error instanceof Error ? error.message : 'Unable to create task.' };
+    }
   }
 
   async update(task: Task): Promise<{ error: string | null }> {
     if (!this.supabase) return { error: 'Supabase not configured.' };
 
-    const { id, createdAt, updatedAt, ...rest } = task;
-    const { data, error } = await this.supabase
-      .from('tasks')
-      .update({
-        ...this.serializeTask(rest as TaskCreateInput),
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', id)
-      .select()
-      .maybeSingle();
+    try {
+      const { id, createdAt, updatedAt, ...rest } = task;
+      const { data, error } = await this.supabase
+        .from('tasks')
+        .update({
+          ...this.serializeTask(rest as TaskCreateInput),
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', id)
+        .select()
+        .maybeSingle();
 
-    if (error) return { error: error.message };
-    if (!data) return { error: 'Update blocked — missing UPDATE policy in Supabase RLS.' };
+      if (error) return { error: error.message };
+      if (!data) return { error: 'Update blocked — missing UPDATE policy in Supabase RLS.' };
 
-    const hydrated = this.hydrateTask(data);
-    this.tasks.update(list => [hydrated, ...list.filter(entry => entry.id !== id)]);
-    this.activity.log('updated', 'task', task.title);
-    return { error: null };
+      const hydrated = this.hydrateTask(data);
+      this.tasks.update(list => [hydrated, ...list.filter(entry => entry.id !== id)]);
+      this.activity.log('updated', 'task', task.title);
+      return { error: null };
+    } catch (error) {
+      return { error: error instanceof Error ? error.message : 'Unable to update task.' };
+    }
   }
 
   async remove(id: string): Promise<{ error: string | null }> {
     if (!this.supabase) return { error: 'Supabase not configured.' };
 
-    const title = this.tasks().find(task => task.id === id)?.title ?? id;
-    const { error, count } = await this.supabase.from('tasks').delete({ count: 'exact' }).eq('id', id);
+    try {
+      const title = this.tasks().find(task => task.id === id)?.title ?? id;
+      const { error, count } = await this.supabase.from('tasks').delete({ count: 'exact' }).eq('id', id);
 
-    if (error) return { error: error.message };
-    if (count === 0) return { error: 'Delete blocked — missing DELETE policy in Supabase RLS.' };
+      if (error) return { error: error.message };
+      if (count === 0) return { error: 'Delete blocked — missing DELETE policy in Supabase RLS.' };
 
-    this.tasks.update(list => list.filter(task => task.id !== id));
-    this.activity.log('deleted', 'task', title);
-    return { error: null };
+      this.tasks.update(list => list.filter(task => task.id !== id));
+      this.activity.log('deleted', 'task', title);
+      return { error: null };
+    } catch (error) {
+      return { error: error instanceof Error ? error.message : 'Unable to delete task.' };
+    }
   }
 
   relatedTasks(entityType: TaskRelatedEntityType, entityId: string): Task[] {
@@ -100,10 +119,13 @@ export class TaskService {
 
   private hydrateTask(row: Record<string, unknown>): Task {
     const task = toCamelCase(row) as unknown as Task;
+    const rawTags = Array.isArray(task.tags) ? task.tags.map(tag => String(tag)) : [];
+    const topic = extractTaskTopic(rawTags) ?? 'office';
     return {
       ...task,
       title: String(task.title ?? ''),
-      tags: Array.isArray(task.tags) ? task.tags : [],
+      topic,
+      tags: stripTaskMetaTags(rawTags),
       description: String(task.description ?? ''),
       assignee: String(task.assignee ?? ''),
       createdBy: String(task.createdBy ?? ''),
@@ -121,7 +143,7 @@ export class TaskService {
       assignee: task.assignee.trim(),
       createdBy: task.createdBy.trim(),
       relatedEntityId: task.relatedEntityId.trim(),
-      tags: task.tags.map(tag => tag.trim()).filter(Boolean),
+      tags: serializeTaskTags(task.tags, task.topic),
     } as unknown as Record<string, unknown>);
   }
 }
