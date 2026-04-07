@@ -59,7 +59,7 @@
         </div>
 
         <div class="field-group">
-          <label>{{ 'form.apartment' | translate }}</label>
+          <label>{{ ('form.unitNo.' + (client.propertyType || 'apartment')) | translate }}</label>
           <input [(ngModel)]="client.apartmentNumber" list="apt-list" placeholder="e.g. 204" />
         </div>
         <div class="field-group">

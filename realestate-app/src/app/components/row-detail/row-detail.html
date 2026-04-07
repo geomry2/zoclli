@@ -2,7 +2,7 @@
   <div class="detail-panel">
     @for (field of fields(); track field.key) {
       <div class="field-block" [class.field-block-full]="isNotes(field)">
-        <span class="field-label">{{ field.label | translate }}</span>
+        <span class="field-label">{{ getFieldLabel(field) | translate }}</span>
         @if (editMode()) {
           @if (isNotes(field)) {
             <app-contact-notes

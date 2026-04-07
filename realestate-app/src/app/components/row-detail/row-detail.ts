@@ -11,6 +11,7 @@ import { TaskRelatedEntityType } from '../../models/task.model';
 export interface FieldDefinition {
   key: string;
   label: string;
+  dynamicLabelField?: string;
   type?: 'text' | 'date' | 'currency' | 'badge' | 'notes' | 'commission';
   options?: string[];
   multiline?: boolean;
@@ -53,6 +54,14 @@ export class RowDetail {
     event.stopPropagation();
     this.entrySave.emit({ ...this.draft });
     this.editMode.set(false);
+  }
+
+  getFieldLabel(field: FieldDefinition): string {
+    if (field.dynamicLabelField) {
+      const val = this.entry()[field.dynamicLabelField];
+      return `${field.label}.${val || 'apartment'}`;
+    }
+    return field.label;
   }
 
   formatValue(field: FieldDefinition, value: unknown): string {

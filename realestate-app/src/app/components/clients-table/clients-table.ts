@@ -174,7 +174,7 @@ export class ClientsTable {
     { key: 'phone', label: 'field.phone' },
     { key: 'email', label: 'field.email' },
     { key: 'buildingName', label: 'field.building' },
-    { key: 'apartmentNumber', label: 'field.apartmentNumber' },
+    { key: 'apartmentNumber', label: 'form.unitNo', dynamicLabelField: 'propertyType' },
     { key: 'propertyType', label: 'field.propertyType', type: 'badge', options: ['apartment', 'house', 'commercial', 'land', 'villa'], translatePrefix: 'proptype.' },
     { key: 'status', label: 'field.status', type: 'badge', options: ['active', 'inactive', 'closed'], translatePrefix: 'status.' },
     { key: 'purchaseDate', label: 'field.purchaseDate', type: 'date' },
@@ -234,7 +234,7 @@ export class ClientsTable {
           title: this.ts.t('form.sectionProperty'),
           fields: [
             { label: this.ts.t('field.building'), value: client.buildingName || '-' },
-            { label: this.ts.t('field.apartmentNumber'), value: client.apartmentNumber || '-' },
+            { label: this.ts.t(`form.unitNo.${client.propertyType || 'apartment'}`), value: client.apartmentNumber || '-' },
             { label: this.ts.t('field.propertyType'), value: this.ts.t(`proptype.${client.propertyType}`) },
             { label: this.ts.t('field.status'), value: this.ts.t(`status.${client.status}`) },
             { label: this.ts.t('field.purchaseDate'), value: this.formatDate(client.purchaseDate) },
