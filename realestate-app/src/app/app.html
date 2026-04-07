@@ -6,7 +6,7 @@
       <span class="app-subtitle">{{ 'app.subtitle' | translate }}</span>
     </div>
     <div class="header-right">
-      @if (activeTab() !== 'dashboard' && activeTab() !== 'properties' && activeTab() !== 'tasks') {
+      @if (activeTab() !== 'dashboard' && activeTab() !== 'properties') {
         @if (activeTab() === 'leads') {
           <div class="view-toggle" role="tablist" [attr.aria-label]="'leadBoard.title' | translate">
             <button
@@ -33,10 +33,10 @@
           </div>
         }
         <app-search-bar (queryChange)="onQueryChange($event)" />
-        <button class="btn-export" (click)="exportXlsx()">{{ 'btn.xlsx' | translate }}</button>
-        @if (activeTab() === 'tasks') {
-          <button class="btn-add" (click)="openCreateTask()">{{ 'tasks.newTask' | translate }}</button>
-        } @else {
+        @if (activeTab() === 'clients' || activeTab() === 'leads') {
+          <button class="btn-export" (click)="exportXlsx()">{{ 'btn.xlsx' | translate }}</button>
+        }
+        @if (activeTab() !== 'tasks') {
           <button class="btn-add" (click)="openCreate()">{{ 'btn.add' | translate }}</button>
         }
       }

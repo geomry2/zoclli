@@ -15,9 +15,36 @@ create table if not exists public.tasks (
   updated_at timestamptz not null default now()
 );
 
+alter table public.tasks enable row level security;
+
 create index if not exists tasks_status_idx on public.tasks (status);
 create index if not exists tasks_due_at_idx on public.tasks (due_at);
 create index if not exists tasks_related_entity_idx on public.tasks (related_entity_type, related_entity_id);
+
+drop policy if exists "Allow anon read tasks" on public.tasks;
+create policy "Allow anon read tasks"
+on public.tasks for select
+to anon
+using (true);
+
+drop policy if exists "Allow anon insert tasks" on public.tasks;
+create policy "Allow anon insert tasks"
+on public.tasks for insert
+to anon
+with check (true);
+
+drop policy if exists "Allow anon update tasks" on public.tasks;
+create policy "Allow anon update tasks"
+on public.tasks for update
+to anon
+using (true)
+with check (true);
+
+drop policy if exists "Allow anon delete tasks" on public.tasks;
+create policy "Allow anon delete tasks"
+on public.tasks for delete
+to anon
+using (true);
 
 create or replace function public.set_tasks_updated_at()
 returns trigger

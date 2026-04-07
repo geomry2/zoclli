@@ -1,6 +1,6 @@
 import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
 import { TranslatePipe } from '../../pipes/translate.pipe';
-import { Task, TaskCreateInput, TaskStatus } from '../../models/task.model';
+import { Task, TaskStatus } from '../../models/task.model';
 import { TaskService } from '../../services/task.service';
 import { TaskModal } from '../task-modal/task-modal';
 import { applySearch } from '../../utils/csv.utils';
@@ -29,6 +29,7 @@ export class TaskBoard {
   readonly dropTargetStatus = signal<TaskStatus | null>(null);
   readonly editTask = signal<Task | null>(null);
   readonly showModal = signal(false);
+  readonly taskError = computed(() => this.taskService.error());
 
   readonly filteredTasks = computed(() =>
     applySearch(this.taskService.tasks() as unknown as Record<string, unknown>[], this.searchQuery()) as unknown as Task[]
@@ -65,17 +66,6 @@ export class TaskBoard {
   closeModal() {
     this.showModal.set(false);
     this.editTask.set(null);
-  }
-
-  async onSave(task: TaskCreateInput | Task) {
-    const editTask = this.editTask();
-    const result = editTask
-      ? await this.taskService.update(task as Task)
-      : await this.taskService.add(task as TaskCreateInput);
-
-    if (!result.error) {
-      this.closeModal();
-    }
   }
 
   onDragStart(event: DragEvent, task: Task) {

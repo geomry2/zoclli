@@ -21,5 +21,7 @@
 .task-priority-high { background:#fff4dc; color:#9b6400; }
 .task-priority-urgent { background:#ffe8e6; color:#b3392d; }
 .tasks-column-empty,.tasks-empty { padding:14px; color:#738296; font-size:12px; }
+.tasks-empty--error,.tasks-error { color:#b42318; background:#fff3f2; border:1px solid #f7c5c0; border-radius:12px; }
+.tasks-error { margin-bottom:14px; }
 @media (max-width: 1200px) { .tasks-columns { grid-template-columns: repeat(2,minmax(0,1fr)); } }
 @media (max-width: 700px) { .tasks-columns { grid-template-columns: 1fr; } }
