@@ -3,6 +3,7 @@ import { SupabaseService } from './supabase.service';
 import { ActivityService } from './activity.service';
 import { toCamelCase, toSnakeCase } from './case.utils';
 import { Task, TaskCreateInput, TaskRelatedEntityType } from '../models/task.model';
+import { toTaskInputDateTime, toTaskStorageDateTime } from '../utils/task.utils';
 
 @Injectable({ providedIn: 'root' })
 export class TaskService {
@@ -28,6 +29,7 @@ export class TaskService {
     if (error) {
       this.error.set(error.message);
     } else {
+      this.error.set(null);
       this.tasks.set((data ?? []).map(row => this.hydrateTask(row)));
     }
     this.loading.set(false);
@@ -39,9 +41,10 @@ export class TaskService {
       .from('tasks')
       .insert(this.serializeTask(task))
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) return { error: error.message };
+    if (!data) return { error: 'Create blocked — missing INSERT policy in Supabase RLS.' };
 
     this.tasks.update(list => [this.hydrateTask(data), ...list]);
     this.activity.log('created', 'task', task.title);
@@ -60,9 +63,10 @@ export class TaskService {
       })
       .eq('id', id)
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) return { error: error.message };
+    if (!data) return { error: 'Update blocked — missing UPDATE policy in Supabase RLS.' };
 
     const hydrated = this.hydrateTask(data);
     this.tasks.update(list => [hydrated, ...list.filter(entry => entry.id !== id)]);
@@ -98,19 +102,26 @@ export class TaskService {
     const task = toCamelCase(row) as unknown as Task;
     return {
       ...task,
+      title: String(task.title ?? ''),
       tags: Array.isArray(task.tags) ? task.tags : [],
       description: String(task.description ?? ''),
       assignee: String(task.assignee ?? ''),
       createdBy: String(task.createdBy ?? ''),
       relatedEntityId: String(task.relatedEntityId ?? ''),
-      dueAt: String(task.dueAt ?? ''),
+      dueAt: toTaskInputDateTime(String(task.dueAt ?? '')),
     };
   }
 
   private serializeTask(task: TaskCreateInput): Record<string, unknown> {
     return toSnakeCase({
       ...task,
-      tags: task.tags,
+      title: task.title.trim(),
+      description: task.description.trim(),
+      dueAt: toTaskStorageDateTime(task.dueAt),
+      assignee: task.assignee.trim(),
+      createdBy: task.createdBy.trim(),
+      relatedEntityId: task.relatedEntityId.trim(),
+      tags: task.tags.map(tag => tag.trim()).filter(Boolean),
     } as unknown as Record<string, unknown>);
   }
 }

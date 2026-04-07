@@ -7,8 +7,12 @@
     <button type="button" class="tasks-new-btn" (click)="openCreate()">{{ 'tasks.newTask' | translate }}</button>
   </div>
 
+  @if (taskError() && filteredTasks().length > 0) {
+    <div class="tasks-error">{{ taskError() }}</div>
+  }
+
   @if (filteredTasks().length === 0) {
-    <div class="tasks-empty">{{ 'tasks.empty' | translate }}</div>
+    <div class="tasks-empty" [class.tasks-empty--error]="taskError() !== null">{{ taskError() || ('tasks.empty' | translate) }}</div>
   } @else {
     <div class="tasks-columns">
       @for (column of columns(); track column.status) {
@@ -58,5 +62,5 @@
     [editTask]="editTask()"
     [relationPrefill]="relationPrefill()"
     (closed)="closeModal()"
-    (saved)="onSave($event)" />
+    (saved)="closeModal()" />
 }

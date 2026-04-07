@@ -3,9 +3,11 @@ import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { Task, TaskCreateInput, TaskPriority, TaskRelatedEntityType, TaskSource, TaskStatus } from '../../models/task.model';
 import { TaskParserService } from '../../services/task-parser.service';
+import { TaskService } from '../../services/task.service';
 import { ClientService } from '../../services/client.service';
 import { LeadService } from '../../services/lead.service';
 import { TranslationService } from '../../services/translation.service';
+import { toTaskInputDateTime } from '../../utils/task.utils';
 
 interface TaskRelationOption {
   id: string;
@@ -37,10 +39,11 @@ export class TaskModal {
   readonly editTask = input<Task | null>(null);
   readonly relationPrefill = input<{ type: TaskRelatedEntityType; id: string; sourceLabel?: string } | null>(null);
   readonly closed = output<void>();
-  readonly saved = output<TaskCreateInput | Task>();
+  readonly saved = output<void>();
 
   readonly ts = inject(TranslationService);
   private readonly taskParser = inject(TaskParserService);
+  private readonly taskService = inject(TaskService);
   private readonly clientService = inject(ClientService);
   private readonly leadService = inject(LeadService);
 
@@ -83,7 +86,7 @@ export class TaskModal {
           description: editing.description,
           status: editing.status,
           priority: editing.priority,
-          dueAt: editing.dueAt,
+          dueAt: toTaskInputDateTime(editing.dueAt),
           assignee: editing.assignee,
           createdBy: editing.createdBy,
           relatedEntityType: editing.relatedEntityType,
@@ -138,13 +141,18 @@ export class TaskModal {
     };
 
     const editTask = this.editTask();
-    if (editTask) {
-      this.saved.emit({ ...editTask, ...payload, updatedAt: new Date().toISOString() });
-    } else {
-      this.saved.emit(payload);
-    }
+    const result = editTask
+      ? await this.taskService.update({ ...editTask, ...payload, updatedAt: new Date().toISOString() })
+      : await this.taskService.add(payload);
 
     this.saving.set(false);
+
+    if (result.error) {
+      this.error.set(result.error);
+      return;
+    }
+
+    this.saved.emit();
   }
 
   async parseFreeform(source: TaskSource = 'ai') {
@@ -156,6 +164,7 @@ export class TaskModal {
     this.parserPreview.set({
       ...this.defaultDraft(),
       ...parsed,
+      dueAt: toTaskInputDateTime(parsed.dueAt),
       createdBy: 'Current user',
       tagsInput: parsed.tags.join(', '),
     });
