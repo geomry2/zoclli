@@ -48,13 +48,13 @@
 
           <div class="tasks-columns-scroll">
             <div class="tasks-columns">
-              @for (column of section.columns; track section.topic + '-' + column.status) {
+              @for (column of section.columns; track column.status) {
                 <section
                   class="tasks-column"
-                  [class.drop-target]="dropTargetKey() === section.topic + ':' + column.status"
-                  (dragover)="onDragOver($event, column.status, section.topic)"
+                  [class.drop-target]="dropTargetKey() === column.topic + ':' + column.status"
+                  (dragover)="onDragOver($event, column.status, column.topic)"
                   (dragleave)="onDragLeave()"
-                  (drop)="onDrop($event, column.status, section.topic)">
+                  (drop)="onDrop($event, column.status, column.topic)">
                   <header>
                     <h4>{{ ('tasks.status.' + column.status) | translate }}</h4>
                     <span>{{ column.tasks.length }}</span>
