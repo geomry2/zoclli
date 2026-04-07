@@ -1,24 +1,20 @@
 import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '../../pipes/translate.pipe';
-import { Task, TaskCreateInput, TaskPriority, TaskRelatedEntityType, TaskSource, TaskStatus } from '../../models/task.model';
+import { TASK_TOPICS, Task, TaskCreateInput, TaskPriority, TaskRelatedEntityType, TaskSource, TaskStatus, TaskTopic } from '../../models/task.model';
 import { TaskParserService } from '../../services/task-parser.service';
 import { TaskService } from '../../services/task.service';
 import { ClientService } from '../../services/client.service';
 import { LeadService } from '../../services/lead.service';
 import { TranslationService } from '../../services/translation.service';
-import { toTaskInputDateTime } from '../../utils/task.utils';
-
-interface TaskRelationOption {
-  id: string;
-  label: string;
-}
+import { normalizeTaskTopic, toTaskInputDateTime } from '../../utils/task.utils';
 
 interface TaskDraft {
   title: string;
   description: string;
   status: TaskStatus;
   priority: TaskPriority;
+  topic: TaskTopic;
   dueAt: string;
   assignee: string;
   createdBy: string;
@@ -63,18 +59,25 @@ export class TaskModal {
 
   readonly statuses: TaskStatus[] = ['inbox', 'todo', 'in_progress', 'waiting', 'done'];
   readonly priorities: TaskPriority[] = ['low', 'medium', 'high', 'urgent'];
+  readonly topics = [...TASK_TOPICS];
   readonly sources: TaskSource[] = ['manual', 'voice', 'ai', 'automation'];
-  readonly relatedTypes: TaskRelatedEntityType[] = ['lead', 'client', 'property', 'deal'];
+  readonly linkedContext = computed(() => {
+    this.ts.lang();
 
-  readonly relationOptions = computed(() => {
-    const type = this.draft().relatedEntityType;
-    if (type === 'lead') {
-      return this.leadService.leads().map(lead => ({ id: lead.id, label: lead.name }));
+    const draft = this.draft();
+    if (!draft.relatedEntityType || !draft.relatedEntityId) return '';
+
+    let entityLabel = draft.relatedEntityId;
+    if (draft.relatedEntityType === 'lead') {
+      entityLabel = this.leadService.leads().find(lead => lead.id === draft.relatedEntityId)?.name ?? entityLabel;
+    } else if (draft.relatedEntityType === 'client') {
+      entityLabel = this.clientService.clients().find(client => client.id === draft.relatedEntityId)?.name ?? entityLabel;
     }
-    if (type === 'client') {
-      return this.clientService.clients().map(client => ({ id: client.id, label: client.name }));
-    }
-    return [];
+
+    return this.ts.t('tasks.linkedTo', {
+      type: this.ts.t(`tasks.related.${draft.relatedEntityType}`),
+      label: entityLabel,
+    });
   });
 
   constructor() {
@@ -86,6 +89,7 @@ export class TaskModal {
           description: editing.description,
           status: editing.status,
           priority: editing.priority,
+          topic: normalizeTaskTopic(editing.topic),
           dueAt: toTaskInputDateTime(editing.dueAt),
           assignee: editing.assignee,
           createdBy: editing.createdBy,
@@ -101,6 +105,7 @@ export class TaskModal {
       if (prefill) {
         this.draft.update(current => ({
           ...current,
+          topic: prefill.type === 'lead' || prefill.type === 'client' ? 'clients' : current.topic,
           relatedEntityType: prefill.type,
           relatedEntityId: prefill.id,
           description: prefill.sourceLabel ? `${prefill.sourceLabel}\n` : current.description,
@@ -128,6 +133,7 @@ export class TaskModal {
       description: draft.description.trim(),
       status: draft.status,
       priority: draft.priority,
+      topic: draft.topic,
       dueAt: draft.dueAt,
       assignee: draft.assignee.trim(),
       createdBy: draft.createdBy.trim() || 'Current user',
@@ -140,19 +146,23 @@ export class TaskModal {
         .filter(Boolean),
     };
 
-    const editTask = this.editTask();
-    const result = editTask
-      ? await this.taskService.update({ ...editTask, ...payload, updatedAt: new Date().toISOString() })
-      : await this.taskService.add(payload);
+    try {
+      const editTask = this.editTask();
+      const result = editTask
+        ? await this.taskService.update({ ...editTask, ...payload, updatedAt: new Date().toISOString() })
+        : await this.taskService.add(payload);
 
-    this.saving.set(false);
+      if (result.error) {
+        this.error.set(result.error);
+        return;
+      }
 
-    if (result.error) {
-      this.error.set(result.error);
-      return;
+      this.saved.emit();
+    } catch (error) {
+      this.error.set(error instanceof Error ? error.message : this.ts.t('tasks.errorSaveFailed'));
+    } finally {
+      this.saving.set(false);
     }
-
-    this.saved.emit();
   }
 
   async parseFreeform(source: TaskSource = 'ai') {
@@ -214,25 +224,13 @@ export class TaskModal {
     recognition.start();
   }
 
-  setRelatedType(value: string) {
-    const type = (value || null) as TaskRelatedEntityType | null;
-    this.draft.update(current => ({
-      ...current,
-      relatedEntityType: type,
-      relatedEntityId: '',
-    }));
-  }
-
-  relationDisplayName(option: TaskRelationOption): string {
-    return option.label;
-  }
-
   private defaultDraft(): TaskDraft {
     return {
       title: '',
       description: '',
       status: 'inbox',
       priority: 'medium',
+      topic: 'office',
       dueAt: '',
       assignee: '',
       createdBy: 'Current user',

@@ -2,6 +2,8 @@ export type TaskStatus = 'inbox' | 'todo' | 'in_progress' | 'waiting' | 'done';
 export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
 export type TaskRelatedEntityType = 'lead' | 'client' | 'property' | 'deal';
 export type TaskSource = 'manual' | 'voice' | 'ai' | 'automation';
+export const TASK_TOPICS = ['office', 'clients', 'documents', 'it'] as const;
+export type TaskTopic = typeof TASK_TOPICS[number];
 
 export interface Task {
   id: string;
@@ -9,6 +11,7 @@ export interface Task {
   description: string;
   status: TaskStatus;
   priority: TaskPriority;
+  topic: TaskTopic;
   dueAt: string;
   assignee: string;
   createdBy: string;
@@ -27,6 +30,7 @@ export interface ParsedTaskDraft {
   description: string;
   dueAt: string;
   priority: TaskPriority;
+  topic: TaskTopic;
   assignee: string;
   relatedEntityType: TaskRelatedEntityType | null;
   relatedEntityId: string;

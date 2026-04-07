@@ -1,20 +1,29 @@
 <div class="task-modal-backdrop" (click)="close()">
   <section class="task-modal" (click)="$event.stopPropagation()">
     <header class="task-modal__header">
-      <h2>{{ editTask() ? ('tasks.editTitle' | translate) : ('tasks.createTitle' | translate) }}</h2>
+      <div>
+        <h2>{{ editTask() ? ('tasks.editTitle' | translate) : ('tasks.createTitle' | translate) }}</h2>
+        <p>{{ 'tasks.modalSubtitle' | translate }}</p>
+      </div>
       <button type="button" class="task-modal__close" (click)="close()">✕</button>
     </header>
 
     <div class="task-assist">
+      <div class="task-assist__intro">
+        <div>
+          <div class="task-assist__eyebrow">{{ 'tasks.assistantTitle' | translate }}</div>
+          <div class="task-assist__hint">{{ 'tasks.assistantHint' | translate }}</div>
+        </div>
+      </div>
       <textarea
         [ngModel]="freeformInput()"
         (ngModelChange)="freeformInput.set($event)"
         [attr.placeholder]="'tasks.freeformPlaceholder' | translate"></textarea>
       <div class="task-assist__actions">
-        <button type="button" (click)="parseFreeform('ai')" [disabled]="parsing()">
+        <button type="button" class="task-assist__primary" (click)="parseFreeform('ai')" [disabled]="parsing()">
           {{ parsing() ? ('tasks.parsing' | translate) : ('tasks.parseWithAi' | translate) }}
         </button>
-        <button type="button" (click)="startVoiceCapture()" [disabled]="!voiceSupported || isRecording()">
+        <button type="button" class="task-assist__secondary" (click)="startVoiceCapture()" [disabled]="!voiceSupported || isRecording()">
           {{ isRecording() ? ('tasks.recording' | translate) : ('tasks.voiceCapture' | translate) }}
         </button>
       </div>
@@ -29,6 +38,10 @@
         </div>
       }
     </div>
+
+    @if (linkedContext()) {
+      <div class="task-linked-context">{{ linkedContext() }}</div>
+    }
 
     <div class="task-form-grid">
       <label>
@@ -60,6 +73,15 @@
       </label>
 
       <label>
+        {{ 'tasks.fieldTopic' | translate }}
+        <select [ngModel]="draft().topic" (ngModelChange)="draft.update(v => ({...v, topic: $event}))">
+          @for (topic of topics; track topic) {
+            <option [value]="topic">{{ ('tasks.topic.' + topic) | translate }}</option>
+          }
+        </select>
+      </label>
+
+      <label>
         {{ 'tasks.fieldAssignee' | translate }}
         <input [ngModel]="draft().assignee" (ngModelChange)="draft.update(v => ({...v, assignee: $event}))" />
       </label>
@@ -76,30 +98,6 @@
             <option [value]="source">{{ ('tasks.source.' + source) | translate }}</option>
           }
         </select>
-      </label>
-
-      <label>
-        {{ 'tasks.fieldRelatedType' | translate }}
-        <select [ngModel]="draft().relatedEntityType" (ngModelChange)="setRelatedType($event)">
-          <option [ngValue]="null">{{ 'tasks.none' | translate }}</option>
-          @for (type of relatedTypes; track type) {
-            <option [value]="type">{{ ('tasks.related.' + type) | translate }}</option>
-          }
-        </select>
-      </label>
-
-      <label>
-        {{ 'tasks.fieldRelatedId' | translate }}
-        @if (relationOptions().length > 0) {
-          <select [ngModel]="draft().relatedEntityId" (ngModelChange)="draft.update(v => ({...v, relatedEntityId: $event}))">
-            <option value="">{{ 'tasks.none' | translate }}</option>
-            @for (option of relationOptions(); track option.id) {
-              <option [value]="option.id">{{ relationDisplayName(option) }}</option>
-            }
-          </select>
-        } @else {
-          <input [ngModel]="draft().relatedEntityId" (ngModelChange)="draft.update(v => ({...v, relatedEntityId: $event}))" />
-        }
       </label>
 
       <label class="task-form-grid__full">

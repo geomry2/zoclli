@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { ClientService } from './client.service';
 import { LeadService } from './lead.service';
-import { TaskParserInput, ParsedTaskDraft, TaskPriority } from '../models/task.model';
+import { TaskParserInput, ParsedTaskDraft, TaskPriority, TaskRelatedEntityType, TaskTopic } from '../models/task.model';
 
 @Injectable({ providedIn: 'root' })
 export class TaskParserService {
@@ -46,6 +46,7 @@ export class TaskParserService {
       description: text,
       dueAt: this.inferDueAt(text),
       priority: this.inferPriority(text),
+      topic: this.inferTopic(text, related?.type ?? null),
       assignee: this.inferAssignee(text),
       relatedEntityType: related?.type ?? null,
       relatedEntityId: related?.id ?? '',
@@ -61,6 +62,7 @@ export class TaskParserService {
       description: String(draft.description ?? '').trim(),
       dueAt: String(draft.dueAt ?? '').trim(),
       priority: this.normalizePriority(draft.priority),
+      topic: this.normalizeTopic(draft.topic),
       assignee: String(draft.assignee ?? '').trim(),
       relatedEntityType: draft.relatedEntityType ?? null,
       relatedEntityId: String(draft.relatedEntityId ?? '').trim(),
@@ -76,6 +78,7 @@ export class TaskParserService {
       description: '',
       dueAt: '',
       priority: 'medium',
+      topic: 'office',
       assignee: '',
       relatedEntityType: null,
       relatedEntityId: '',
@@ -103,6 +106,12 @@ export class TaskParserService {
     return priority === 'low' || priority === 'medium' || priority === 'high' || priority === 'urgent'
       ? priority
       : 'medium';
+  }
+
+  private normalizeTopic(topic: unknown): TaskTopic {
+    return topic === 'office' || topic === 'clients' || topic === 'documents' || topic === 'it'
+      ? topic
+      : 'office';
   }
 
   private inferDueAt(text: string): string {
@@ -143,6 +152,15 @@ export class TaskParserService {
     if (lower.includes('contract')) tags.add('contract');
     if (lower.includes('render')) tags.add('design');
     return [...tags];
+  }
+
+  private inferTopic(text: string, relatedEntityType: TaskRelatedEntityType | null): TaskTopic {
+    if (relatedEntityType === 'lead' || relatedEntityType === 'client') return 'clients';
+
+    const lower = text.toLowerCase();
+    if (/(contract|document|passport|invoice|agreement|scan|pdf|doc)/.test(lower)) return 'documents';
+    if (/(website|site|bug|crm|it|tech|server|domain|email|render|integration|login)/.test(lower)) return 'it';
+    return 'office';
   }
 
   private resolveEntity(text: string): { type: 'lead' | 'client'; id: string } | null {

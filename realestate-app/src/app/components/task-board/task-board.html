@@ -7,6 +7,27 @@
     <button type="button" class="tasks-new-btn" (click)="openCreate()">{{ 'tasks.newTask' | translate }}</button>
   </div>
 
+  <div class="tasks-toolbar">
+    <div class="tasks-topic-filters">
+      <button
+        type="button"
+        class="tasks-topic-filter"
+        [class.active]="selectedTopic() === 'all'"
+        (click)="setTopicFilter('all')">
+        {{ 'tasks.allTopics' | translate }}
+      </button>
+      @for (topic of topics; track topic) {
+        <button
+          type="button"
+          class="tasks-topic-filter"
+          [class.active]="selectedTopic() === topic"
+          (click)="setTopicFilter(topic)">
+          {{ ('tasks.topic.' + topic) | translate }}
+        </button>
+      }
+    </div>
+  </div>
+
   @if (taskError() && filteredTasks().length > 0) {
     <div class="tasks-error">{{ taskError() }}</div>
   }
@@ -14,43 +35,70 @@
   @if (filteredTasks().length === 0) {
     <div class="tasks-empty" [class.tasks-empty--error]="taskError() !== null">{{ taskError() || ('tasks.empty' | translate) }}</div>
   } @else {
-    <div class="tasks-columns">
-      @for (column of columns(); track column.status) {
-        <section
-          class="tasks-column"
-          [class.drop-target]="dropTargetStatus() === column.status"
-          (dragover)="onDragOver($event, column.status)"
-          (dragleave)="onDragLeave()"
-          (drop)="onDrop($event, column.status)">
-          <header>
-            <h3>{{ ('tasks.status.' + column.status) | translate }}</h3>
-            <span>{{ column.tasks.length }}</span>
+    <div class="tasks-sections">
+      @for (section of visibleSections(); track section.topic) {
+        <section class="tasks-section">
+          <header class="tasks-section__header">
+            <div>
+              <h3>{{ ('tasks.topic.' + section.topic) | translate }}</h3>
+              <p>{{ ('tasks.topicDescription.' + section.topic) | translate }}</p>
+            </div>
+            <span>{{ section.taskCount }}</span>
           </header>
 
-          @if (column.tasks.length === 0) {
-            <div class="tasks-column-empty">{{ 'tasks.dropHere' | translate }}</div>
-          } @else {
-            <div class="tasks-list">
-              @for (task of column.tasks; track task.id) {
-                <article class="task-card" draggable="true" (dragstart)="onDragStart($event, task)">
-                  <div class="task-card__top">
-                    <h4>{{ task.title }}</h4>
-                    <span class="task-priority task-priority-{{ task.priority }}">{{ ('tasks.priority.' + task.priority) | translate }}</span>
-                  </div>
-                  <p>{{ task.description || ('tasks.noDescription' | translate) }}</p>
-                  <div class="task-card__meta">
-                    <span>{{ 'tasks.fieldDue' | translate }}: {{ formatDueAt(task) }}</span>
-                    @if (task.assignee) { <span>{{ task.assignee }}</span> }
-                    @if (task.relatedEntityType) { <span>{{ ('tasks.related.' + task.relatedEntityType) | translate }}</span> }
-                  </div>
-                  <div class="task-card__actions">
-                    <button type="button" (click)="openEdit(task)">{{ 'btn.edit' | translate }}</button>
-                    <button type="button" (click)="removeTask(task)">{{ 'btn.delete' | translate }}</button>
-                  </div>
-                </article>
+          <div class="tasks-columns-scroll">
+            <div class="tasks-columns">
+              @for (column of section.columns; track section.topic + '-' + column.status) {
+                <section
+                  class="tasks-column"
+                  [class.drop-target]="dropTargetKey() === section.topic + ':' + column.status"
+                  (dragover)="onDragOver($event, column.status, section.topic)"
+                  (dragleave)="onDragLeave()"
+                  (drop)="onDrop($event, column.status, section.topic)">
+                  <header>
+                    <h4>{{ ('tasks.status.' + column.status) | translate }}</h4>
+                    <span>{{ column.tasks.length }}</span>
+                  </header>
+
+                  @if (column.tasks.length === 0) {
+                    <div class="tasks-column-empty">{{ 'tasks.dropHere' | translate }}</div>
+                  } @else {
+                    <div class="tasks-list">
+                      @for (task of column.tasks; track task.id) {
+                        <article class="task-card" draggable="true" (dragstart)="onDragStart($event, task)">
+                          <div class="task-card__top">
+                            <h5>{{ task.title }}</h5>
+                            <span class="task-priority task-priority-{{ task.priority }}">{{ ('tasks.priority.' + task.priority) | translate }}</span>
+                          </div>
+
+                          <p>{{ task.description || ('tasks.noDescription' | translate) }}</p>
+
+                          @if (task.tags.length > 0) {
+                            <div class="task-card__tags">
+                              @for (tag of task.tags; track tag) {
+                                <span>{{ tag }}</span>
+                              }
+                            </div>
+                          }
+
+                          <div class="task-card__meta">
+                            <span>{{ 'tasks.fieldDue' | translate }}: {{ formatDueAt(task) }}</span>
+                            @if (task.assignee) { <span>{{ task.assignee }}</span> }
+                            @if (task.relatedEntityType) { <span>{{ ('tasks.related.' + task.relatedEntityType) | translate }}</span> }
+                          </div>
+
+                          <div class="task-card__actions">
+                            <button type="button" (click)="openEdit(task)">{{ 'btn.edit' | translate }}</button>
+                            <button type="button" (click)="removeTask(task)">{{ 'btn.delete' | translate }}</button>
+                          </div>
+                        </article>
+                      }
+                    </div>
+                  }
+                </section>
               }
             </div>
-          }
+          </div>
         </section>
       }
     </div>
