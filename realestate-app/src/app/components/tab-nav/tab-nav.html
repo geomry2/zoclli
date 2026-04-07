@@ -1,14 +1,84 @@
-<nav class="tab-nav">
-  @for (group of groups; track group.labelKey) {
-    <section class="tab-nav__group">
-      <span class="tab-nav__group-label">{{ group.labelKey | translate }}</span>
-      <div class="tab-nav__group-tabs">
-        @for (tab of group.tabs; track tab.id) {
-          <button class="tab-btn" [class.active]="activeTab() === tab.id" (click)="switchTab(tab.id)">
-            {{ tab.labelKey | translate }}
-          </button>
+<aside class="sidebar" [class.collapsed]="collapsed()">
+  <!-- Logo area -->
+  <div class="sidebar-logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="32" height="32" rx="8" fill="#D4A017"/>
+        <path d="M8 22V14L16 8L24 14V22H19V17H13V22H8Z" fill="white"/>
+      </svg>
+    </div>
+    @if (!collapsed()) {
+      <span class="logo-text">Zoclli</span>
+    }
+  </div>
+
+  <!-- Navigation items -->
+  <nav class="sidebar-nav">
+    @for (item of items; track item.id) {
+      <button
+        class="nav-item"
+        [class.active]="activeTab() === item.id"
+        [title]="item.labelKey | translate"
+        (click)="switchTab(item.id)">
+        <span class="nav-icon">
+          @switch (item.icon) {
+            @case ('dashboard') {
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="7" height="7" rx="1"/>
+                <rect x="14" y="3" width="7" height="4" rx="1"/>
+                <rect x="3" y="14" width="7" height="7" rx="1"/>
+                <rect x="14" y="11" width="7" height="10" rx="1"/>
+              </svg>
+            }
+            @case ('people') {
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+            }
+            @case ('leads') {
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+              </svg>
+            }
+            @case ('properties') {
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 21h18"/>
+                <path d="M5 21V7l8-4v18"/>
+                <path d="M19 21V11l-6-4"/>
+                <path d="M9 9v.01"/><path d="M9 12v.01"/><path d="M9 15v.01"/><path d="M9 18v.01"/>
+              </svg>
+            }
+            @case ('tasks') {
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 11l3 3L22 4"/>
+                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+              </svg>
+            }
+          }
+        </span>
+        @if (!collapsed()) {
+          <span class="nav-label">{{ item.labelKey | translate }}</span>
         }
-      </div>
-    </section>
-  }
-</nav>
+        @if (activeTab() === item.id) {
+          <span class="nav-indicator"></span>
+        }
+      </button>
+    }
+  </nav>
+
+  <!-- Bottom section -->
+  <div class="sidebar-bottom">
+    <button class="nav-item collapse-btn" (click)="toggleCollapse()" [title]="collapsed() ? 'Expand' : 'Collapse'">
+      <span class="nav-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+          [style.transform]="collapsed() ? 'rotate(0deg)' : 'rotate(180deg)'"
+          style="transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)">
+          <path d="M9 18l6-6-6-6"/>
+        </svg>
+      </span>
+    </button>
+  </div>
+</aside>

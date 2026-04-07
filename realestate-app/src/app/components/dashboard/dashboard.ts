@@ -1,4 +1,4 @@
-import { Component, computed, inject, output } from '@angular/core';
+import { Component, computed, inject, output, signal, OnInit } from '@angular/core';
 import { ClientService } from '../../services/client.service';
 import { LeadService } from '../../services/lead.service';
 import { ActivityService, ActivityEntry } from '../../services/activity.service';
@@ -9,6 +9,13 @@ import { getCommissionAmount } from '../../utils/commission.utils';
 
 interface StatRow { label: string; count: number; color: string; }
 
+interface MonthlyData {
+  month: string;
+  revenue: number;
+  commissions: number;
+  profit: number;
+}
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -16,12 +23,15 @@ interface StatRow { label: string; count: number; color: string; }
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss'
 })
-export class Dashboard {
+export class Dashboard implements OnInit {
   readonly followUpsRequest = output<FollowUpFilter>();
   readonly ts = inject(TranslationService);
   private readonly clientService = inject(ClientService);
   private readonly leadService = inject(LeadService);
   private readonly activityService = inject(ActivityService);
+
+  readonly animatedIn = signal(false);
+  readonly chartReady = signal(false);
 
   readonly recentActivity = computed(() => this.activityService.activities().slice(0, 20));
 
@@ -31,6 +41,12 @@ export class Dashboard {
   readonly totalRevenue = computed(() =>
     this.clientService.clients().reduce((sum, c) => sum + (c.dealValue ?? 0), 0)
   );
+
+  readonly totalCommissions = computed(() =>
+    this.clientService.clients().reduce((sum, c) => sum + getCommissionAmount(c), 0)
+  );
+
+  readonly totalProfit = computed(() => this.totalRevenue() - this.totalCommissions());
 
   readonly avgDeal = computed(() => {
     const active = this.clientService.clients().filter(c => c.dealValue > 0);
@@ -45,30 +61,55 @@ export class Dashboard {
     return countByFollowUpFilter(this.leadService.leads(), 'today');
   });
 
+  readonly completedDeals = computed(() =>
+    this.clientService.clients().filter(c => c.status === 'closed').length
+  );
+
+  readonly completedDealsPercent = computed(() => {
+    const total = this.totalClients();
+    return total ? Math.round(this.completedDeals() / total * 100) : 0;
+  });
+
+  /** Pipeline conversion: clients / (clients + all leads) */
+  readonly pipelineConversion = computed(() => {
+    const total = this.totalClients() + this.totalLeads();
+    return total ? Math.round(this.totalClients() / total * 100) : 0;
+  });
+
+  /** New leads this month (leads with firstInteractionDate in current month) */
+  readonly newLeadsThisMonth = computed(() => {
+    const now = new Date();
+    const m = now.getMonth();
+    const y = now.getFullYear();
+    return this.leadService.leads().filter(l => {
+      if (!l.firstInteractionDate) return false;
+      const d = new Date(l.firstInteractionDate);
+      return d.getMonth() === m && d.getFullYear() === y;
+    }).length;
+  });
+
   readonly leadsByStatus = computed((): StatRow[] => {
     const leads = this.leadService.leads();
-    const total = leads.length || 1;
     const colorMap: Record<string, string> = {
-      new: '#4a90d9',
-      contacted: '#f0a500',
-      negotiating: '#7c5cbf',
-      lost: '#e05252',
+      new: '#3B82F6',
+      contacted: '#F59E0B',
+      negotiating: '#8B5CF6',
+      lost: '#EF4444',
     };
     const order = ['new', 'contacted', 'negotiating', 'lost'];
     return order.map(s => ({
       label: s.charAt(0).toUpperCase() + s.slice(1),
       count: leads.filter(l => l.status === s).length,
       color: colorMap[s],
-      pct: Math.round(leads.filter(l => l.status === s).length / total * 100),
-    })) as (StatRow & { pct: number })[];
+    }));
   });
 
   readonly clientsByStatus = computed((): StatRow[] => {
     const clients = this.clientService.clients();
     const colorMap: Record<string, string> = {
-      active: '#3aaa6e',
-      inactive: '#aaa',
-      closed: '#e05252',
+      active: '#22C55E',
+      inactive: '#94A3B8',
+      closed: '#EF4444',
     };
     const order = ['active', 'inactive', 'closed'];
     return order.map(s => ({
@@ -94,11 +135,11 @@ export class Dashboard {
     const total = clients.length || 1;
     const types = ['apartment', 'house', 'villa', 'commercial', 'land'];
     const colors: Record<string, string> = {
-      apartment: '#4a90d9',
-      house: '#3aaa6e',
-      villa: '#7c5cbf',
-      commercial: '#f0a500',
-      land: '#b87333',
+      apartment: '#3B82F6',
+      house: '#22C55E',
+      villa: '#8B5CF6',
+      commercial: '#F59E0B',
+      land: '#B87333',
     };
     return types
       .map(t => ({
@@ -131,10 +172,138 @@ export class Dashboard {
       .slice(0, 5);
   });
 
+  /** Monthly revenue data for the chart: Revenue, Commissions, Net Profit */
+  readonly monthlyRevenue = computed((): MonthlyData[] => {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const clients = this.clientService.clients();
+    const monthlyRev = new Array(12).fill(0);
+    const monthlyComm = new Array(12).fill(0);
+
+    for (const c of clients) {
+      if (c.purchaseDate) {
+        const d = new Date(c.purchaseDate);
+        const m = d.getMonth();
+        monthlyRev[m] += c.dealValue ?? 0;
+        monthlyComm[m] += getCommissionAmount(c);
+      }
+    }
+
+    return months.map((month, i) => ({
+      month,
+      revenue: monthlyRev[i],
+      commissions: monthlyComm[i],
+      profit: monthlyRev[i] - monthlyComm[i],
+    }));
+  });
+
+  readonly chartMaxValue = computed(() => {
+    const data = this.monthlyRevenue();
+    const allValues = data.flatMap(d => [d.revenue, d.commissions, d.profit]);
+    return Math.max(...allValues, 1);
+  });
+
+  readonly revenuePath = computed(() => this.buildChartPath('revenue'));
+  readonly commissionsPath = computed(() => this.buildChartPath('commissions'));
+  readonly profitPath = computed(() => this.buildChartPath('profit'));
+
+  readonly chartSummary = computed(() => {
+    const data = this.monthlyRevenue();
+    return {
+      revenue: data.reduce((s, d) => s + d.revenue, 0),
+      commissions: data.reduce((s, d) => s + d.commissions, 0),
+      profit: data.reduce((s, d) => s + d.profit, 0),
+    };
+  });
+
+  readonly revenueTrend = computed(() => this.calcTrend('revenue'));
+  readonly commissionsTrend = computed(() => this.calcTrend('commissions'));
+  readonly profitTrend = computed(() => this.calcTrend('profit'));
+
+  readonly activeChartFilter = signal<'all' | 'revenue' | 'commissions' | 'profit'>('all');
+
+  /** Visit statistic mini sparkline points (derived from activity timestamps) */
+  readonly activitySparkline = computed(() => {
+    const acts = this.activityService.activities();
+    // Group last 7 days
+    const now = Date.now();
+    const days = [0, 0, 0, 0, 0, 0, 0];
+    for (const a of acts) {
+      const age = Math.floor((now - new Date(a.timestamp).getTime()) / 86400000);
+      if (age >= 0 && age < 7) days[6 - age]++;
+    }
+    const max = Math.max(...days, 1);
+    return days.map(d => Math.round((d / max) * 100));
+  });
+
+  ngOnInit() {
+    requestAnimationFrame(() => {
+      this.animatedIn.set(true);
+      setTimeout(() => this.chartReady.set(true), 300);
+    });
+  }
+
+  setChartFilter(filter: 'all' | 'revenue' | 'commissions' | 'profit') {
+    this.activeChartFilter.set(filter);
+  }
+
+  private calcTrend(field: 'revenue' | 'commissions' | 'profit'): number {
+    const data = this.monthlyRevenue();
+    const recent = data.slice(-3).reduce((s, d) => s + d[field], 0);
+    const earlier = data.slice(-6, -3).reduce((s, d) => s + d[field], 0);
+    if (earlier === 0) return 0;
+    return Math.round((recent - earlier) / earlier * 100);
+  }
+
+  private buildChartPath(field: 'revenue' | 'commissions' | 'profit'): string {
+    const data = this.monthlyRevenue();
+    const max = this.chartMaxValue();
+    const chartWidth = 720;
+    const chartHeight = 200;
+    const padding = 40;
+    const usableWidth = chartWidth - padding * 2;
+    const usableHeight = chartHeight - 20;
+
+    if (data.length === 0 || max === 0) return '';
+
+    const points = data.map((d, i) => {
+      const x = padding + (i / (data.length - 1)) * usableWidth;
+      const y = chartHeight - 10 - (d[field] / max) * usableHeight;
+      return { x, y };
+    });
+
+    let path = `M ${points[0].x} ${points[0].y}`;
+    for (let i = 1; i < points.length; i++) {
+      const prev = points[i - 1];
+      const curr = points[i];
+      const cpx1 = prev.x + (curr.x - prev.x) * 0.4;
+      const cpx2 = curr.x - (curr.x - prev.x) * 0.4;
+      path += ` C ${cpx1} ${prev.y}, ${cpx2} ${curr.y}, ${curr.x} ${curr.y}`;
+    }
+    return path;
+  }
+
+  buildAreaPath(field: 'revenue' | 'commissions' | 'profit'): string {
+    const linePath = field === 'revenue' ? this.revenuePath() :
+                     field === 'commissions' ? this.commissionsPath() : this.profitPath();
+    if (!linePath) return '';
+    const data = this.monthlyRevenue();
+    const chartHeight = 200;
+    const padding = 40;
+    const usableWidth = 720 - padding * 2;
+    const lastX = padding + ((data.length - 1) / (data.length - 1)) * usableWidth;
+    return `${linePath} L ${lastX} ${chartHeight - 10} L ${padding} ${chartHeight - 10} Z`;
+  }
+
   formatCurrency(value: number): string {
-    if (value >= 1_000_000) return '€' + (value / 1_000_000).toFixed(1) + 'M';
-    if (value >= 1_000) return '€' + (value / 1_000).toFixed(0) + 'K';
-    return '€' + value.toLocaleString('en-US');
+    if (value >= 1_000_000) return '\u20AC' + (value / 1_000_000).toFixed(1) + 'M';
+    if (value >= 1_000) return '\u20AC' + (value / 1_000).toFixed(0) + 'K';
+    return '\u20AC' + value.toLocaleString('en-US');
+  }
+
+  formatCurrencyShort(value: number): string {
+    if (value >= 1_000_000) return '\u20AC' + (value / 1_000_000).toFixed(1) + 'M';
+    if (value >= 1_000) return '\u20AC' + Math.round(value / 1_000) + 'K';
+    return '\u20AC' + value;
   }
 
   pct(count: number, total: number): number {
@@ -142,11 +311,11 @@ export class Dashboard {
   }
 
   activityIcon(entry: ActivityEntry): string {
-    if (entry.action === 'created') return '＋';
-    if (entry.action === 'updated') return '✏';
-    if (entry.action === 'deleted') return '✕';
-    if (entry.action === 'converted') return '→';
-    return '·';
+    if (entry.action === 'created') return '\uFF0B';
+    if (entry.action === 'updated') return '\u270F';
+    if (entry.action === 'deleted') return '\u2715';
+    if (entry.action === 'converted') return '\u2192';
+    return '\u00B7';
   }
 
   activityKey(entry: ActivityEntry): string {

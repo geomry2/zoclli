@@ -148,8 +148,8 @@ describe('Dashboard', () => {
     injector = createdInjector;
 
     expect(dashboard.propertyMix()).toEqual([
-      { label: 'apartment', count: 2, color: '#4a90d9', pct: 67 },
-      { label: 'villa', count: 1, color: '#7c5cbf', pct: 33 },
+      { label: 'apartment', count: 2, color: '#3B82F6', pct: 67 },
+      { label: 'villa', count: 1, color: '#8B5CF6', pct: 33 },
     ]);
     expect(dashboard.topRealtors()).toEqual([
       { name: 'Bella', deals: 2, earnings: 22000 },

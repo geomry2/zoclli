@@ -33,7 +33,8 @@ type LeadViewMode = 'board' | 'table' | 'followups';
 })
 export class App {
   readonly ts = inject(TranslationService);
-  readonly activeTab = signal<TabType>('clients');
+  readonly activeTab = signal<TabType>('dashboard');
+  readonly sidebarCollapsed = signal(true);
   readonly taskRelationPrefill = signal<{ type: 'lead' | 'client' | 'property' | 'deal'; id: string; sourceLabel?: string } | null>(null);
   readonly leadsViewMode = signal<LeadViewMode>('board');
   readonly leadFollowUpFilter = signal<FollowUpFilter>('all');
@@ -50,6 +51,17 @@ export class App {
   readonly modalTab = computed<'clients' | 'leads'>(() =>
     this.activeTab() === 'leads' ? 'leads' : 'clients'
   );
+
+  readonly activeTabLabel = computed(() => {
+    const labels: Record<TabType, string> = {
+      dashboard: 'nav.dashboard',
+      clients: 'nav.clients',
+      leads: 'nav.leads',
+      properties: 'nav.properties',
+      tasks: 'nav.tasks',
+    };
+    return labels[this.activeTab()];
+  });
 
   private readonly clientService = inject(ClientService);
   private readonly leadService = inject(LeadService);
