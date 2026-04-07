@@ -8,29 +8,31 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 12px;
-  border: 1px solid #e3e7eb;
-  border-radius: 12px;
-  background: #fbfcfd;
+  padding: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-hover);
 }
 
 .notes-input {
   width: 100%;
   min-height: 86px;
   padding: 10px 12px;
-  border: 1px solid #d3dae2;
-  border-radius: 10px;
-  background: #fff;
-  color: #1f2933;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
   font: inherit;
   font-size: 13px;
   line-height: 1.45;
   resize: vertical;
   box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
 
   &:focus {
     outline: none;
-    border-color: #8893a0;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(27, 67, 50, 0.06);
   }
 }
 
@@ -43,25 +45,24 @@
 
 .notes-helper {
   font-size: 12px;
-  color: #7a8592;
+  color: var(--color-text-muted);
 }
 
 .notes-add-btn {
   height: 32px;
-  padding: 0 12px;
+  padding: 0 14px;
   border: none;
-  border-radius: 999px;
-  background: #1f2937;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
   color: #fff;
   font: inherit;
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
+  transition: all 0.15s;
 
-  &:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
-  }
+  &:hover { background: var(--color-primary-light); }
+  &:disabled { opacity: 0.45; cursor: not-allowed; }
 }
 
 .notes-timeline {
@@ -72,19 +73,24 @@
 
 .notes-empty {
   padding: 18px 14px;
-  border: 1px dashed #d6dde5;
-  border-radius: 12px;
-  background: #fafbfd;
-  color: #8893a0;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-hover);
+  color: var(--color-text-muted);
   font-size: 12px;
 }
 
 .notes-entry {
   position: relative;
   padding: 12px 14px 12px 18px;
-  border: 1px solid #e3e7eb;
-  border-radius: 12px;
-  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  transition: box-shadow 0.2s;
+
+  &:hover {
+    box-shadow: var(--shadow-xs);
+  }
 
   &::before {
     content: '';
@@ -93,8 +99,8 @@
     left: 8px;
     bottom: 14px;
     width: 3px;
-    border-radius: 999px;
-    background: linear-gradient(180deg, #4a90d9 0%, #3aaa6e 100%);
+    border-radius: var(--radius-full);
+    background: linear-gradient(180deg, var(--color-primary) 0%, var(--color-success) 100%);
   }
 }
 
@@ -111,13 +117,13 @@
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #667282;
+  color: var(--color-text-muted);
 }
 
 .notes-entry__body {
   white-space: pre-wrap;
   word-break: break-word;
-  color: #24303b;
+  color: var(--color-text);
   font-size: 13px;
   line-height: 1.45;
 }

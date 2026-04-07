@@ -1,8 +1,5 @@
 .tasks-shell {
-  padding: 24px;
-  background:
-    radial-gradient(circle at top right, rgba(34, 197, 94, 0.08), transparent 24%),
-    linear-gradient(180deg, #f8fbff 0%, #f3f6fb 100%);
+  padding: 4px 0 24px;
 }
 
 .tasks-board-head {
@@ -17,27 +14,35 @@
   font-size: 24px;
   font-weight: 700;
   letter-spacing: -0.03em;
-  color: #0f172a;
+  color: var(--color-text);
 }
 
 .tasks-board-subtitle {
   margin-top: 4px;
   font-size: 13px;
-  color: #64748b;
+  color: var(--color-text-muted);
 }
 
 .tasks-new-btn {
   min-height: 42px;
   border: none;
-  background: #0f172a;
+  background: var(--color-primary);
   color: #ffffff;
-  border-radius: 12px;
-  padding: 0 16px;
+  border-radius: var(--radius-md);
+  padding: 0 18px;
   font: inherit;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.16);
+  box-shadow: 0 2px 8px rgba(27, 67, 50, 0.2);
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: var(--color-primary-light);
+    box-shadow: 0 4px 14px rgba(27, 67, 50, 0.25);
+    transform: translateY(-1px);
+  }
+  &:active { transform: translateY(0); }
 }
 
 .tasks-toolbar {
@@ -61,27 +66,27 @@
   justify-content: center;
   min-height: 36px;
   padding: 0 14px;
-  border: 1px solid #d8e2ee;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.82);
-  color: #475569;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
   font: inherit;
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+  transition: all 0.2s ease;
 
   &:hover {
-    background: #ffffff;
-    border-color: #bfd0e2;
-    color: #0f172a;
+    background: var(--color-surface-hover);
+    border-color: #94A3B8;
+    color: var(--color-text);
   }
 
   &.active {
-    background: #eaf2ff;
-    border-color: #96b4e7;
-    color: #1d4ed8;
-    box-shadow: 0 8px 18px rgba(29, 78, 216, 0.14);
+    background: rgba(27, 67, 50, 0.08);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    box-shadow: 0 2px 8px rgba(27, 67, 50, 0.1);
   }
 }
 
@@ -92,11 +97,16 @@
 }
 
 .tasks-section {
-  border: 1px solid #d9e4ef;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.92);
-  padding: 16px;
-  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.05);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  padding: 18px;
+  box-shadow: var(--shadow-card);
+  transition: box-shadow 0.3s ease;
+
+  &:hover {
+    box-shadow: var(--shadow-card-hover);
+  }
 }
 
 .tasks-section__header {
@@ -109,12 +119,13 @@
   h3 {
     margin: 0;
     font-size: 18px;
-    color: #0f172a;
+    font-weight: 700;
+    color: var(--color-text);
   }
 
   p {
     margin: 4px 0 0;
-    color: #64748b;
+    color: var(--color-text-muted);
     font-size: 12px;
   }
 
@@ -125,9 +136,9 @@
     min-width: 34px;
     min-height: 34px;
     padding: 0 10px;
-    border-radius: 999px;
-    background: #eff6ff;
-    color: #1d4ed8;
+    border-radius: var(--radius-full);
+    background: var(--color-info-bg);
+    color: var(--color-info);
     font-size: 12px;
     font-weight: 700;
   }
@@ -146,16 +157,16 @@
 }
 
 .tasks-column {
-  border: 1px solid #dbe3ee;
-  border-radius: 16px;
-  background: #ffffff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
   min-height: 380px;
-  transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+  transition: all 0.2s ease;
 
   &.drop-target {
-    border-color: #60a5fa;
-    background: #f4f8ff;
-    box-shadow: inset 0 0 0 1px rgba(96, 165, 250, 0.18);
+    border-color: var(--color-info);
+    background: #F8FAFF;
+    box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.12);
   }
 
   > header {
@@ -164,12 +175,13 @@
     align-items: center;
     gap: 8px;
     padding: 12px;
-    border-bottom: 1px solid #ebf0f5;
+    border-bottom: 1px solid var(--color-border-light);
 
     h4 {
       margin: 0;
       font-size: 13px;
-      color: #334155;
+      font-weight: 700;
+      color: var(--color-text);
     }
 
     span {
@@ -178,9 +190,9 @@
       justify-content: center;
       min-width: 26px;
       height: 26px;
-      border-radius: 999px;
-      background: #f1f5f9;
-      color: #475569;
+      border-radius: var(--radius-full);
+      background: var(--color-bg);
+      color: var(--color-text-secondary);
       font-size: 11px;
       font-weight: 700;
     }
@@ -195,12 +207,19 @@
 }
 
 .task-card {
-  border: 1px solid #dce4ef;
-  border-radius: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
   padding: 12px;
-  background: #ffffff;
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-xs);
   cursor: grab;
+  transition: all 0.2s var(--ease-out);
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+    border-color: #CBD5E1;
+  }
 }
 
 .task-card__top {
@@ -214,14 +233,14 @@
   margin: 0;
   font-size: 14px;
   line-height: 1.35;
-  color: #0f172a;
+  color: var(--color-text);
 }
 
 .task-card p {
   margin: 9px 0;
   font-size: 12px;
   line-height: 1.5;
-  color: #475569;
+  color: var(--color-text-secondary);
 }
 
 .task-card__tags {
@@ -236,10 +255,10 @@
     justify-content: center;
     min-height: 24px;
     padding: 0 8px;
-    border-radius: 999px;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    color: #475569;
+    border-radius: var(--radius-full);
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
     font-size: 11px;
     font-weight: 600;
   }
@@ -250,7 +269,7 @@
   flex-wrap: wrap;
   gap: 6px;
   font-size: 11px;
-  color: #64748b;
+  color: var(--color-text-muted);
 }
 
 .task-card__actions {
@@ -261,14 +280,20 @@
   button {
     flex: 1;
     min-height: 32px;
-    border: 1px solid #d7e0ea;
-    background: #ffffff;
-    border-radius: 10px;
-    color: #334155;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    border-radius: var(--radius-sm);
+    color: var(--color-text-secondary);
     font: inherit;
     font-size: 12px;
     font-weight: 600;
     cursor: pointer;
+    transition: all 0.15s;
+
+    &:hover {
+      background: var(--color-surface-hover);
+      color: var(--color-text);
+    }
   }
 }
 
@@ -278,7 +303,7 @@
   justify-content: center;
   min-height: 28px;
   padding: 0 10px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   font-size: 11px;
   font-weight: 700;
   line-height: 1;
@@ -286,45 +311,30 @@
   white-space: nowrap;
 }
 
-.task-priority-low {
-  background: #ecf7ef;
-  color: #2f7a45;
-}
-
-.task-priority-medium {
-  background: #ecf2fd;
-  color: #285f9c;
-}
-
-.task-priority-high {
-  background: #fff4dc;
-  color: #9b6400;
-}
-
-.task-priority-urgent {
-  background: #ffe8e6;
-  color: #b3392d;
-}
+.task-priority-low    { background: var(--color-success-bg); color: #15803D; }
+.task-priority-medium { background: var(--color-info-bg);    color: #1E40AF; }
+.task-priority-high   { background: var(--color-warning-bg); color: #92400E; }
+.task-priority-urgent { background: var(--color-danger-bg);  color: #DC2626; }
 
 .tasks-column-empty,
 .tasks-empty {
   padding: 16px;
-  color: #738296;
+  color: var(--color-text-muted);
   font-size: 12px;
 }
 
 .tasks-empty {
-  border: 1px dashed #cad7e4;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.78);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
 }
 
 .tasks-empty--error,
 .tasks-error {
-  color: #b42318;
-  background: #fff3f2;
-  border: 1px solid #f7c5c0;
-  border-radius: 14px;
+  color: var(--color-danger);
+  background: var(--color-danger-bg);
+  border: 1px solid #FECACA;
+  border-radius: var(--radius-md);
 }
 
 .tasks-error {
@@ -334,7 +344,7 @@
 
 @media (max-width: 760px) {
   .tasks-shell {
-    padding: 16px;
+    padding: 8px 0 16px;
   }
 
   .tasks-board-head,

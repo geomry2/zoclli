@@ -1,22 +1,23 @@
 .badge {
   display: inline-block;
-  padding: 2px 9px;
-  border-radius: 5px;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
   font-size: 11px;
-  font-weight: 500;
+  font-weight: 600;
   text-transform: capitalize;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.02em;
+  transition: all 0.15s ease;
 
-  &.badge-active { background: #e6f4ea; color: #1a7f37; }
-  &.badge-inactive { background: #f3f3f1; color: #777; }
-  &.badge-closed { background: #eef0f2; color: #5a6370; }
-  &.badge-new { background: #e8f0fe; color: #1a73e8; }
-  &.badge-contacted { background: #e6f4ea; color: #1a7f37; }
-  &.badge-negotiating { background: #fef6e0; color: #a16800; }
-  &.badge-lost { background: #fdf1f0; color: #c5221f; }
-  &.badge-apartment { background: #edf3fb; color: #2a6db5; }
-  &.badge-house { background: #eaf6ee; color: #2a7a4e; }
-  &.badge-commercial { background: #fef6e0; color: #a16800; }
-  &.badge-land { background: #f4f0eb; color: #7a5a30; }
-  &.badge-villa { background: #f0ecfb; color: #6b3ecf; }
+  &.badge-active     { background: var(--color-success-bg); color: #15803D; }
+  &.badge-inactive   { background: #F1F5F9; color: #64748B; }
+  &.badge-closed     { background: #F1F5F9; color: #475569; }
+  &.badge-new        { background: var(--color-info-bg); color: #1D4ED8; }
+  &.badge-contacted  { background: var(--color-success-bg); color: #15803D; }
+  &.badge-negotiating{ background: var(--color-warning-bg); color: #B45309; }
+  &.badge-lost       { background: var(--color-danger-bg); color: #DC2626; }
+  &.badge-apartment  { background: #EFF6FF; color: #1E40AF; }
+  &.badge-house      { background: #F0FDF4; color: #166534; }
+  &.badge-commercial { background: #FFFBEB; color: #92400E; }
+  &.badge-land       { background: #FDF4E8; color: #7A5A30; }
+  &.badge-villa      { background: var(--color-purple-bg); color: #7C3AED; }
 }
