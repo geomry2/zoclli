@@ -1,6 +1,6 @@
 .detail-wrap {
-  background: #fafafa;
-  border-top: 1px solid #efefef;
+  background: var(--color-surface-hover);
+  border-top: 1px solid var(--color-border-light);
 }
 
 .detail-panel {
@@ -29,55 +29,56 @@
 
 .field-label {
   font-size: 11px;
-  font-weight: 500;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #8b9298;
+  color: var(--color-text-muted);
 }
 
 .field-value {
   font-size: 14px;
-  color: #2f3437;
+  color: var(--color-text);
   word-break: break-word;
 }
 
 .field-badge {
   display: inline-block;
-  padding: 3px 9px;
-  border-radius: 999px;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
   font-size: 11px;
-  font-weight: 500;
+  font-weight: 600;
   width: fit-content;
 
-  &.badge-active   { background: #e6f4ea; color: #1a7f37; }
-  &.badge-inactive { background: #fce8e6; color: #c5221f; }
-  &.badge-closed   { background: #f1f1f1; color: #666; }
-  &.badge-new      { background: #e8f0fe; color: #1a73e8; }
-  &.badge-contacted { background: #e6f4ea; color: #1a7f37; }
-  &.badge-negotiating { background: #fef9e0; color: #a16800; }
-  &.badge-lost     { background: #fce8e6; color: #c5221f; }
-  &.badge-apartment  { background: #f1f1f1; color: #555; }
-  &.badge-house      { background: #f1f1f1; color: #555; }
-  &.badge-commercial { background: #f1f1f1; color: #555; }
-  &.badge-land       { background: #f1f1f1; color: #555; }
-  &.badge-villa      { background: #f1f1f1; color: #555; }
+  &.badge-active      { background: var(--color-success-bg); color: #15803D; }
+  &.badge-inactive    { background: var(--color-danger-bg);  color: #DC2626; }
+  &.badge-closed      { background: #F1F5F9; color: #475569; }
+  &.badge-new         { background: var(--color-info-bg);    color: #1D4ED8; }
+  &.badge-contacted   { background: var(--color-success-bg); color: #15803D; }
+  &.badge-negotiating { background: var(--color-warning-bg); color: #B45309; }
+  &.badge-lost        { background: var(--color-danger-bg);  color: #DC2626; }
+  &.badge-apartment   { background: #EFF6FF; color: #1E40AF; }
+  &.badge-house       { background: #F0FDF4; color: #166534; }
+  &.badge-commercial  { background: #FFFBEB; color: #92400E; }
+  &.badge-land        { background: #FDF4E8; color: #7A5A30; }
+  &.badge-villa       { background: var(--color-purple-bg); color: #7C3AED; }
 }
 
 .field-input {
   font-size: 13px;
   font-family: inherit;
-  color: #2f3437;
-  background: #fff;
-  border: 1px solid #d0d5da;
-  border-radius: 5px;
-  padding: 5px 8px;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
   outline: none;
   width: 100%;
   box-sizing: border-box;
-  transition: border-color 0.15s;
+  transition: all 0.2s;
 
   &:focus {
-    border-color: #2f3437;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(27, 67, 50, 0.06);
   }
 }
 
@@ -93,40 +94,40 @@
 
 .detail-btn {
   font-size: 12px;
-  font-weight: 500;
-  padding: 5px 14px;
-  border-radius: 5px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
   border: 1px solid transparent;
   cursor: pointer;
-  transition: background 0.1s, border-color 0.1s;
+  transition: all 0.15s;
 }
 
 .detail-edit-btn {
-  background: #fff;
-  border-color: #d0d5da;
-  color: #2f3437;
+  background: var(--color-surface);
+  border-color: var(--color-border);
+  color: var(--color-text-secondary);
 
-  &:hover { background: #f3f3f2; }
+  &:hover { background: var(--color-surface-hover); color: var(--color-text); }
 }
 
 .detail-save-btn {
-  background: #2f3437;
+  background: var(--color-primary);
   color: #fff;
 
-  &:hover { background: #1a1d1f; }
+  &:hover { background: var(--color-primary-light); }
 }
 
 .detail-cancel-btn {
-  background: #fff;
-  border-color: #d0d5da;
-  color: #666;
+  background: var(--color-surface);
+  border-color: var(--color-border);
+  color: var(--color-text-secondary);
 
-  &:hover { background: #f3f3f2; }
+  &:hover { background: var(--color-surface-hover); }
 }
 
 .detail-save-error {
   font-size: 12px;
-  color: #c5221f;
+  color: var(--color-danger);
   margin-right: 4px;
 }
 

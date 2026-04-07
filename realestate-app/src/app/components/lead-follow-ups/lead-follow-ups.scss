@@ -1,13 +1,10 @@
 @use '../../shared-badges';
 
 .followups-shell {
-  padding: 20px;
+  padding: 4px 0 24px;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  background:
-    radial-gradient(circle at top right, rgba(58, 170, 110, 0.08), transparent 30%),
-    linear-gradient(180deg, #fbfcfe 0%, #f7f9fb 100%);
 }
 
 .followups-header {
@@ -20,12 +17,12 @@
 .followups-title {
   font-size: 18px;
   font-weight: 700;
-  color: #1d2630;
+  color: var(--color-text);
 }
 
 .followups-subtitle {
   font-size: 12px;
-  color: #7b8796;
+  color: var(--color-text-muted);
 }
 
 .followups-filter-row {
@@ -40,20 +37,27 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 0 12px;
-  border: 1px solid #d7dee6;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.88);
-  color: #55606d;
+  padding: 0 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
   font: inherit;
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: var(--color-surface-hover);
+    border-color: #94A3B8;
+  }
 
   &.active {
-    border-color: #1f2937;
-    background: #1f2937;
+    border-color: var(--color-primary);
+    background: var(--color-primary);
     color: #fff;
+    box-shadow: 0 2px 8px rgba(27, 67, 50, 0.2);
   }
 }
 
@@ -63,16 +67,16 @@
   align-items: center;
   justify-content: center;
   padding: 0 6px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: rgba(255, 255, 255, 0.18);
 }
 
 .followups-empty {
   padding: 48px 20px;
-  border: 1px dashed #d8e0e8;
-  border-radius: 16px;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-lg);
   text-align: center;
-  color: #8893a0;
+  color: var(--color-text-muted);
 }
 
 .followups-list {
@@ -85,11 +89,16 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) 320px;
   gap: 16px;
-  padding: 16px 18px;
-  border: 1px solid #e1e7ee;
-  border-radius: 16px;
-  background: #fff;
-  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.05);
+  padding: 18px 20px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+  transition: all 0.2s ease;
+
+  &:hover {
+    box-shadow: var(--shadow-card-hover);
+  }
 }
 
 .followups-item__main {
@@ -109,12 +118,12 @@
   margin: 0;
   font-size: 16px;
   font-weight: 700;
-  color: #1f2933;
+  color: var(--color-text);
 }
 
 .followups-interest {
   font-size: 13px;
-  color: #55606d;
+  color: var(--color-text-secondary);
 }
 
 .followups-status {
@@ -132,40 +141,40 @@
   display: inline-flex;
   align-items: center;
   min-height: 30px;
-  padding: 0 10px;
-  border-radius: 999px;
+  padding: 0 12px;
+  border-radius: var(--radius-full);
   font-size: 12px;
   font-weight: 600;
 }
 
 .followups-meta__label {
-  background: #f3f6f9;
-  color: #52606e;
+  background: var(--color-bg);
+  color: var(--color-text-secondary);
 }
 
 .followups-date-pill {
-  background: #edf4fb;
-  color: #345b86;
+  background: var(--color-info-bg);
+  color: #1E40AF;
 }
 
 .followups-date-pill--overdue {
-  background: #fdf0ef;
-  color: #b42318;
+  background: var(--color-danger-bg);
+  color: #DC2626;
 }
 
 .followups-date-pill--today {
-  background: #fff4db;
-  color: #9a6400;
+  background: var(--color-warning-bg);
+  color: #92400E;
 }
 
 .followups-date-pill--upcoming {
-  background: #edf7ef;
-  color: #23683d;
+  background: var(--color-success-bg);
+  color: #15803D;
 }
 
 .followups-date-pill--none {
-  background: #f3f4f6;
-  color: #6b7280;
+  background: var(--color-bg);
+  color: var(--color-text-muted);
 }
 
 .followups-actions {
@@ -184,47 +193,50 @@
   flex: 1;
   min-width: 0;
   height: 36px;
-  padding: 0 10px;
-  border: 1px solid #d4dbe3;
-  border-radius: 10px;
-  background: #fff;
-  color: #1f2933;
+  padding: 0 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
   font: inherit;
   font-size: 12px;
+  transition: border-color 0.2s;
 
   &:focus {
     outline: none;
-    border-color: #8893a0;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(27, 67, 50, 0.06);
   }
 }
 
 .followups-btn {
   height: 36px;
-  padding: 0 12px;
-  border: 1px solid #d4dbe3;
-  border-radius: 10px;
-  background: #fff;
-  color: #3f4b59;
+  padding: 0 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
   font: inherit;
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
+  transition: all 0.15s;
 
-  &:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
-  }
+  &:hover { background: var(--color-surface-hover); color: var(--color-text); }
+  &:disabled { opacity: 0.45; cursor: not-allowed; }
 }
 
 .followups-btn-primary {
-  border-color: #1f2937;
-  background: #1f2937;
+  border-color: var(--color-primary);
+  background: var(--color-primary);
   color: #fff;
+
+  &:hover { background: var(--color-primary-light); }
 }
 
 .followups-error {
   font-size: 12px;
-  color: #b42318;
+  color: var(--color-danger);
 }
 
 @media (max-width: 980px) {
@@ -235,7 +247,7 @@
 
 @media (max-width: 720px) {
   .followups-shell {
-    padding: 16px;
+    padding: 8px 0 16px;
   }
 
   .followups-header {

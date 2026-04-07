@@ -1,74 +1,171 @@
-.tab-nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  padding: 16px 20px;
-  border-bottom: 1px solid #ebf0f5;
-  background: #ffffff;
-}
-
-.tab-nav__group {
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 12px;
-  border: 1px solid #e5ebf3;
-  border-radius: 16px;
-  background: #f8fafc;
-  min-width: 0;
+  width: var(--sidebar-expanded);
+  height: 100vh;
+  background: var(--sidebar-bg);
+  transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+
+  &.collapsed {
+    width: var(--sidebar-width);
+  }
 }
 
-.tab-nav__group-label {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #64748b;
-}
-
-.tab-nav__group-tabs {
+/* ── Logo ──────────────────────────────────────── */
+.sidebar-logo {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 22px;
+  margin-bottom: 8px;
+  min-height: 72px;
 }
 
-.tab-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 36px;
-  padding: 0 14px;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  color: #64748b;
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 999px;
-  cursor: pointer;
-  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+.logo-icon {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.logo-text {
+  font-size: 20px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.03em;
   white-space: nowrap;
+  animation: fadeIn 0.25s ease both;
+}
+
+/* ── Navigation ────────────────────────────────── */
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 12px;
+  flex: 1;
+}
+
+.nav-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  height: 48px;
+  padding: 0 14px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.5);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    color 0.2s ease,
+    background 0.2s ease,
+    transform 0.15s ease;
+  white-space: nowrap;
+  overflow: hidden;
 
   &:hover {
-    color: #1e293b;
-    background: #ffffff;
-    border-color: #dbe3ee;
+    color: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  &:active {
+    transform: scale(0.97);
   }
 
   &.active {
-    color: #1d4ed8;
-    background: #eff6ff;
-    border-color: #9ab6e7;
-    box-shadow: 0 10px 20px rgba(29, 78, 216, 0.12);
+    color: #fff;
+    background: rgba(212, 160, 23, 0.15);
+
+    .nav-icon {
+      color: var(--color-accent);
+    }
   }
 }
 
-@media (max-width: 760px) {
-  .tab-nav {
-    padding: 14px 16px;
+.nav-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  transition: color 0.2s ease;
+}
+
+.nav-label {
+  animation: fadeIn 0.2s ease both;
+}
+
+.nav-indicator {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 24px;
+  background: var(--color-accent);
+  border-radius: 0 3px 3px 0;
+  animation: scaleIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* ── Bottom section ────────────────────────────── */
+.sidebar-bottom {
+  padding: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.collapse-btn {
+  justify-content: center;
+
+  .sidebar:not(.collapsed) & {
+    justify-content: flex-end;
+    padding-right: 18px;
+  }
+}
+
+/* ── Mobile ────────────────────────────────────── */
+@media (max-width: 768px) {
+  .sidebar {
+    width: var(--sidebar-width) !important;
+
+    .logo-text,
+    .nav-label {
+      display: none;
+    }
   }
 
-  .tab-nav__group {
-    width: 100%;
+  .collapse-btn {
+    display: none;
   }
+
+  .nav-item {
+    justify-content: center;
+    padding: 0;
+  }
+}
+
+/* ── Animations ────────────────────────────────── */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: translateY(-50%) scaleY(0); }
+  to   { opacity: 1; transform: translateY(-50%) scaleY(1); }
 }
