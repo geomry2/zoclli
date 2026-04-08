@@ -11,8 +11,8 @@ interface StatRow { label: string; count: number; color: string; }
 
 interface MonthlyData {
   month: string;
-  income: number;
-  expenses: number;
+  revenue: number;
+  commissions: number;
   profit: number;
 }
 
@@ -42,6 +42,12 @@ export class Dashboard implements OnInit {
     this.clientService.clients().reduce((sum, c) => sum + (c.dealValue ?? 0), 0)
   );
 
+  readonly totalCommissions = computed(() =>
+    this.clientService.clients().reduce((sum, c) => sum + getCommissionAmount(c), 0)
+  );
+
+  readonly totalProfit = computed(() => this.totalRevenue() - this.totalCommissions());
+
   readonly avgDeal = computed(() => {
     const active = this.clientService.clients().filter(c => c.dealValue > 0);
     return active.length ? this.totalRevenue() / active.length : 0;
@@ -64,10 +70,22 @@ export class Dashboard implements OnInit {
     return total ? Math.round(this.completedDeals() / total * 100) : 0;
   });
 
-  readonly revenuePercent = computed(() => {
-    // Show as percentage of a reasonable target
-    const rev = this.totalRevenue();
-    return rev > 0 ? Math.min(100, Math.round(rev / (rev * 1.5) * 100)) : 0;
+  /** Pipeline conversion: clients / (clients + all leads) */
+  readonly pipelineConversion = computed(() => {
+    const total = this.totalClients() + this.totalLeads();
+    return total ? Math.round(this.totalClients() / total * 100) : 0;
+  });
+
+  /** New leads this month (leads with firstInteractionDate in current month) */
+  readonly newLeadsThisMonth = computed(() => {
+    const now = new Date();
+    const m = now.getMonth();
+    const y = now.getFullYear();
+    return this.leadService.leads().filter(l => {
+      if (!l.firstInteractionDate) return false;
+      const d = new Date(l.firstInteractionDate);
+      return d.getMonth() === m && d.getFullYear() === y;
+    }).length;
   });
 
   readonly leadsByStatus = computed((): StatRow[] => {
@@ -154,72 +172,68 @@ export class Dashboard implements OnInit {
       .slice(0, 5);
   });
 
-  /** Generate monthly revenue data for the chart */
+  /** Monthly revenue data for the chart: Revenue, Commissions, Net Profit */
   readonly monthlyRevenue = computed((): MonthlyData[] => {
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const clients = this.clientService.clients();
-    const monthlyIncome = new Array(12).fill(0);
+    const monthlyRev = new Array(12).fill(0);
+    const monthlyComm = new Array(12).fill(0);
 
     for (const c of clients) {
       if (c.purchaseDate) {
         const d = new Date(c.purchaseDate);
         const m = d.getMonth();
-        monthlyIncome[m] += c.dealValue ?? 0;
+        monthlyRev[m] += c.dealValue ?? 0;
+        monthlyComm[m] += getCommissionAmount(c);
       }
     }
 
-    return months.map((month, i) => {
-      const income = monthlyIncome[i];
-      const expenses = Math.round(income * 0.65);
-      return { month, income, expenses, profit: income - expenses };
-    });
+    return months.map((month, i) => ({
+      month,
+      revenue: monthlyRev[i],
+      commissions: monthlyComm[i],
+      profit: monthlyRev[i] - monthlyComm[i],
+    }));
   });
 
   readonly chartMaxValue = computed(() => {
     const data = this.monthlyRevenue();
-    const allValues = data.flatMap(d => [d.income, d.expenses, d.profit]);
+    const allValues = data.flatMap(d => [d.revenue, d.commissions, d.profit]);
     return Math.max(...allValues, 1);
   });
 
-  /** SVG path data for the revenue chart lines */
-  readonly incomePath = computed(() => this.buildChartPath('income'));
-  readonly expensesPath = computed(() => this.buildChartPath('expenses'));
+  readonly revenuePath = computed(() => this.buildChartPath('revenue'));
+  readonly commissionsPath = computed(() => this.buildChartPath('commissions'));
   readonly profitPath = computed(() => this.buildChartPath('profit'));
 
-  readonly chartRevenueSummary = computed(() => {
+  readonly chartSummary = computed(() => {
     const data = this.monthlyRevenue();
     return {
-      income: data.reduce((s, d) => s + d.income, 0),
-      expenses: data.reduce((s, d) => s + d.expenses, 0),
+      revenue: data.reduce((s, d) => s + d.revenue, 0),
+      commissions: data.reduce((s, d) => s + d.commissions, 0),
       profit: data.reduce((s, d) => s + d.profit, 0),
     };
   });
 
-  readonly incomeTrend = computed(() => {
-    const data = this.monthlyRevenue();
-    const recent = data.slice(-3).reduce((s, d) => s + d.income, 0);
-    const earlier = data.slice(-6, -3).reduce((s, d) => s + d.income, 0);
-    if (earlier === 0) return 0;
-    return Math.round((recent - earlier) / earlier * 100);
-  });
+  readonly revenueTrend = computed(() => this.calcTrend('revenue'));
+  readonly commissionsTrend = computed(() => this.calcTrend('commissions'));
+  readonly profitTrend = computed(() => this.calcTrend('profit'));
 
-  readonly expensesTrend = computed(() => {
-    const data = this.monthlyRevenue();
-    const recent = data.slice(-3).reduce((s, d) => s + d.expenses, 0);
-    const earlier = data.slice(-6, -3).reduce((s, d) => s + d.expenses, 0);
-    if (earlier === 0) return 0;
-    return Math.round((recent - earlier) / earlier * 100);
-  });
+  readonly activeChartFilter = signal<'all' | 'revenue' | 'commissions' | 'profit'>('all');
 
-  readonly profitTrend = computed(() => {
-    const data = this.monthlyRevenue();
-    const recent = data.slice(-3).reduce((s, d) => s + d.profit, 0);
-    const earlier = data.slice(-6, -3).reduce((s, d) => s + d.profit, 0);
-    if (earlier === 0) return 0;
-    return Math.round((recent - earlier) / earlier * 100);
+  /** Visit statistic mini sparkline points (derived from activity timestamps) */
+  readonly activitySparkline = computed(() => {
+    const acts = this.activityService.activities();
+    // Group last 7 days
+    const now = Date.now();
+    const days = [0, 0, 0, 0, 0, 0, 0];
+    for (const a of acts) {
+      const age = Math.floor((now - new Date(a.timestamp).getTime()) / 86400000);
+      if (age >= 0 && age < 7) days[6 - age]++;
+    }
+    const max = Math.max(...days, 1);
+    return days.map(d => Math.round((d / max) * 100));
   });
-
-  readonly activeChartFilter = signal<'all' | 'income' | 'expenses' | 'profit'>('all');
 
   ngOnInit() {
     requestAnimationFrame(() => {
@@ -228,11 +242,19 @@ export class Dashboard implements OnInit {
     });
   }
 
-  setChartFilter(filter: 'all' | 'income' | 'expenses' | 'profit') {
+  setChartFilter(filter: 'all' | 'revenue' | 'commissions' | 'profit') {
     this.activeChartFilter.set(filter);
   }
 
-  private buildChartPath(field: 'income' | 'expenses' | 'profit'): string {
+  private calcTrend(field: 'revenue' | 'commissions' | 'profit'): number {
+    const data = this.monthlyRevenue();
+    const recent = data.slice(-3).reduce((s, d) => s + d[field], 0);
+    const earlier = data.slice(-6, -3).reduce((s, d) => s + d[field], 0);
+    if (earlier === 0) return 0;
+    return Math.round((recent - earlier) / earlier * 100);
+  }
+
+  private buildChartPath(field: 'revenue' | 'commissions' | 'profit'): string {
     const data = this.monthlyRevenue();
     const max = this.chartMaxValue();
     const chartWidth = 720;
@@ -249,7 +271,6 @@ export class Dashboard implements OnInit {
       return { x, y };
     });
 
-    // Smooth curve using cubic bezier
     let path = `M ${points[0].x} ${points[0].y}`;
     for (let i = 1; i < points.length; i++) {
       const prev = points[i - 1];
@@ -261,15 +282,14 @@ export class Dashboard implements OnInit {
     return path;
   }
 
-  buildAreaPath(field: 'income' | 'expenses' | 'profit'): string {
-    const linePath = field === 'income' ? this.incomePath() :
-                     field === 'expenses' ? this.expensesPath() : this.profitPath();
+  buildAreaPath(field: 'revenue' | 'commissions' | 'profit'): string {
+    const linePath = field === 'revenue' ? this.revenuePath() :
+                     field === 'commissions' ? this.commissionsPath() : this.profitPath();
     if (!linePath) return '';
     const data = this.monthlyRevenue();
-    const chartWidth = 720;
     const chartHeight = 200;
     const padding = 40;
-    const usableWidth = chartWidth - padding * 2;
+    const usableWidth = 720 - padding * 2;
     const lastX = padding + ((data.length - 1) / (data.length - 1)) * usableWidth;
     return `${linePath} L ${lastX} ${chartHeight - 10} L ${padding} ${chartHeight - 10} Z`;
   }
