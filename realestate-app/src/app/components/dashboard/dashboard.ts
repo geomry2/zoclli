@@ -297,26 +297,14 @@ export class Dashboard implements OnInit {
   }
 
   formatCurrency(value: number): string {
-    if (value >= 1_000_000) return '\u20AC' + new Intl.NumberFormat(this.locale(), {
-      notation: 'compact',
-      maximumFractionDigits: 1,
-    }).format(value);
-    if (value >= 1_000) return '\u20AC' + new Intl.NumberFormat(this.locale(), {
-      notation: 'compact',
-      maximumFractionDigits: 0,
-    }).format(value);
+    if (value >= 1_000_000) return '\u20AC' + this.formatCompactNumber(value, 1);
+    if (value >= 1_000) return '\u20AC' + this.formatCompactNumber(value, 0);
     return '\u20AC' + value.toLocaleString(this.locale());
   }
 
   formatCurrencyShort(value: number): string {
-    if (value >= 1_000_000) return '\u20AC' + new Intl.NumberFormat(this.locale(), {
-      notation: 'compact',
-      maximumFractionDigits: 1,
-    }).format(value);
-    if (value >= 1_000) return '\u20AC' + new Intl.NumberFormat(this.locale(), {
-      notation: 'compact',
-      maximumFractionDigits: 0,
-    }).format(value);
+    if (value >= 1_000_000) return '\u20AC' + this.formatCompactNumber(value, 1);
+    if (value >= 1_000) return '\u20AC' + this.formatCompactNumber(value, 0);
     return '\u20AC' + value;
   }
 
@@ -367,5 +355,12 @@ export class Dashboard implements OnInit {
 
   private locale(): string {
     return this.ts.lang() === 'ru' ? 'ru-RU' : 'en-GB';
+  }
+
+  private formatCompactNumber(value: number, maximumFractionDigits: number): string {
+    return new Intl.NumberFormat(this.locale(), {
+      notation: 'compact',
+      maximumFractionDigits,
+    }).format(value).replace(/([kmgbt])/g, match => match.toUpperCase());
   }
 }
