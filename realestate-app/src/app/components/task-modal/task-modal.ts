@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, output, signal } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, computed, inject, input, output, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { TASK_TOPICS, Task, TaskCreateInput, TaskPriority, TaskRelatedEntityType, TaskSource, TaskStatus, TaskTopic } from '../../models/task.model';
@@ -31,11 +31,12 @@ interface TaskDraft {
   templateUrl: './task-modal.html',
   styleUrl: './task-modal.scss'
 })
-export class TaskModal {
+export class TaskModal implements AfterViewInit {
   readonly editTask = input<Task | null>(null);
   readonly relationPrefill = input<{ type: TaskRelatedEntityType; id: string; sourceLabel?: string } | null>(null);
   readonly closed = output<void>();
   readonly saved = output<void>();
+  readonly titleInput = viewChild<ElementRef<HTMLInputElement>>('titleInput');
 
   readonly ts = inject(TranslationService);
   private readonly taskParser = inject(TaskParserService);
@@ -111,6 +112,12 @@ export class TaskModal {
           description: prefill.sourceLabel ? `${prefill.sourceLabel}\n` : current.description,
         }));
       }
+    });
+  }
+
+  ngAfterViewInit() {
+    queueMicrotask(() => {
+      this.titleInput()?.nativeElement.focus({ preventScroll: true });
     });
   }
 

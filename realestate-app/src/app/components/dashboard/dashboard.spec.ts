@@ -55,7 +55,17 @@ function createDashboard(options?: {
   const clientService = { clients: signal(options?.clients ?? []) };
   const leadService = { leads: signal(options?.leads ?? []) };
   const activityService = { activities: signal(options?.activities ?? []) };
-  const translationService = { t: vi.fn((key: string) => key) };
+  const translationService = {
+    lang: signal<'en' | 'ru'>('en'),
+    t: vi.fn((key: string, params?: Record<string, string | number>) => {
+      const dict: Record<string, string> = {
+        'time.justNow': 'just now',
+        'time.minutesAgo': `${params?.['n']}m ago`,
+        'time.hoursAgo': `${params?.['n']}h ago`,
+      };
+      return dict[key] ?? key;
+    }),
+  };
 
   const injector = createEnvironmentInjector([
     { provide: TranslationService, useValue: translationService },
@@ -95,21 +105,40 @@ describe('Dashboard', () => {
     });
     injector = createdInjector;
 
-    expect(dashboard.totalClients()).toBe(2);
+    expect(dashboard.totalClients()).toBe(1);
     expect(dashboard.totalLeads()).toBe(2);
-    expect(dashboard.totalRevenue()).toBe(150000);
-    expect(dashboard.avgDeal()).toBe(75000);
+    expect(dashboard.totalRevenue()).toBe(100000);
+    expect(dashboard.avgDeal()).toBe(100000);
+    expect(dashboard.completedDeals()).toBe(1);
+    expect(dashboard.completedDealsPercent()).toBe(100);
     expect(dashboard.overdueCount()).toBe(1);
     expect(dashboard.dueTodayCount()).toBe(1);
     expect(dashboard.activeClientsCount()).toBe(1);
-    expect(dashboard.winRate()).toBe(67);
+    expect(dashboard.winRate()).toBe(50);
 
     clientService.clients.set([...clientService.clients(), buildClient({ id: 'c3', dealValue: 25000 })]);
     leadService.leads.set([...leadService.leads(), buildLead({ id: 'l3', status: 'new' })]);
 
-    expect(dashboard.totalClients()).toBe(3);
+    expect(dashboard.totalClients()).toBe(2);
     expect(dashboard.totalLeads()).toBe(3);
-    expect(dashboard.totalRevenue()).toBe(175000);
+    expect(dashboard.totalRevenue()).toBe(125000);
+    expect(dashboard.completedDeals()).toBe(2);
+  });
+
+  it('counts inactive records with deal data as completed deals', () => {
+    const { dashboard, injector: createdInjector } = createDashboard({
+      clients: [
+        buildClient({ id: 'c1', status: 'inactive', dealValue: 120000 }),
+        buildClient({ id: 'c2', status: 'inactive', purchaseDate: '2026-03-10', dealValue: 0 }),
+        buildClient({ id: 'c3', status: 'inactive', dealValue: 0, purchaseDate: '' }),
+        buildClient({ id: 'c4', status: 'closed', dealValue: 990000, purchaseDate: '2024-01-05' }),
+      ],
+    });
+    injector = createdInjector;
+
+    expect(dashboard.completedDeals()).toBe(2);
+    expect(dashboard.completedDealsPercent()).toBe(67);
+    expect(dashboard.totalClients()).toBe(3);
   });
 
   it('builds property mix and top realtor summaries in the expected order', () => {

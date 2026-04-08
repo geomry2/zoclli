@@ -234,6 +234,8 @@
                 @switch (column.key) {
                   @case ('name') { {{ client.name }} }
                   @case ('phone') { {{ client.phone }} }
+                  @case ('buildingName') { {{ client.buildingName || '—' }} }
+                  @case ('apartmentNumber') { {{ client.apartmentNumber || '—' }} }
                   @case ('propertyType') { <span class="badge badge-{{ client.propertyType }}">{{ ('proptype.' + client.propertyType) | translate }}</span> }
                   @case ('status') { <span class="badge badge-{{ client.status }}">{{ ('status.' + client.status) | translate }}</span> }
                   @case ('dealValue') { {{ formatDealValue(client.dealValue) }} }

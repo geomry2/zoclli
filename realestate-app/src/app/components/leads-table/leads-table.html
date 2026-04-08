@@ -51,22 +51,30 @@
 
     <div class="filter-group filter-group-range">
       <span class="filter-label">{{ 'filter.budgetRange' | translate }}</span>
-      <div class="filter-range-row">
-        <input
-          class="filter-input"
-          type="number"
-          min="0"
-          [attr.placeholder]="'filter.min' | translate"
-          [value]="budgetRange().min"
-          (input)="setBudgetRange('min', $any($event.target).value)" />
-        <span class="filter-separator">{{ 'filter.to' | translate }}</span>
-        <input
-          class="filter-input"
-          type="number"
-          min="0"
-          [attr.placeholder]="'filter.max' | translate"
-          [value]="budgetRange().max"
-          (input)="setBudgetRange('max', $any($event.target).value)" />
+      <div class="filter-range-row budget-range-row">
+        <label class="budget-range-field">
+          <span class="budget-range-currency">€</span>
+          <input
+            class="filter-input budget-range-input"
+            type="text"
+            inputmode="numeric"
+            autocomplete="off"
+            [attr.placeholder]="'filter.min' | translate"
+            [value]="budgetRange().min"
+            (input)="setBudgetRange('min', $any($event.target).value)" />
+        </label>
+        <span class="budget-range-divider" aria-hidden="true"></span>
+        <label class="budget-range-field">
+          <span class="budget-range-currency">€</span>
+          <input
+            class="filter-input budget-range-input"
+            type="text"
+            inputmode="numeric"
+            autocomplete="off"
+            [attr.placeholder]="'filter.max' | translate"
+            [value]="budgetRange().max"
+            (input)="setBudgetRange('max', $any($event.target).value)" />
+        </label>
       </div>
     </div>
 

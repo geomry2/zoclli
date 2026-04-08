@@ -10,9 +10,12 @@ import { PropertyCatalogue } from './components/property-catalogue/property-cata
 import { AddUnitModal } from './components/add-unit-modal/add-unit-modal';
 import { LeadsBoard } from './components/leads-board/leads-board';
 import { LeadFollowUps } from './components/lead-follow-ups/lead-follow-ups';
+import { LeadsInsights } from './components/leads-insights/leads-insights';
 import { TaskBoard } from './components/task-board/task-board';
+import { TaskModal } from './components/task-modal/task-modal';
 import { Client } from './models/client.model';
 import { Lead } from './models/lead.model';
+import { Task } from './models/task.model';
 import { Unit } from './models/unit.model';
 import { ClientService } from './services/client.service';
 import { LeadService } from './services/lead.service';
@@ -22,12 +25,12 @@ import { exportToXlsx } from './utils/xlsx.utils';
 import { applySearch } from './utils/csv.utils';
 import { FollowUpFilter, matchesFollowUpFilter } from './utils/follow-up.utils';
 
-type LeadViewMode = 'board' | 'table' | 'followups';
+type LeadViewMode = 'board' | 'table' | 'followups' | 'insights';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [SearchBar, TabNav, ClientsTable, LeadsTable, LeadsBoard, LeadFollowUps, TaskBoard, CreateModal, AddUnitModal, PasswordGate, Dashboard, PropertyCatalogue, TranslatePipe],
+  imports: [SearchBar, TabNav, ClientsTable, LeadsTable, LeadsBoard, LeadFollowUps, LeadsInsights, TaskBoard, TaskModal, CreateModal, AddUnitModal, PasswordGate, Dashboard, PropertyCatalogue, TranslatePipe],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
@@ -36,6 +39,8 @@ export class App {
   readonly activeTab = signal<TabType>('dashboard');
   readonly sidebarCollapsed = signal(true);
   readonly taskRelationPrefill = signal<{ type: 'lead' | 'client' | 'property' | 'deal'; id: string; sourceLabel?: string } | null>(null);
+  readonly editingTask = signal<Task | null>(null);
+  readonly showTaskModal = signal(false);
   readonly leadsViewMode = signal<LeadViewMode>('board');
   readonly leadFollowUpFilter = signal<FollowUpFilter>('all');
   readonly searchQuery = signal<string>('');
@@ -126,10 +131,25 @@ export class App {
   openCreateTask(prefill?: { type: 'lead' | 'client' | 'property' | 'deal'; id: string; sourceLabel?: string }) {
     this.activeTab.set('tasks');
     this.taskRelationPrefill.set(prefill ?? null);
+    this.editingTask.set(null);
+    this.showTaskModal.set(true);
   }
 
   clearTaskPrefill() {
     this.taskRelationPrefill.set(null);
+  }
+
+  openEditTask(task: Task) {
+    this.activeTab.set('tasks');
+    this.taskRelationPrefill.set(null);
+    this.editingTask.set(task);
+    this.showTaskModal.set(true);
+  }
+
+  closeTaskModal() {
+    this.showTaskModal.set(false);
+    this.editingTask.set(null);
+    this.clearTaskPrefill();
   }
 
   openAddUnit(buildingName: string) {

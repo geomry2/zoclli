@@ -50,7 +50,7 @@ describe('LeadsTable', () => {
     localStorage.clear();
   });
 
-  it('filters leads by status, realtor, follow-up date, and overlapping budget range', () => {
+  it('filters leads by status, realtor, follow-up date, and contained budget range', () => {
     const { table, injector: createdInjector } = createLeadsTable([
       buildLead({
         id: 'l1',
@@ -104,11 +104,25 @@ describe('LeadsTable', () => {
     table.toggleRealtor('Bella');
     table.setFollowUpDate('from', '2026-04-01');
     table.setFollowUpDate('to', '2026-04-30');
-    table.setBudgetRange('min', '150000');
-    table.setBudgetRange('max', '250000');
+    table.setBudgetRange('min', '100000');
+    table.setBudgetRange('max', '220000');
 
     expect(table.filteredLeads().map(lead => lead.id)).toEqual(['l1']);
     expect(table.hasActiveFilters()).toBe(true);
+  });
+
+  it('treats budget filter boundaries as inclusive and parses formatted values', () => {
+    const { table, injector: createdInjector } = createLeadsTable([
+      buildLead({ id: 'l1', name: 'Anna', budgetMin: 120000, budgetMax: 250000 }),
+      buildLead({ id: 'l2', name: 'Boris', budgetMin: 100000, budgetMax: 220000 }),
+      buildLead({ id: 'l3', name: 'Clara', budgetMin: 120000, budgetMax: 260000 }),
+    ]);
+    injector = createdInjector;
+
+    table.setBudgetRange('min', '120 000');
+    table.setBudgetRange('max', '250,000');
+
+    expect(table.filteredLeads().map(lead => lead.id)).toEqual(['l1']);
   });
 
   it('sorts leads by budget range and toggles the sort direction', () => {

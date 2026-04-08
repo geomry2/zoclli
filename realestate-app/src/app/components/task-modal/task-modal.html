@@ -1,13 +1,15 @@
-<div class="task-modal-backdrop" (click)="close()">
-  <section class="task-modal" (click)="$event.stopPropagation()">
-    <header class="task-modal__header">
-      <div>
-        <h2>{{ editTask() ? ('tasks.editTitle' | translate) : ('tasks.createTitle' | translate) }}</h2>
-        <p>{{ 'tasks.modalSubtitle' | translate }}</p>
-      </div>
-      <button type="button" class="task-modal__close" (click)="close()">✕</button>
-    </header>
+<div class="task-modal-backdrop" (click)="close()"></div>
 
+<section class="task-modal" (click)="$event.stopPropagation()">
+  <header class="task-modal__header">
+    <div>
+      <h2>{{ editTask() ? ('tasks.editTitle' | translate) : ('tasks.createTitle' | translate) }}</h2>
+      <p>{{ 'tasks.modalSubtitle' | translate }}</p>
+    </div>
+    <button type="button" class="task-modal__close" (click)="close()">✕</button>
+  </header>
+
+  <div class="task-modal__body">
     <div class="task-assist">
       <div class="task-assist__intro">
         <div>
@@ -46,7 +48,7 @@
     <div class="task-form-grid">
       <label>
         {{ 'tasks.fieldTitle' | translate }}
-        <input [ngModel]="draft().title" (ngModelChange)="draft.update(v => ({...v, title: $event}))" />
+        <input #titleInput [ngModel]="draft().title" (ngModelChange)="draft.update(v => ({...v, title: $event}))" />
       </label>
 
       <label>
@@ -114,12 +116,12 @@
     @if (error()) {
       <div class="task-error">{{ error() }}</div>
     }
+  </div>
 
-    <footer class="task-modal__footer">
-      <button type="button" class="ghost" (click)="close()">{{ 'btn.cancel' | translate }}</button>
-      <button type="button" class="primary" (click)="submit()" [disabled]="saving()">
-        {{ saving() ? ('btn.saving' | translate) : (editTask() ? ('btn.saveChanges' | translate) : ('tasks.createAction' | translate)) }}
-      </button>
-    </footer>
-  </section>
-</div>
+  <footer class="task-modal__footer">
+    <button type="button" class="ghost" (click)="close()">{{ 'btn.cancel' | translate }}</button>
+    <button type="button" class="primary" (click)="submit()" [disabled]="saving()">
+      {{ saving() ? ('btn.saving' | translate) : (editTask() ? ('btn.saveChanges' | translate) : ('tasks.createAction' | translate)) }}
+    </button>
+  </footer>
+</section>
