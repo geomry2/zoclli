@@ -6,11 +6,11 @@
     <div class="hero-left">
       <div class="hero-stats">
         <div class="hero-stat" style="animation-delay: 0ms">
-          <span class="hero-stat__label">Number of Deals</span>
+          <span class="hero-stat__label">{{ 'dash.totalClients' | translate }}</span>
           <span class="hero-stat__value">{{ totalClients() }}</span>
         </div>
         <div class="hero-stat" style="animation-delay: 80ms">
-          <span class="hero-stat__label">Active Leads</span>
+          <span class="hero-stat__label">{{ 'dash.totalLeads' | translate }}</span>
           <span class="hero-stat__value">{{ totalLeads() }}</span>
         </div>
       </div>
@@ -21,7 +21,7 @@
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
           </div>
           <div class="progress-card__body">
-            <span class="progress-card__label">Completed Deals</span>
+            <span class="progress-card__label">{{ 'dash.completedDeals' | translate }}</span>
             <div class="progress-card__row">
               <span class="progress-card__value">{{ completedDeals() }}</span>
               <span class="progress-card__pct">{{ completedDealsPercent() }}%</span>
@@ -37,7 +37,7 @@
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
           </div>
           <div class="progress-card__body">
-            <span class="progress-card__label">Total Revenue</span>
+            <span class="progress-card__label">{{ 'dash.revenue' | translate }}</span>
             <div class="progress-card__row">
               <span class="progress-card__value progress-card__value--green">{{ formatCurrency(totalRevenue()) }}</span>
               <span class="progress-card__pct">{{ pipelineConversion() }}%</span>
@@ -54,9 +54,9 @@
     <div class="hero-right">
       <div class="feature-card" style="animation-delay: 160ms">
         <div class="feature-card__header">
-          <span class="feature-card__eyebrow">Pipeline Overview</span>
-          <h3 class="feature-card__title">Lead Pipeline</h3>
-          <p class="feature-card__desc">Track your leads through every stage of the sales process.</p>
+          <span class="feature-card__eyebrow">{{ 'dash.pipelineOverview' | translate }}</span>
+          <h3 class="feature-card__title">{{ 'dash.leadPipeline' | translate }}</h3>
+          <p class="feature-card__desc">{{ 'dash.leadPipelineDesc' | translate }}</p>
         </div>
         <div class="pipeline-bars">
           @for (row of leadsByStatus(); track row.label) {
@@ -72,7 +72,7 @@
         </div>
         <div class="feature-card__actions">
           <button class="feature-btn" type="button" (click)="openFollowUps('all')">
-            View Follow-ups
+            {{ 'dash.viewFollowUps' | translate }}
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
           </button>
         </div>
@@ -86,21 +86,21 @@
     <div class="card card-chart" style="animation-delay: 300ms">
       <div class="card-header">
         <div class="card-header-left">
-          <h2 class="card-title">Revenue</h2>
-          <span class="card-subtitle">Your Revenue This Year</span>
+          <h2 class="card-title">{{ 'dash.revenue' | translate }}</h2>
+          <span class="card-subtitle">{{ 'dash.revenueThisYear' | translate }}</span>
         </div>
         <div class="chart-filters">
-          <button class="chart-filter-btn" [class.active]="activeChartFilter() === 'all'" (click)="setChartFilter('all')">All</button>
-          <button class="chart-filter-btn" [class.active]="activeChartFilter() === 'revenue'" (click)="setChartFilter('revenue')">Revenue</button>
-          <button class="chart-filter-btn" [class.active]="activeChartFilter() === 'commissions'" (click)="setChartFilter('commissions')">Commissions</button>
-          <button class="chart-filter-btn" [class.active]="activeChartFilter() === 'profit'" (click)="setChartFilter('profit')">Profit</button>
+          <button class="chart-filter-btn" [class.active]="activeChartFilter() === 'all'" (click)="setChartFilter('all')">{{ 'followUps.all' | translate }}</button>
+          <button class="chart-filter-btn" [class.active]="activeChartFilter() === 'revenue'" (click)="setChartFilter('revenue')">{{ 'dash.revenue' | translate }}</button>
+          <button class="chart-filter-btn" [class.active]="activeChartFilter() === 'commissions'" (click)="setChartFilter('commissions')">{{ 'dash.commissions' | translate }}</button>
+          <button class="chart-filter-btn" [class.active]="activeChartFilter() === 'profit'" (click)="setChartFilter('profit')">{{ 'dash.netProfit' | translate }}</button>
         </div>
       </div>
 
       <div class="revenue-metrics">
         <div class="rev-metric">
           <span class="rev-metric-dot" style="background: #22C55E"></span>
-          <span class="rev-metric-label">Revenue</span>
+          <span class="rev-metric-label">{{ 'dash.revenue' | translate }}</span>
           <span class="rev-metric-value">{{ formatCurrency(chartSummary().revenue) }}</span>
           <span class="rev-metric-trend" [class.positive]="revenueTrend() >= 0" [class.negative]="revenueTrend() < 0">
             {{ revenueTrend() >= 0 ? '&#9650;' : '&#9660;' }} {{ revenueTrend() >= 0 ? revenueTrend() : -revenueTrend() }}%
@@ -108,7 +108,7 @@
         </div>
         <div class="rev-metric">
           <span class="rev-metric-dot" style="background: #F59E0B"></span>
-          <span class="rev-metric-label">Commissions</span>
+          <span class="rev-metric-label">{{ 'dash.commissions' | translate }}</span>
           <span class="rev-metric-value">{{ formatCurrency(chartSummary().commissions) }}</span>
           <span class="rev-metric-trend" [class.positive]="commissionsTrend() < 0" [class.negative]="commissionsTrend() >= 0">
             {{ commissionsTrend() >= 0 ? '&#9650;' : '&#9660;' }} {{ commissionsTrend() >= 0 ? commissionsTrend() : -commissionsTrend() }}%
@@ -116,7 +116,7 @@
         </div>
         <div class="rev-metric">
           <span class="rev-metric-dot" style="background: #3B82F6"></span>
-          <span class="rev-metric-label">Net Profit</span>
+          <span class="rev-metric-label">{{ 'dash.netProfit' | translate }}</span>
           <span class="rev-metric-value">{{ formatCurrency(chartSummary().profit) }}</span>
           <span class="rev-metric-trend" [class.positive]="profitTrend() >= 0" [class.negative]="profitTrend() < 0">
             {{ profitTrend() >= 0 ? '&#9650;' : '&#9660;' }} {{ profitTrend() >= 0 ? profitTrend() : -profitTrend() }}%
@@ -132,14 +132,6 @@
           <line x1="40" y1="160" x2="680" y2="160" stroke="#F1F5F9" stroke-width="1"/>
           <line x1="40" y1="200" x2="680" y2="200" stroke="#E8ECF1" stroke-width="1"/>
 
-          @if (chartMaxValue() > 0) {
-            <text x="34" y="14" text-anchor="end" class="chart-label">{{ formatCurrencyShort(chartMaxValue()) }}</text>
-            <text x="34" y="64" text-anchor="end" class="chart-label">{{ formatCurrencyShort(chartMaxValue() * 0.75) }}</text>
-            <text x="34" y="114" text-anchor="end" class="chart-label">{{ formatCurrencyShort(chartMaxValue() * 0.5) }}</text>
-            <text x="34" y="164" text-anchor="end" class="chart-label">{{ formatCurrencyShort(chartMaxValue() * 0.25) }}</text>
-            <text x="34" y="204" text-anchor="end" class="chart-label">0</text>
-          }
-
           @if (activeChartFilter() === 'all' || activeChartFilter() === 'revenue') {
             <path [attr.d]="buildAreaPath('revenue')" fill="url(#areaGreen)" class="chart-area"/>
             <path [attr.d]="revenuePath()" fill="none" stroke="#22C55E" stroke-width="2.5" stroke-linecap="round" class="chart-line"/>
@@ -151,11 +143,6 @@
           @if (activeChartFilter() === 'all' || activeChartFilter() === 'profit') {
             <path [attr.d]="buildAreaPath('profit')" fill="url(#areaBlue)" class="chart-area"/>
             <path [attr.d]="profitPath()" fill="none" stroke="#3B82F6" stroke-width="2.5" stroke-linecap="round" class="chart-line"/>
-          }
-
-          @for (d of monthlyRevenue(); track d.month; let i = $index) {
-            <text [attr.x]="40 + (i / 11) * 640" y="210" text-anchor="middle" class="chart-label chart-month"
-              [style.font-weight]="d.revenue > 0 ? '600' : '400'">{{ d.month }}</text>
           }
 
           <defs>
@@ -170,6 +157,27 @@
             </linearGradient>
           </defs>
         </svg>
+
+        @if (chartMaxValue() > 0) {
+          <div class="chart-y-axis" aria-hidden="true">
+            <span class="chart-axis-label">{{ formatCurrencyShort(chartMaxValue()) }}</span>
+            <span class="chart-axis-label">{{ formatCurrencyShort(chartMaxValue() * 0.75) }}</span>
+            <span class="chart-axis-label">{{ formatCurrencyShort(chartMaxValue() * 0.5) }}</span>
+            <span class="chart-axis-label">{{ formatCurrencyShort(chartMaxValue() * 0.25) }}</span>
+            <span class="chart-axis-label">0</span>
+          </div>
+        }
+
+        <div class="chart-x-axis" aria-hidden="true">
+          @for (d of monthlyRevenue(); track d.month; let i = $index) {
+            <span
+              class="chart-axis-label chart-axis-label--month"
+              [class.active]="d.revenue > 0"
+              [style.left.%]="(i / 11) * 100">
+              {{ d.month }}
+            </span>
+          }
+        </div>
       </div>
     </div>
 
@@ -177,20 +185,20 @@
     <div class="sidebar-stats">
       <!-- Sales Statistic -->
       <div class="stat-card" style="animation-delay: 350ms">
-        <h4 class="stat-card__title">Sales Statistic</h4>
+        <h4 class="stat-card__title">{{ 'dash.salesStats' | translate }}</h4>
         <div class="stat-card__grid">
           <div class="stat-card__metric">
             <span class="stat-card__metric-icon">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
             </span>
             <div>
-              <span class="stat-card__metric-label">Total Profit</span>
+              <span class="stat-card__metric-label">{{ 'dash.totalProfit' | translate }}</span>
               <span class="stat-card__metric-value">{{ formatCurrency(totalProfit()) }}</span>
             </div>
           </div>
           <div class="stat-card__metric">
             <div>
-              <span class="stat-card__metric-label">Avg Deal</span>
+              <span class="stat-card__metric-label">{{ 'dash.avgDeal' | translate }}</span>
               <span class="stat-card__metric-value stat-card__metric-value--sm">{{ formatCurrency(avgDeal()) }}</span>
             </div>
           </div>
@@ -200,9 +208,9 @@
       <!-- Activity / Visit Statistic -->
       <div class="stat-card" style="animation-delay: 420ms">
         <div class="stat-card__header-row">
-          <h4 class="stat-card__title">Activity</h4>
+          <h4 class="stat-card__title">{{ 'dash.activity' | translate }}</h4>
           <div class="stat-card__rate">
-            <span class="stat-card__rate-label">Rate</span>
+            <span class="stat-card__rate-label">{{ 'dash.winRate' | translate }}</span>
             @if (winRate() !== null) {
               <span class="stat-card__rate-value">{{ winRate() }}%</span>
             }
@@ -249,7 +257,7 @@
       @for (row of clientsByStatus(); track row.label) {
         <div class="stat-row">
           <span class="stat-dot" [style.background]="row.color"></span>
-          <span class="stat-label">{{ ('status.' + row.label.toLowerCase()) | translate }}</span>
+          <span class="stat-label">{{ ('dash.clientDealStatus.' + row.label.toLowerCase()) | translate }}</span>
           <div class="bar-wrap">
             <div class="bar" [style.width.%]="pct(row.count, totalClients())" [style.background]="row.color"></div>
           </div>

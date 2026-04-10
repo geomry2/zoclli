@@ -104,11 +104,3 @@
     </div>
   }
 </div>
-
-@if (showModal()) {
-  <app-task-modal
-    [editTask]="editTask()"
-    [relationPrefill]="relationPrefill()"
-    (closed)="closeModal()"
-    (saved)="closeModal()" />
-}

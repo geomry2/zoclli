@@ -9,6 +9,24 @@ import { Unit } from '../../models/unit.model';
 import { UnitService } from '../../services/unit.service';
 import { openPrintableDocument } from '../../utils/pdf.utils';
 
+const PROPERTY_CARD_PLACEHOLDERS = [
+  {
+    image: 'https://images.pexels.com/photos/19407406/pexels-photo-19407406.jpeg?auto=compress&cs=tinysrgb&w=1200',
+    accent: 'rgba(9, 32, 24, 0.82)',
+    glow: 'rgba(45, 106, 79, 0.42)',
+  },
+  {
+    image: 'https://images.pexels.com/photos/4890695/pexels-photo-4890695.jpeg?auto=compress&cs=tinysrgb&w=1200',
+    accent: 'rgba(22, 32, 44, 0.82)',
+    glow: 'rgba(59, 130, 246, 0.34)',
+  },
+  {
+    image: 'https://images.pexels.com/photos/11888157/pexels-photo-11888157.jpeg?auto=compress&cs=tinysrgb&w=1200',
+    accent: 'rgba(47, 29, 16, 0.82)',
+    glow: 'rgba(212, 160, 23, 0.3)',
+  },
+] as const;
+
 interface PropertyEntry {
   id: string;
   unitId?: string;
@@ -33,6 +51,17 @@ interface PropertyRow {
   entries: PropertyEntry[];
   totalValue: number;
   statusCounts: Record<string, number>;
+  previewUnits: string[];
+  averageDealValue: number;
+  clientLinkedCount: number;
+  activeCount: number;
+  inactiveCount: number;
+  closedCount: number;
+  primaryType: string;
+  hasMixedTypes: boolean;
+  heroImage: string;
+  heroAccent: string;
+  heroGlow: string;
 }
 
 @Component({
@@ -134,9 +163,18 @@ export class PropertyCatalogue {
           acc[entry.status] = (acc[entry.status] ?? 0) + 1;
           return acc;
         }, {} as Record<string, number>);
+        const typeCounts = entries.reduce((acc, entry) => {
+          const type = entry.propertyType || 'apartment';
+          acc[type] = (acc[type] ?? 0) + 1;
+          return acc;
+        }, {} as Record<string, number>);
         const units = [...new Set(entries.map(entry => entry.apartmentNumber).filter(Boolean))].sort((a, b) =>
           a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' })
         );
+        const valuedEntries = entries.filter(entry => (entry.dealValue ?? 0) > 0);
+        const [primaryType = 'apartment'] = Object.entries(typeCounts)
+          .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0] ?? [];
+        const placeholder = this.placeholderForBuilding(building);
 
         return {
           building,
@@ -146,6 +184,19 @@ export class PropertyCatalogue {
           entries,
           totalValue: entries.reduce((sum, entry) => sum + (entry.dealValue ?? 0), 0),
           statusCounts,
+          previewUnits: units.slice(0, 4),
+          averageDealValue: valuedEntries.length
+            ? valuedEntries.reduce((sum, entry) => sum + (entry.dealValue ?? 0), 0) / valuedEntries.length
+            : 0,
+          clientLinkedCount: entries.filter(entry => !entry.isStandalone).length,
+          activeCount: statusCounts['active'] ?? 0,
+          inactiveCount: statusCounts['inactive'] ?? 0,
+          closedCount: statusCounts['closed'] ?? 0,
+          primaryType,
+          hasMixedTypes: Object.keys(typeCounts).length > 1,
+          heroImage: placeholder.image,
+          heroAccent: placeholder.accent,
+          heroGlow: placeholder.glow,
         };
       })
       .sort((a, b) => b.totalValue - a.totalValue);
@@ -154,6 +205,9 @@ export class PropertyCatalogue {
   readonly totalBuildings = computed(() => this.properties().length);
   readonly totalUnits = computed(() =>
     this.properties().reduce((s, p) => s + p.units.length, 0)
+  );
+  readonly totalPortfolioValue = computed(() =>
+    this.properties().reduce((sum, property) => sum + property.totalValue, 0)
   );
 
   toggleBuilding(name: string) {
@@ -390,6 +444,14 @@ export class PropertyCatalogue {
     return '€' + value.toLocaleString('en-US');
   }
 
+  propertyTypeLabel(prop: PropertyRow): string {
+    return prop.hasMixedTypes ? this.ts.t('prop.mixedInventory') : this.ts.t(`proptype.${prop.primaryType}`);
+  }
+
+  remainingUnits(prop: PropertyRow): number {
+    return Math.max(0, prop.units.length - prop.previewUnits.length);
+  }
+
   private formatPdfCurrency(value: number): string {
     return '€' + value.toLocaleString('en-US');
   }
@@ -407,5 +469,10 @@ export class PropertyCatalogue {
   private findUnit(id?: string): Unit | undefined {
     if (!id) return undefined;
     return this.unitService.units().find(unit => unit.id === id);
+  }
+
+  private placeholderForBuilding(building: string) {
+    const hash = [...building].reduce((sum, char) => sum + char.charCodeAt(0), 0);
+    return PROPERTY_CARD_PLACEHOLDERS[hash % PROPERTY_CARD_PLACEHOLDERS.length];
   }
 }

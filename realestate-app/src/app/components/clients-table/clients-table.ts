@@ -26,7 +26,7 @@ import {
   uniqueValues,
 } from '../../utils/table.utils';
 
-type ClientSortKey = 'name' | 'phone' | 'propertyType' | 'status' | 'dealValue' | 'realtorName';
+type ClientSortKey = 'name' | 'phone' | 'buildingName' | 'apartmentNumber' | 'propertyType' | 'status' | 'dealValue' | 'realtorName';
 type ClientColumnKey = ClientSortKey;
 
 interface ClientColumnDefinition {
@@ -37,6 +37,8 @@ interface ClientColumnDefinition {
 const CLIENT_COLUMNS: ClientColumnDefinition[] = [
   { key: 'name', label: 'col.name' },
   { key: 'phone', label: 'col.phone' },
+  { key: 'buildingName', label: 'col.building' },
+  { key: 'apartmentNumber', label: 'col.unit' },
   { key: 'propertyType', label: 'col.propertyType' },
   { key: 'status', label: 'col.status' },
   { key: 'dealValue', label: 'col.dealValue' },
@@ -196,6 +198,10 @@ export class ClientsTable {
         return client.name || '-';
       case 'phone':
         return client.phone || '-';
+      case 'buildingName':
+        return client.buildingName || '-';
+      case 'apartmentNumber':
+        return client.apartmentNumber || '-';
       case 'propertyType':
         return this.ts.t(`proptype.${client.propertyType}`);
       case 'status':
@@ -380,6 +386,8 @@ export class ClientsTable {
   private readonly sortAccessors: Record<ClientSortKey, (client: Client) => unknown> = {
     name: client => client.name,
     phone: client => client.phone,
+    buildingName: client => client.buildingName,
+    apartmentNumber: client => client.apartmentNumber,
     propertyType: client => this.ts.t(`proptype.${client.propertyType}`),
     status: client => this.ts.t(`status.${client.status}`),
     dealValue: client => client.dealValue,

@@ -1,9 +1,8 @@
-import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
+import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { TASK_TOPICS, Task, TaskStatus, TaskTopic } from '../../models/task.model';
 import { TaskService } from '../../services/task.service';
 import { TranslationService } from '../../services/translation.service';
-import { TaskModal } from '../task-modal/task-modal';
 import { applySearch } from '../../utils/csv.utils';
 
 interface TaskColumn {
@@ -23,15 +22,15 @@ type TaskTopicFilter = 'all' | TaskTopic;
 @Component({
   selector: 'app-task-board',
   standalone: true,
-  imports: [TranslatePipe, TaskModal],
+  imports: [TranslatePipe],
   templateUrl: './task-board.html',
   styleUrl: './task-board.scss'
 })
 export class TaskBoard {
   readonly ts = inject(TranslationService);
   readonly searchQuery = input<string>('');
-  readonly relationPrefill = input<{ type: 'lead' | 'client' | 'property' | 'deal'; id: string; sourceLabel?: string } | null>(null);
-  readonly prefillConsumed = output<void>();
+  readonly createRequest = output<void>();
+  readonly editRequest = output<Task>();
 
   private readonly taskService = inject(TaskService);
 
@@ -40,8 +39,6 @@ export class TaskBoard {
   readonly draggedTaskId = signal<string | null>(null);
   readonly selectedTopic = signal<TaskTopicFilter>('all');
   readonly dropTargetKey = signal<string | null>(null);
-  readonly editTask = signal<Task | null>(null);
-  readonly showModal = signal(false);
   readonly taskError = computed(() => this.taskService.error());
 
   readonly filteredTasks = computed(() =>
@@ -65,30 +62,12 @@ export class TaskBoard {
     }));
   });
 
-  constructor() {
-    effect(() => {
-      const prefill = this.relationPrefill();
-      if (prefill && !this.showModal()) {
-        this.editTask.set(null);
-        this.showModal.set(true);
-        this.prefillConsumed.emit();
-      }
-    });
-  }
-
   openCreate() {
-    this.editTask.set(null);
-    this.showModal.set(true);
+    this.createRequest.emit();
   }
 
   openEdit(task: Task) {
-    this.editTask.set(task);
-    this.showModal.set(true);
-  }
-
-  closeModal() {
-    this.showModal.set(false);
-    this.editTask.set(null);
+    this.editRequest.emit(task);
   }
 
   setTopicFilter(topic: TaskTopicFilter) {

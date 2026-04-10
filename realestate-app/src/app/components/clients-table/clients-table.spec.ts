@@ -145,6 +145,8 @@ describe('ClientsTable', () => {
     expect(table.visibleClientColumns().map(column => column.key)).toEqual([
       'name',
       'phone',
+      'buildingName',
+      'apartmentNumber',
       'propertyType',
       'status',
       'dealValue',
@@ -157,6 +159,8 @@ describe('ClientsTable', () => {
     expect(table.visibleClientColumns().map(column => column.key)).toEqual([
       'name',
       'phone',
+      'buildingName',
+      'apartmentNumber',
       'propertyType',
       'status',
       'realtorName',
@@ -165,12 +169,16 @@ describe('ClientsTable', () => {
     expect(JSON.parse(localStorage.getItem('clients-table-visible-columns') ?? '[]')).toEqual([
       'name',
       'phone',
+      'buildingName',
+      'apartmentNumber',
       'propertyType',
       'status',
       'realtorName',
     ]);
 
     table.toggleColumnVisibility('phone');
+    table.toggleColumnVisibility('buildingName');
+    table.toggleColumnVisibility('apartmentNumber');
     table.toggleColumnVisibility('propertyType');
     table.toggleColumnVisibility('status');
     table.toggleColumnVisibility('realtorName');
@@ -183,6 +191,8 @@ describe('ClientsTable', () => {
     expect(table.visibleClientColumns().map(column => column.key)).toEqual([
       'name',
       'phone',
+      'buildingName',
+      'apartmentNumber',
       'propertyType',
       'status',
       'dealValue',
@@ -195,6 +205,8 @@ describe('ClientsTable', () => {
       id: 'c1',
       name: 'Anna',
       phone: '+357 555 0101',
+      buildingName: 'Sunset Park',
+      apartmentNumber: 'A-204',
       dealValue: 420000,
       realtorName: 'Bella',
     });
@@ -203,14 +215,20 @@ describe('ClientsTable', () => {
 
     expect(table.mobileClientColumns().map(column => column.key)).toEqual([
       'phone',
+      'buildingName',
+      'apartmentNumber',
       'dealValue',
       'realtorName',
     ]);
     expect(table.formatClientColumnValue(client, 'dealValue')).toBe('€420,000');
+    expect(table.formatClientColumnValue(client, 'buildingName')).toBe('Sunset Park');
+    expect(table.formatClientColumnValue(client, 'apartmentNumber')).toBe('A-204');
 
     table.toggleColumnVisibility('phone');
 
     expect(table.mobileClientColumns().map(column => column.key)).toEqual([
+      'buildingName',
+      'apartmentNumber',
       'dealValue',
       'realtorName',
     ]);

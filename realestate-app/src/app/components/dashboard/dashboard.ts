@@ -34,23 +34,26 @@ export class Dashboard implements OnInit {
   readonly chartReady = signal(false);
 
   readonly recentActivity = computed(() => this.activityService.activities().slice(0, 20));
+  readonly visibleClients = computed(() =>
+    this.clientService.clients().filter(client => client.status !== 'closed')
+  );
 
-  readonly totalClients = computed(() => this.clientService.clients().length);
+  readonly totalClients = computed(() => this.visibleClients().length);
   readonly totalLeads = computed(() => this.leadService.leads().length);
 
   readonly totalRevenue = computed(() =>
-    this.clientService.clients().reduce((sum, c) => sum + (c.dealValue ?? 0), 0)
+    this.visibleClients().reduce((sum, c) => sum + (c.dealValue ?? 0), 0)
   );
 
   readonly totalCommissions = computed(() =>
-    this.clientService.clients().reduce((sum, c) => sum + getCommissionAmount(c), 0)
+    this.visibleClients().reduce((sum, c) => sum + getCommissionAmount(c), 0)
   );
 
   readonly totalProfit = computed(() => this.totalRevenue() - this.totalCommissions());
 
   readonly avgDeal = computed(() => {
-    const active = this.clientService.clients().filter(c => c.dealValue > 0);
-    return active.length ? this.totalRevenue() / active.length : 0;
+    const completed = this.visibleClients().filter(client => this.isCompletedDeal(client));
+    return completed.length ? this.totalRevenue() / completed.length : 0;
   });
 
   readonly overdueCount = computed(() => {
@@ -62,7 +65,7 @@ export class Dashboard implements OnInit {
   });
 
   readonly completedDeals = computed(() =>
-    this.clientService.clients().filter(c => c.status === 'closed').length
+    this.visibleClients().filter(client => this.isCompletedDeal(client)).length
   );
 
   readonly completedDealsPercent = computed(() => {
@@ -105,13 +108,12 @@ export class Dashboard implements OnInit {
   });
 
   readonly clientsByStatus = computed((): StatRow[] => {
-    const clients = this.clientService.clients();
+    const clients = this.visibleClients();
     const colorMap: Record<string, string> = {
       active: '#22C55E',
       inactive: '#94A3B8',
-      closed: '#EF4444',
     };
-    const order = ['active', 'inactive', 'closed'];
+    const order = ['active', 'inactive'];
     return order.map(s => ({
       label: s.charAt(0).toUpperCase() + s.slice(1),
       count: clients.filter(c => c.status === s).length,
@@ -120,18 +122,18 @@ export class Dashboard implements OnInit {
   });
 
   readonly activeClientsCount = computed(() =>
-    this.clientService.clients().filter(c => c.status === 'active').length
+    this.visibleClients().filter(c => c.status === 'active').length
   );
 
   readonly winRate = computed((): number | null => {
-    const won = this.clientService.clients().length;
+    const won = this.visibleClients().length;
     const lost = this.leadService.leads().filter(l => l.status === 'lost').length;
     const total = won + lost;
     return total === 0 ? null : Math.round(won / total * 100);
   });
 
   readonly propertyMix = computed(() => {
-    const clients = this.clientService.clients();
+    const clients = this.visibleClients();
     const total = clients.length || 1;
     const types = ['apartment', 'house', 'villa', 'commercial', 'land'];
     const colors: Record<string, string> = {
@@ -154,7 +156,7 @@ export class Dashboard implements OnInit {
 
   readonly topRealtors = computed(() => {
     const map = new Map<string, { deals: number; earnings: number }>();
-    for (const c of this.clientService.clients()) {
+    for (const c of this.visibleClients()) {
       if (!c.realtorName) continue;
       const existing = map.get(c.realtorName) ?? { deals: 0, earnings: 0 };
       map.set(c.realtorName, {
@@ -174,8 +176,8 @@ export class Dashboard implements OnInit {
 
   /** Monthly revenue data for the chart: Revenue, Commissions, Net Profit */
   readonly monthlyRevenue = computed((): MonthlyData[] => {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const clients = this.clientService.clients();
+    const monthFormatter = new Intl.DateTimeFormat(this.locale(), { month: 'short' });
+    const clients = this.visibleClients();
     const monthlyRev = new Array(12).fill(0);
     const monthlyComm = new Array(12).fill(0);
 
@@ -188,8 +190,8 @@ export class Dashboard implements OnInit {
       }
     }
 
-    return months.map((month, i) => ({
-      month,
+    return Array.from({ length: 12 }, (_, i) => ({
+      month: monthFormatter.format(new Date(2026, i, 1)).replace('.', ''),
       revenue: monthlyRev[i],
       commissions: monthlyComm[i],
       profit: monthlyRev[i] - monthlyComm[i],
@@ -295,14 +297,14 @@ export class Dashboard implements OnInit {
   }
 
   formatCurrency(value: number): string {
-    if (value >= 1_000_000) return '\u20AC' + (value / 1_000_000).toFixed(1) + 'M';
-    if (value >= 1_000) return '\u20AC' + (value / 1_000).toFixed(0) + 'K';
-    return '\u20AC' + value.toLocaleString('en-US');
+    if (value >= 1_000_000) return '\u20AC' + this.formatCompactNumber(value, 1);
+    if (value >= 1_000) return '\u20AC' + this.formatCompactNumber(value, 0);
+    return '\u20AC' + value.toLocaleString(this.locale());
   }
 
   formatCurrencyShort(value: number): string {
-    if (value >= 1_000_000) return '\u20AC' + (value / 1_000_000).toFixed(1) + 'M';
-    if (value >= 1_000) return '\u20AC' + Math.round(value / 1_000) + 'K';
+    if (value >= 1_000_000) return '\u20AC' + this.formatCompactNumber(value, 1);
+    if (value >= 1_000) return '\u20AC' + this.formatCompactNumber(value, 0);
     return '\u20AC' + value;
   }
 
@@ -334,14 +336,31 @@ export class Dashboard implements OnInit {
     const now = new Date();
     const diffMs = now.getTime() - d.getTime();
     const diffMins = Math.floor(diffMs / 60000);
-    if (diffMins < 1) return 'just now';
-    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffMins < 1) return this.ts.t('time.justNow');
+    if (diffMins < 60) return this.ts.t('time.minutesAgo', { n: diffMins });
     const diffHrs = Math.floor(diffMins / 60);
-    if (diffHrs < 24) return `${diffHrs}h ago`;
-    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    if (diffHrs < 24) return this.ts.t('time.hoursAgo', { n: diffHrs });
+    return d.toLocaleDateString(this.locale(), { day: 'numeric', month: 'short' }).replace('.', '');
   }
 
   openFollowUps(filter: FollowUpFilter) {
     this.followUpsRequest.emit(filter);
+  }
+
+  private isCompletedDeal(client: { status: string; purchaseDate: string; dealValue: number }): boolean {
+    return client.status === 'closed'
+      || Boolean(client.purchaseDate)
+      || (client.dealValue ?? 0) > 0;
+  }
+
+  private locale(): string {
+    return this.ts.lang() === 'ru' ? 'ru-RU' : 'en-GB';
+  }
+
+  private formatCompactNumber(value: number, maximumFractionDigits: number): string {
+    return new Intl.NumberFormat(this.locale(), {
+      notation: 'compact',
+      maximumFractionDigits,
+    }).format(value).replace(/([kmgbt])/g, match => match.toUpperCase());
   }
 }

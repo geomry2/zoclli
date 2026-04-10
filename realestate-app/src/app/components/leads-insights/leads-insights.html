@@ -1,0 +1,189 @@
+<div class="lead-insights">
+  <section class="insights-hero">
+    <div class="insights-hero__copy">
+      <span class="insights-hero__eyebrow">{{ 'leadInsights.eyebrow' | translate }}</span>
+      <h2 class="insights-hero__title">{{ 'leadInsights.title' | translate }}</h2>
+      <p class="insights-hero__subtitle">{{ 'leadInsights.subtitle' | translate }}</p>
+      <div class="insights-hero__summary">
+        <span class="insights-hero__summary-pill">
+          {{ scheduledFollowUps() }} {{ 'leadInsights.scheduledFollowUps' | translate }}
+        </span>
+        <span class="insights-hero__summary-pill">
+          {{ projectDemand().length }} {{ 'leadInsights.activeSegments' | translate }}
+        </span>
+      </div>
+    </div>
+
+    <div class="insights-hero__metrics">
+      @for (metric of heroMetrics(); track metric.labelKey) {
+        <article class="metric-card metric-card--{{ metric.accent }}">
+          <span class="metric-card__label">{{ metric.labelKey | translate }}</span>
+          <strong class="metric-card__value">{{ metric.value }}</strong>
+          <span class="metric-card__helper">{{ metric.helperKey | translate }}</span>
+        </article>
+      }
+    </div>
+  </section>
+
+  @if (insightLeads().length) {
+    <div class="insights-grid">
+      <section class="insight-card">
+        <div class="insight-card__header">
+          <div>
+            <h3 class="insight-card__title">{{ 'leadInsights.byProject' | translate }}</h3>
+            <p class="insight-card__subtitle">{{ 'leadInsights.byProjectSubtitle' | translate }}</p>
+          </div>
+          <span class="insight-card__badge">{{ trackedProjects() }} {{ 'leadInsights.projects' | translate }}</span>
+        </div>
+
+        <div class="project-list">
+          @for (row of projectDemand(); track row.name) {
+            <div class="project-row">
+              <div class="project-row__top">
+                <div>
+                  <div class="project-row__name">{{ row.name }}</div>
+                  <div class="project-row__meta">
+                    {{ row.count }} {{ 'leadInsights.leadsLabel' | translate }} · {{ formatCurrency(row.avgBudget) }}
+                  </div>
+                </div>
+                <div class="project-row__amount">{{ formatCompactCurrency(row.amount) }}</div>
+              </div>
+              <div class="project-row__bar">
+                <div class="project-row__fill" [style.width.%]="row.pct"></div>
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+
+      <section class="insight-card">
+        <div class="insight-card__header">
+          <div>
+            <h3 class="insight-card__title">{{ 'leadInsights.budgetHeatmap' | translate }}</h3>
+            <p class="insight-card__subtitle">{{ 'leadInsights.budgetHeatmapSubtitle' | translate }}</p>
+          </div>
+        </div>
+
+        <div class="budget-list">
+          @for (bucket of budgetBuckets(); track bucket.key) {
+            <div class="budget-row">
+              <div class="budget-row__top">
+                <span class="budget-row__label">{{ bucket.labelKey | translate }}</span>
+                <span class="budget-row__count">{{ bucket.count }}</span>
+              </div>
+              <div class="budget-row__bar">
+                <div class="budget-row__fill" [style.width.%]="bucket.pct" [style.background]="bucket.color"></div>
+              </div>
+              <div class="budget-row__meta">
+                <span>{{ bucket.pct }}%</span>
+                <span>{{ formatCompactCurrency(bucket.amount) }}</span>
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+    </div>
+
+    <div class="insights-grid insights-grid--secondary">
+      <section class="insight-card">
+        <div class="insight-card__header">
+          <div>
+            <h3 class="insight-card__title">{{ 'leadInsights.pipelineMix' | translate }}</h3>
+            <p class="insight-card__subtitle">{{ 'leadInsights.pipelineMixSubtitle' | translate }}</p>
+          </div>
+        </div>
+
+        <div class="status-list">
+          @for (row of statusRows(); track row.status) {
+            <div class="status-row">
+              <div class="status-row__header">
+                <div class="status-row__label-wrap">
+                  <span class="status-row__dot" [style.background]="row.color"></span>
+                  <span class="status-row__label">{{ ('status.' + row.status) | translate }}</span>
+                </div>
+                <span class="status-row__count">{{ row.count }}</span>
+              </div>
+              <div class="status-row__bar">
+                <div class="status-row__fill" [style.width.%]="row.pct" [style.background]="row.color"></div>
+              </div>
+              <div class="status-row__meta">
+                <span>{{ row.pct }}%</span>
+                <span>{{ formatCompactCurrency(row.amount) }}</span>
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+
+      <section class="insight-card">
+        <div class="insight-card__header">
+          <div>
+            <h3 class="insight-card__title">{{ 'leadInsights.monthlyFlow' | translate }}</h3>
+            <p class="insight-card__subtitle">{{ 'leadInsights.monthlyFlowSubtitle' | translate }}</p>
+          </div>
+        </div>
+
+        <div class="timeline">
+          @for (month of monthlyFlow(); track month.label) {
+            <div class="timeline__column">
+              <span class="timeline__count">{{ month.count }}</span>
+              <div class="timeline__bar-wrap">
+                <div class="timeline__bar" [style.height.%]="month.height"></div>
+              </div>
+              <span class="timeline__label">{{ month.label }}</span>
+              <span class="timeline__amount">{{ formatCompactCurrency(month.amount) }}</span>
+            </div>
+          }
+        </div>
+      </section>
+    </div>
+
+    <section class="insight-card insight-card--snapshot">
+      <div class="insight-card__header">
+        <div>
+          <h3 class="insight-card__title">{{ 'leadInsights.snapshot' | translate }}</h3>
+          <p class="insight-card__subtitle">{{ 'leadInsights.snapshotSubtitle' | translate }}</p>
+        </div>
+      </div>
+
+      <div class="snapshot-head">
+        <span>{{ 'col.name' | translate }}</span>
+        <span>{{ 'col.building' | translate }}</span>
+        <span>{{ 'col.status' | translate }}</span>
+        <span>{{ 'leadInsights.expectedBudget' | translate }}</span>
+        <span>{{ 'col.followUp' | translate }}</span>
+      </div>
+
+      <div class="snapshot-list">
+        @for (item of spotlightLeads(); track item.lead.id) {
+          <button class="snapshot-row" type="button" (click)="openLead(item.lead)">
+            <div class="snapshot-row__lead">
+              <strong>{{ item.lead.name }}</strong>
+              <span>{{ item.lead.realtorName || ('leadBoard.noRealtor' | translate) }}</span>
+            </div>
+
+            <div class="snapshot-row__project">{{ item.project }}</div>
+
+            <div class="snapshot-row__status">
+              <span class="status-badge status-badge--{{ item.lead.status }}">
+                {{ ('status.' + item.lead.status) | translate }}
+              </span>
+            </div>
+
+            <div class="snapshot-row__budget">
+              <strong>{{ formatCurrency(item.expectedBudget) }}</strong>
+              <span>{{ formatBudgetRange(item.lead) }}</span>
+            </div>
+
+            <div class="snapshot-row__followup">{{ formatFollowUp(item.lead.followUpDate) }}</div>
+          </button>
+        }
+      </div>
+    </section>
+  } @else {
+    <section class="insight-card insight-card--empty">
+      <h3 class="insight-card__title">{{ 'leadInsights.emptyTitle' | translate }}</h3>
+      <p class="insight-card__subtitle">{{ 'empty.leads' | translate }}</p>
+    </section>
+  }
+</div>

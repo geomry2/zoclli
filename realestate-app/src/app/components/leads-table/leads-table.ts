@@ -186,7 +186,7 @@ export class LeadsTable {
   ];
 
   formatBudget(lead: Lead): string {
-    return '€' + lead.budgetMin.toLocaleString('en-EU') + ' – €' + lead.budgetMax.toLocaleString('en-EU');
+    return '€' + lead.budgetMin.toLocaleString('en-US') + ' – €' + lead.budgetMax.toLocaleString('en-US');
   }
 
   formatFollowUp(date: string): string {
@@ -331,21 +331,59 @@ export class LeadsTable {
   }
 
   private matchesBudgetRange(lead: Lead): boolean {
+    const { min, max } = this.normalizedBudgetRange();
+
+    if (min === null && max === null) return true;
+    if (min !== null && lead.budgetMin < min) return false;
+    if (max !== null && lead.budgetMax > max) return false;
+    return true;
+  }
+
+  private normalizedBudgetRange(): { min: number | null; max: number | null } {
     const range = this.budgetRange();
     const min = this.parseRangeNumber(range.min);
     const max = this.parseRangeNumber(range.max);
 
-    if (min === null && max === null) return true;
-    if (min !== null && lead.budgetMax < min) return false;
-    if (max !== null && lead.budgetMin > max) return false;
-    return true;
+    if (min !== null && max !== null && min > max) {
+      return { min: max, max: min };
+    }
+
+    return { min, max };
   }
 
   private parseRangeNumber(value: string): number | null {
     const trimmed = value.trim();
     if (!trimmed) return null;
 
-    const parsed = Number(trimmed);
+    const compactMatch = trimmed.match(/^([\d.,\s]+)\s*([km])$/i);
+    if (compactMatch) {
+      const base = this.parseFlexibleNumber(compactMatch[1]);
+      if (base === null) return null;
+      return base * (compactMatch[2].toLowerCase() === 'm' ? 1_000_000 : 1_000);
+    }
+
+    return this.parseFlexibleNumber(trimmed);
+  }
+
+  private parseFlexibleNumber(value: string): number | null {
+    const cleaned = value.replace(/[^\d.,-]/g, '');
+    if (!cleaned) return null;
+
+    const hasComma = cleaned.includes(',');
+    const hasDot = cleaned.includes('.');
+    let normalized = cleaned;
+
+    if (hasComma && hasDot) {
+      normalized = cleaned.replace(/,/g, '');
+    } else if (hasComma) {
+      const parts = cleaned.split(',');
+      normalized = parts.at(-1)?.length === 3 ? parts.join('') : parts.join('.');
+    } else if (hasDot) {
+      const parts = cleaned.split('.');
+      normalized = parts.at(-1)?.length === 3 ? parts.join('') : cleaned;
+    }
+
+    const parsed = Number(normalized);
     return Number.isFinite(parsed) ? parsed : null;
   }
 }

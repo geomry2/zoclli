@@ -1,6 +1,4 @@
 <div class="catalogue">
-
-  <!-- Summary + New Property header -->
   <div class="catalogue-header">
     <div class="summary-row">
       <div class="summary-card">
@@ -11,6 +9,10 @@
         <div class="summary-label">{{ 'prop.unitsTracked' | translate }}</div>
         <div class="summary-value">{{ totalUnits() }}</div>
       </div>
+      <div class="summary-card summary-card--value">
+        <div class="summary-label">{{ 'prop.portfolioValue' | translate }}</div>
+        <div class="summary-value">{{ totalPortfolioValue() ? formatCurrency(totalPortfolioValue()) : '—' }}</div>
+      </div>
     </div>
 
     @if (!showNewPropertyForm()) {
@@ -20,7 +22,6 @@
     }
   </div>
 
-  <!-- Inline New Property form -->
   @if (showNewPropertyForm()) {
     <div class="new-property-form" id="new-property-form">
       <div class="new-property-form__controls">
@@ -44,51 +45,123 @@
   @if (properties().length === 0) {
     <div class="empty-state">{{ 'empty.properties' | translate }}</div>
   } @else {
-    <div class="building-list">
+    <div class="property-list">
       @for (prop of properties(); track prop.building) {
-        <div class="building-card" [class.expanded]="expandedBuilding() === prop.building">
+        @let isExpanded = expandedBuilding() === prop.building;
 
-          <div class="building-header" (click)="toggleBuilding(prop.building)">
-            <div class="building-info">
-              <span class="building-name">{{ prop.building }}</span>
-              <div class="building-meta">
-                <span>{{ ts.plural(prop.clients.length, 'prop.clients.one', 'prop.clients.many') }}</span>
-                @if (prop.units.length) {
-                  <span>·</span>
-                  <span>{{ ts.plural(prop.units.length, 'prop.units.one', 'prop.units.many') }}</span>
-                }
+        <article
+          class="property-card"
+          [class.expanded]="isExpanded"
+          [style.--property-hero-image]="'url(' + prop.heroImage + ')'"
+          [style.--property-hero-accent]="prop.heroAccent"
+          [style.--property-hero-glow]="prop.heroGlow">
+          <div class="property-card__summary">
+            <div class="property-card__media" (click)="toggleBuilding(prop.building)">
+              <div class="property-card__media-top">
+                <span class="property-card__media-chip">{{ propertyTypeLabel(prop) }}</span>
+                <span class="property-card__media-chip property-card__media-chip--units">
+                  {{ ts.plural(prop.units.length, 'prop.units.one', 'prop.units.many') }}
+                </span>
+              </div>
+
+              <div class="property-card__media-bottom">
+                <div class="property-card__media-label">{{ 'pdf.totalValue' | translate }}</div>
+                <div class="property-card__media-value">
+                  {{ prop.totalValue > 0 ? formatCurrency(prop.totalValue) : ('prop.noDealValues' | translate) }}
+                </div>
               </div>
             </div>
-            <div class="building-right">
-              @if (prop.totalValue > 0) {
-                <span class="building-value">{{ formatCurrency(prop.totalValue) }}</span>
+
+            <div class="property-card__content">
+              <div class="property-card__topline">
+                <div class="property-card__title-wrap">
+                  <h3 class="property-card__title">{{ prop.building }}</h3>
+                  <p class="property-card__subtitle">
+                    {{ ts.plural(prop.clients.length, 'prop.clients.one', 'prop.clients.many') }}
+                    <span>·</span>
+                    {{ ts.plural(prop.units.length, 'prop.units.one', 'prop.units.many') }}
+                  </p>
+                </div>
+
+                <button class="btn-toggle-details" type="button" (click)="toggleBuilding(prop.building)">
+                  {{ isExpanded ? ('prop.hideDetails' | translate) : ('prop.openDetails' | translate) }}
+                </button>
+              </div>
+
+              <div class="property-card__metrics">
+                <div class="property-metric">
+                  <span class="property-metric__label">{{ 'pdf.clientCount' | translate }}</span>
+                  <strong class="property-metric__value">{{ prop.clientLinkedCount }}</strong>
+                </div>
+                <div class="property-metric">
+                  <span class="property-metric__label">{{ 'dash.avgDeal' | translate }}</span>
+                  <strong class="property-metric__value">
+                    {{ prop.averageDealValue > 0 ? formatCurrency(prop.averageDealValue) : '—' }}
+                  </strong>
+                </div>
+                <div class="property-metric">
+                  <span class="property-metric__label">{{ 'pdf.standaloneUnits' | translate }}</span>
+                  <strong class="property-metric__value">{{ prop.standaloneUnitCount }}</strong>
+                </div>
+                <div class="property-metric">
+                  <span class="property-metric__label">{{ 'prop.activeNow' | translate }}</span>
+                  <strong class="property-metric__value">{{ prop.activeCount }}</strong>
+                </div>
+              </div>
+
+              @if (prop.previewUnits.length) {
+                <div class="property-card__unit-preview">
+                  <span class="property-card__preview-label">{{ 'prop.unitPreview' | translate }}</span>
+                  <div class="property-card__unit-chips">
+                    @for (unit of prop.previewUnits; track unit) {
+                      <span class="unit-chip">{{ unit }}</span>
+                    }
+                    @if (remainingUnits(prop) > 0) {
+                      <span class="unit-chip unit-chip--more">+{{ remainingUnits(prop) }}</span>
+                    }
+                  </div>
+                </div>
               }
-              <div class="status-dots">
-                @if (prop.statusCounts['active']) {
-                  <span class="dot dot-active" [title]="prop.statusCounts['active'] + ' ' + ts.t('status.active')"></span>
+
+              <div class="property-card__status-pills">
+                @if (prop.activeCount) {
+                  <span class="status-pill status-pill--active">
+                    <span class="status-pill__icon">✓</span>
+                    {{ prop.activeCount }} {{ 'status.active' | translate }}
+                  </span>
                 }
-                @if (prop.statusCounts['inactive']) {
-                  <span class="dot dot-inactive" [title]="prop.statusCounts['inactive'] + ' ' + ts.t('status.inactive')"></span>
+                @if (prop.inactiveCount) {
+                  <span class="status-pill status-pill--inactive">
+                    <span class="status-pill__icon">✓</span>
+                    {{ prop.inactiveCount }} {{ 'status.inactive' | translate }}
+                  </span>
                 }
-                @if (prop.statusCounts['closed']) {
-                  <span class="dot dot-closed" [title]="prop.statusCounts['closed'] + ' ' + ts.t('status.closed')"></span>
+                @if (prop.closedCount) {
+                  <span class="status-pill status-pill--closed">
+                    <span class="status-pill__icon">•</span>
+                    {{ prop.closedCount }} {{ 'status.closed' | translate }}
+                  </span>
                 }
               </div>
-              <button class="btn-export-property" (click)="exportPropertySheet($event, prop)">
-                {{ 'btn.pdf' | translate }}
-              </button>
-              <button class="btn-add-unit" (click)="requestAddUnit($event, prop.building)">
-                {{ 'prop.addUnit' | translate }}
-              </button>
-              <button class="btn-add-unit" (click)="requestPropertyTask($event, prop)">{{ 'tasks.newTaskShort' | translate }}</button>
-              <button class="btn-delete-property" (click)="startDeleteProperty($event, prop)">
-                {{ 'prop.deleteProperty' | translate }}
-              </button>
-              <span class="chevron">{{ expandedBuilding() === prop.building ? '▲' : '▼' }}</span>
+
+              <div class="property-card__actions">
+                <button class="property-action property-action--primary" type="button" (click)="requestAddUnit($event, prop.building)">
+                  {{ 'prop.addUnit' | translate }}
+                </button>
+                <button class="property-action" type="button" (click)="requestPropertyTask($event, prop)">
+                  {{ 'tasks.newTaskShort' | translate }}
+                </button>
+                <button class="property-action property-action--info" type="button" (click)="exportPropertySheet($event, prop)">
+                  {{ 'btn.pdf' | translate }}
+                </button>
+                <button class="property-action property-action--danger" type="button" (click)="startDeleteProperty($event, prop)">
+                  {{ 'prop.deleteProperty' | translate }}
+                </button>
+              </div>
             </div>
           </div>
 
-          @if (expandedBuilding() === prop.building) {
+          @if (isExpanded) {
             <div class="unit-list">
               @if (deletePropertyPending() === prop.building || propertyActionErrorBuilding() === prop.building) {
                 <div class="property-delete-banner">
@@ -191,10 +264,8 @@
               }
             </div>
           }
-
-        </div>
+        </article>
       }
     </div>
   }
-
 </div>

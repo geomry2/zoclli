@@ -1,5 +1,7 @@
 @use '../../shared-badges';
 
+@use '../../shared-date-input' as dateInput;
+
 .followups-shell {
   padding: 4px 0 24px;
   display: flex;
@@ -207,6 +209,8 @@
     border-color: var(--color-primary);
     box-shadow: 0 0 0 2px rgba(27, 67, 50, 0.06);
   }
+
+  @include dateInput.control;
 }
 
 .followups-btn {
