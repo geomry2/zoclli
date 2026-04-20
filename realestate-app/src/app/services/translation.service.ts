@@ -340,6 +340,7 @@ const EN: Translations = {
   'notes.empty': 'No notes yet. Add the first timeline entry.',
   'notes.legacy': 'Imported note',
 
+  'nav.workflow': 'Workflow',
   // Tasks
   'nav.tasks': 'Tasks',
   'tasks.title': 'Task Board',
@@ -748,6 +749,7 @@ const RU: Translations = {
   'notes.empty': 'Заметок пока нет. Добавьте первую запись в таймлайн.',
   'notes.legacy': 'Импортированная заметка',
 
+  'nav.workflow': 'Воркфлоу',
   // Tasks
   'nav.tasks': 'Задачи',
   'tasks.title': 'Доска задач',

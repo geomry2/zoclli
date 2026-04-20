@@ -123,6 +123,8 @@
         }
       } @else if (activeTab() === 'properties') {
         <app-property-catalogue (addUnitRequest)="openAddUnit($event)" (editUnitRequest)="openEditUnit($event)" (createTaskRequest)="openCreateTask($event)" />
+      } @else if (activeTab() === 'workflow') {
+        <app-workflow />
       } @else {
         <app-task-board [searchQuery]="searchQuery()" (createRequest)="openCreateTask()" (editRequest)="openEditTask($event)" />
       }

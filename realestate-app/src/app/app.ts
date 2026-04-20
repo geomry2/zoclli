@@ -16,6 +16,7 @@ import { LeadFollowUps } from './components/lead-follow-ups/lead-follow-ups';
 import { LeadsInsights } from './components/leads-insights/leads-insights';
 import { TaskBoard } from './components/task-board/task-board';
 import { TaskModal } from './components/task-modal/task-modal';
+import { Workflow } from './components/workflow/workflow';
 import { Client } from './models/client.model';
 import { Lead } from './models/lead.model';
 import { Task } from './models/task.model';
@@ -33,7 +34,7 @@ import { parseAppUrl, routeForLeadView, routeForTab, type LeadViewMode } from '.
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [SearchBar, TabNav, ClientsTable, LeadsTable, LeadsBoard, LeadFollowUps, LeadsInsights, TaskBoard, TaskModal, CreateModal, AddUnitModal, PasswordGate, Dashboard, PropertyCatalogue, TranslatePipe],
+  imports: [SearchBar, TabNav, ClientsTable, LeadsTable, LeadsBoard, LeadFollowUps, LeadsInsights, TaskBoard, TaskModal, CreateModal, AddUnitModal, PasswordGate, Dashboard, PropertyCatalogue, Workflow, TranslatePipe],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
@@ -80,6 +81,7 @@ export class App {
       leads: 'nav.leads',
       properties: 'nav.properties',
       tasks: 'nav.tasks',
+      workflow: 'nav.workflow',
     };
     return labels[this.activeTab()];
   });
