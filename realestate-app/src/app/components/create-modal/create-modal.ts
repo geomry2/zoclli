@@ -9,6 +9,7 @@ import { UnitService } from '../../services/unit.service';
 import { Client, PropertyType, ClientStatus, CommissionType } from '../../models/client.model';
 import { Lead, LeadStatus } from '../../models/lead.model';
 import { ContactNotes } from '../contact-notes/contact-notes';
+import { FancyDateInput } from '../fancy-date-input/fancy-date-input';
 import { normalizeContactNotes } from '../../utils/contact-notes.utils';
 import { getCommissionAmount, normalizeCommissionType, normalizeCommissionValue } from '../../utils/commission.utils';
 
@@ -19,7 +20,7 @@ type InterestMode = 'text' | 'building';
 @Component({
   selector: 'app-create-modal',
   standalone: true,
-  imports: [FormsModule, TranslatePipe, ContactNotes],
+  imports: [FormsModule, TranslatePipe, ContactNotes, FancyDateInput],
   templateUrl: './create-modal.html',
   styleUrl: './create-modal.scss',
 })
@@ -193,6 +194,7 @@ export class CreateModal implements OnInit {
 
     if (this.tab() === 'clients') {
       const ec = this.editClient();
+      const cl = this.convertLead();
       const normalizedClient = this.normalizeClient(this.client);
       const clientValidationError = this.validateClient(normalizedClient, ec?.id);
       if (clientValidationError) {
@@ -204,9 +206,27 @@ export class CreateModal implements OnInit {
       this.client = normalizedClient;
       await this.buildingService.ensureExists(this.client.buildingName);
       await this.agencyService.ensureExists(this.client.realtorAgency);
-      result = ec
-        ? await this.clientService.update({ ...this.client, id: ec.id })
-        : await this.clientService.add(this.client, this.isConvert ? 'converted' : 'created');
+      if (ec) {
+        result = await this.clientService.update({ ...this.client, id: ec.id });
+      } else if (cl) {
+        const createResult = await this.clientService.add(this.client, 'converted');
+        if (createResult.error) {
+          result = { error: createResult.error };
+        } else {
+          const deleteResult = await this.leadService.remove(cl.id);
+          if (deleteResult.error) {
+            if (createResult.client) {
+              await this.clientService.remove(createResult.client.id);
+            }
+            result = { error: deleteResult.error };
+          } else {
+            result = { error: null };
+          }
+        }
+      } else {
+        const createResult = await this.clientService.add(this.client, 'created');
+        result = { error: createResult.error };
+      }
     } else {
       const el = this.editLead();
       const normalizedLead = this.normalizeLead(this.lead);
@@ -233,7 +253,7 @@ export class CreateModal implements OnInit {
   readonly propertyTypes: PropertyType[] = ['apartment', 'house', 'villa', 'commercial', 'land'];
   readonly clientStatuses: ClientStatus[] = ['active', 'inactive', 'closed'];
   readonly commissionTypes: CommissionType[] = ['percent', 'fixed'];
-  readonly leadStatuses: LeadStatus[] = ['new', 'contacted', 'negotiating', 'lost'];
+  readonly leadStatuses: LeadStatus[] = ['new', 'contacted', 'negotiating', 'showing', 'deposit', 'lost'];
 
   useLeadInterestText() {
     this.leadInterestMode.set('text');

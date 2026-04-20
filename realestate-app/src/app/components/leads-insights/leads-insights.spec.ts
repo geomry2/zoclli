@@ -79,6 +79,8 @@ describe('LeadsInsights', () => {
       { status: 'new', count: 1, amount: 150_000, pct: 33, color: '#3B82F6' },
       { status: 'contacted', count: 1, amount: 150_000, pct: 33, color: '#F59E0B' },
       { status: 'negotiating', count: 0, amount: 0, pct: 0, color: '#8B5CF6' },
+      { status: 'showing', count: 0, amount: 0, pct: 0, color: '#14B8A6' },
+      { status: 'deposit', count: 0, amount: 0, pct: 0, color: '#10B981' },
       { status: 'lost', count: 1, amount: 300_000, pct: 33, color: '#EF4444' },
     ]);
 

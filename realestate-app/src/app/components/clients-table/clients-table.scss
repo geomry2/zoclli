@@ -1,6 +1,38 @@
 @use '../../shared-table';
 @use '../../shared-table-mobile';
 
+:host {
+  display: block;
+  min-height: calc(100vh - 72px - (var(--space-lg) * 2));
+}
+
+.table-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: inherit;
+  overflow: hidden;
+  border-radius: var(--radius-xl);
+}
+
+.table-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+
+.data-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.empty-state {
+  flex: 1 1 auto;
+  display: grid;
+  place-items: center;
+  min-height: 240px;
+}
+
 .col-actions {
   width: 104px;
 }
@@ -13,5 +45,21 @@
   &:hover {
     background: #eef3ff;
     color: #3858a6;
+  }
+}
+
+@media (max-width: 760px) {
+  :host {
+    min-height: auto;
+  }
+
+  .table-wrapper {
+    min-height: auto;
+    overflow: visible;
+    border-radius: 0;
+  }
+
+  .table-scroll {
+    overflow: visible;
   }
 }

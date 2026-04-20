@@ -50,12 +50,14 @@ interface MonthlyFlowRow {
   height: number;
 }
 
-const STATUS_ORDER: LeadStatus[] = ['new', 'contacted', 'negotiating', 'lost'];
+const STATUS_ORDER: LeadStatus[] = ['new', 'contacted', 'negotiating', 'showing', 'deposit', 'lost'];
 
 const STATUS_COLORS: Record<LeadStatus, string> = {
   new: '#3B82F6',
   contacted: '#F59E0B',
   negotiating: '#8B5CF6',
+  showing: '#14B8A6',
+  deposit: '#10B981',
   lost: '#EF4444',
 };
 

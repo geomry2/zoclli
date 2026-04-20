@@ -1,4 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router } from '@angular/router';
+import { filter, map, startWith } from 'rxjs';
 import { SearchBar } from './components/search-bar/search-bar';
 import { TabNav, TabType } from './components/tab-nav/tab-nav';
 import { ClientsTable } from './components/clients-table/clients-table';
@@ -24,8 +27,8 @@ import { TranslatePipe } from './pipes/translate.pipe';
 import { exportToXlsx } from './utils/xlsx.utils';
 import { applySearch } from './utils/csv.utils';
 import { FollowUpFilter, matchesFollowUpFilter } from './utils/follow-up.utils';
+import { parseAppUrl, routeForLeadView, routeForTab, type LeadViewMode } from './app.routes';
 
-type LeadViewMode = 'board' | 'table' | 'followups' | 'insights';
 
 @Component({
   selector: 'app-root',
@@ -36,13 +39,24 @@ type LeadViewMode = 'board' | 'table' | 'followups' | 'insights';
 })
 export class App {
   readonly ts = inject(TranslationService);
-  readonly activeTab = signal<TabType>('dashboard');
+  private readonly router = inject(Router);
+  private readonly currentUrl = toSignal(
+    this.router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+      map(() => this.router.url),
+      startWith(this.router.url),
+    ),
+    { initialValue: this.router.url },
+  );
+  private readonly routeState = computed(() => parseAppUrl(this.currentUrl()));
+  readonly activeTab = computed<TabType>(() => this.routeState().tab);
   readonly sidebarCollapsed = signal(true);
+  readonly sidebarPreviewExpanded = signal(false);
   readonly taskRelationPrefill = signal<{ type: 'lead' | 'client' | 'property' | 'deal'; id: string; sourceLabel?: string } | null>(null);
   readonly editingTask = signal<Task | null>(null);
   readonly showTaskModal = signal(false);
-  readonly leadsViewMode = signal<LeadViewMode>('board');
-  readonly leadFollowUpFilter = signal<FollowUpFilter>('all');
+  readonly leadsViewMode = computed<LeadViewMode>(() => this.routeState().leadsViewMode);
+  readonly leadFollowUpFilter = computed<FollowUpFilter>(() => this.routeState().leadFollowUpFilter);
   readonly searchQuery = signal<string>('');
   readonly showModal = signal(false);
   readonly editingClient = signal<Client | null>(null);
@@ -54,7 +68,9 @@ export class App {
   readonly editingUnit = signal<Unit | null>(null);
   /** Narrows activeTab to only the values CreateModal accepts */
   readonly modalTab = computed<'clients' | 'leads'>(() =>
-    this.activeTab() === 'leads' ? 'leads' : 'clients'
+    this.convertingLead() || this.editingClient()
+      ? 'clients'
+      : (this.editingLead() || this.activeTab() === 'leads' ? 'leads' : 'clients')
   );
 
   readonly activeTabLabel = computed(() => {
@@ -72,23 +88,37 @@ export class App {
   private readonly leadService = inject(LeadService);
 
   switchTab(tab: TabType) {
-    this.activeTab.set(tab);
     this.searchQuery.set('');
+    void this.router.navigateByUrl(routeForTab(tab));
+  }
+
+  onSidebarCollapsedChange(collapsed: boolean) {
+    this.sidebarCollapsed.set(collapsed);
+    if (!collapsed) {
+      this.sidebarPreviewExpanded.set(false);
+    }
+  }
+
+  onSidebarPreviewExpandedChange(expanded: boolean) {
+    if (!this.sidebarCollapsed()) {
+      this.sidebarPreviewExpanded.set(false);
+      return;
+    }
+
+    this.sidebarPreviewExpanded.set(expanded);
   }
 
   setLeadsViewMode(mode: LeadViewMode) {
-    this.leadsViewMode.set(mode);
+    void this.router.navigateByUrl(routeForLeadView(mode));
   }
 
   openLeadFollowUps(filter: FollowUpFilter = 'all') {
-    this.activeTab.set('leads');
-    this.leadsViewMode.set('followups');
-    this.leadFollowUpFilter.set(filter);
     this.searchQuery.set('');
+    void this.router.navigateByUrl(routeForLeadView('followups', filter));
   }
 
   setLeadFollowUpFilter(filter: FollowUpFilter) {
-    this.leadFollowUpFilter.set(filter);
+    void this.router.navigateByUrl(routeForLeadView('followups', filter));
   }
 
   onQueryChange(query: string) { this.searchQuery.set(query); }
@@ -113,7 +143,7 @@ export class App {
   }
 
   openConvertLead(lead: Lead) {
-    this.activeTab.set('clients');
+    void this.router.navigateByUrl(routeForTab('clients'));
     this.convertingLead.set(lead);
     this.editingClient.set(null);
     this.editingLead.set(null);
@@ -129,7 +159,7 @@ export class App {
   }
 
   openCreateTask(prefill?: { type: 'lead' | 'client' | 'property' | 'deal'; id: string; sourceLabel?: string }) {
-    this.activeTab.set('tasks');
+    void this.router.navigateByUrl(routeForTab('tasks'));
     this.taskRelationPrefill.set(prefill ?? null);
     this.editingTask.set(null);
     this.showTaskModal.set(true);
@@ -140,7 +170,7 @@ export class App {
   }
 
   openEditTask(task: Task) {
-    this.activeTab.set('tasks');
+    void this.router.navigateByUrl(routeForTab('tasks'));
     this.taskRelationPrefill.set(null);
     this.editingTask.set(task);
     this.showTaskModal.set(true);

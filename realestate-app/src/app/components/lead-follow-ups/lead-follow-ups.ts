@@ -4,6 +4,7 @@ import { Lead, LeadStatus } from '../../models/lead.model';
 import { LeadService } from '../../services/lead.service';
 import { TranslationService } from '../../services/translation.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { FancyDateInput } from '../fancy-date-input/fancy-date-input';
 import { applySearch } from '../../utils/csv.utils';
 import {
   countByFollowUpFilter,
@@ -24,7 +25,7 @@ interface FollowUpFilterOption {
 @Component({
   selector: 'app-lead-follow-ups',
   standalone: true,
-  imports: [FormsModule, TranslatePipe],
+  imports: [FormsModule, TranslatePipe, FancyDateInput],
   templateUrl: './lead-follow-ups.html',
   styleUrl: './lead-follow-ups.scss'
 })

@@ -56,7 +56,7 @@
       @if (unit.status !== 'inactive') {
         <div class="field-group">
           <label>{{ 'form.purchaseDate' | translate }}</label>
-          <input [(ngModel)]="unit.purchaseDate" type="date" />
+          <app-fancy-date-input [(value)]="unit.purchaseDate" />
         </div>
       }
       <div class="field-group full">

@@ -1,9 +1,12 @@
 <app-password-gate>
-<div class="app-layout" [class.sidebar-collapsed]="sidebarCollapsed()">
+<div class="app-layout" [class.sidebar-collapsed]="sidebarCollapsed() && !sidebarPreviewExpanded()">
   <!-- Left Sidebar -->
   <app-tab-nav
     [activeTab]="activeTab()"
+    [collapsed]="sidebarCollapsed()"
     (tabChange)="switchTab($event)"
+    (collapsedChange)="onSidebarCollapsedChange($event)"
+    (previewExpandedChange)="onSidebarPreviewExpandedChange($event)"
   />
 
   <!-- Main Content Area -->

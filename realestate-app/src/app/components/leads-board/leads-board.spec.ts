@@ -81,6 +81,8 @@ describe('LeadsBoard', () => {
     expect(columns.find(column => column.status === 'new')?.leads.map(lead => lead.id)).toEqual(['l2', 'l1']);
     expect(columns.find(column => column.status === 'contacted')?.leads.map(lead => lead.id)).toEqual(['l4', 'l3']);
     expect(columns.find(column => column.status === 'negotiating')?.leads).toEqual([]);
+    expect(columns.find(column => column.status === 'showing')?.leads).toEqual([]);
+    expect(columns.find(column => column.status === 'deposit')?.leads).toEqual([]);
     expect(columns.find(column => column.status === 'lost')?.leads).toEqual([]);
   });
 

@@ -1,6 +1,6 @@
 import { ContactNote } from './contact-note.model';
 
-export type LeadStatus = 'new' | 'contacted' | 'negotiating' | 'lost';
+export type LeadStatus = 'new' | 'contacted' | 'negotiating' | 'showing' | 'deposit' | 'lost';
 
 export interface Lead {
   id: string;

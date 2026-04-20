@@ -2,6 +2,7 @@ import { Component, computed, inject, input, output, signal } from '@angular/cor
 import { LeadService } from '../../services/lead.service';
 import { Lead, LeadStatus } from '../../models/lead.model';
 import { RowDetail, FieldDefinition } from '../row-detail/row-detail';
+import { FancyDateInput } from '../fancy-date-input/fancy-date-input';
 import { TranslationService } from '../../services/translation.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { applySearch } from '../../utils/csv.utils';
@@ -48,7 +49,7 @@ const LEAD_MOBILE_HEADER_KEYS: LeadColumnKey[] = ['name', 'status', 'followUpDat
 @Component({
   selector: 'app-leads-table',
   standalone: true,
-  imports: [RowDetail, TranslatePipe],
+  imports: [RowDetail, TranslatePipe, FancyDateInput],
   templateUrl: './leads-table.html',
   styleUrl: './leads-table.scss'
 })
@@ -62,7 +63,7 @@ export class LeadsTable {
   private readonly leadService = inject(LeadService);
   readonly expandedRowId = signal<string | null>(null);
   readonly deletingId = signal<string | null>(null);
-  readonly leadStatuses: LeadStatus[] = ['new', 'contacted', 'negotiating', 'lost'];
+  readonly leadStatuses: LeadStatus[] = ['new', 'contacted', 'negotiating', 'showing', 'deposit', 'lost'];
   readonly leadColumns = LEAD_COLUMNS;
   readonly visibleColumnKeys = signal<LeadColumnKey[]>(
     loadVisibleColumnKeys(LEAD_COLUMN_STORAGE_KEY, LEAD_COLUMN_KEYS)
@@ -175,7 +176,7 @@ export class LeadsTable {
     { key: 'phone', label: 'field.phone' },
     { key: 'email', label: 'field.email' },
     { key: 'interestedIn', label: 'field.interestedIn' },
-    { key: 'status', label: 'field.status', type: 'badge', options: ['new', 'contacted', 'negotiating', 'lost'], translatePrefix: 'status.' },
+    { key: 'status', label: 'field.status', type: 'badge', options: ['new', 'contacted', 'negotiating', 'showing', 'deposit', 'lost'], translatePrefix: 'status.' },
     { key: 'budgetMin', label: 'field.budgetMin', type: 'currency' },
     { key: 'budgetMax', label: 'field.budgetMax', type: 'currency' },
     { key: 'followUpDate', label: 'field.followUpDate', type: 'date' },

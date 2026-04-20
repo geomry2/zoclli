@@ -7,13 +7,14 @@ import { BuildingService } from '../../services/building.service';
 import { PropertyType, ClientStatus } from '../../models/client.model';
 import { Unit } from '../../models/unit.model';
 import { UnitService } from '../../services/unit.service';
+import { FancyDateInput } from '../fancy-date-input/fancy-date-input';
 
 type FieldMode = 'select' | 'new';
 
 @Component({
   selector: 'app-add-unit-modal',
   standalone: true,
-  imports: [FormsModule, TranslatePipe],
+  imports: [FormsModule, TranslatePipe, FancyDateInput],
   templateUrl: './add-unit-modal.html',
   styleUrl: './add-unit-modal.scss',
 })

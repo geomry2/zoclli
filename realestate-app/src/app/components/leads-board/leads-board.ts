@@ -25,7 +25,7 @@ export class LeadsBoard implements OnDestroy {
   readonly ts = inject(TranslationService);
   private readonly leadService = inject(LeadService);
 
-  readonly statuses: LeadStatus[] = ['new', 'contacted', 'negotiating', 'lost'];
+  readonly statuses: LeadStatus[] = ['new', 'contacted', 'negotiating', 'showing', 'deposit', 'lost'];
   readonly draggedLeadId = signal<string | null>(null);
   readonly dropTargetStatus = signal<LeadStatus | null>(null);
   readonly movingLeadId = signal<string | null>(null);

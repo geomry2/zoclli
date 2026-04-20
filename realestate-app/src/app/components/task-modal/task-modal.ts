@@ -8,6 +8,7 @@ import { ClientService } from '../../services/client.service';
 import { LeadService } from '../../services/lead.service';
 import { TranslationService } from '../../services/translation.service';
 import { normalizeTaskTopic, toTaskInputDateTime } from '../../utils/task.utils';
+import { FancyDateInput } from '../fancy-date-input/fancy-date-input';
 
 interface TaskDraft {
   title: string;
@@ -27,7 +28,7 @@ interface TaskDraft {
 @Component({
   selector: 'app-task-modal',
   standalone: true,
-  imports: [FormsModule, TranslatePipe],
+  imports: [FormsModule, TranslatePipe, FancyDateInput],
   templateUrl: './task-modal.html',
   styleUrl: './task-modal.scss'
 })
@@ -62,6 +63,14 @@ export class TaskModal implements AfterViewInit {
   readonly priorities: TaskPriority[] = ['low', 'medium', 'high', 'urgent'];
   readonly topics = [...TASK_TOPICS];
   readonly sources: TaskSource[] = ['manual', 'voice', 'ai', 'automation'];
+  readonly pendingDueTime = signal('09:00');
+  readonly dueTimeOptions = Array.from({ length: 24 * 4 }, (_, index) => {
+    const hour = Math.floor(index / 4);
+    const minute = (index % 4) * 15;
+    return `${`${hour}`.padStart(2, '0')}:${`${minute}`.padStart(2, '0')}`;
+  });
+  readonly dueDateValue = computed(() => this.extractDueDate(this.draft().dueAt));
+  readonly dueTimeValue = computed(() => this.extractDueTime(this.draft().dueAt) || this.pendingDueTime());
   readonly linkedContext = computed(() => {
     this.ts.lang();
 
@@ -83,6 +92,10 @@ export class TaskModal implements AfterViewInit {
 
   constructor() {
     queueMicrotask(() => {
+      this.pendingDueTime.set(this.extractDueTime(this.draft().dueAt) || '09:00');
+    });
+
+    queueMicrotask(() => {
       const editing = this.editTask();
       if (editing) {
         this.draft.set({
@@ -99,6 +112,7 @@ export class TaskModal implements AfterViewInit {
           source: editing.source,
           tagsInput: editing.tags.join(', '),
         });
+        this.pendingDueTime.set(this.extractDueTime(toTaskInputDateTime(editing.dueAt)) || '09:00');
         return;
       }
 
@@ -193,6 +207,7 @@ export class TaskModal implements AfterViewInit {
     if (!preview) return;
 
     this.draft.set(preview);
+    this.pendingDueTime.set(this.extractDueTime(preview.dueAt) || '09:00');
     this.parserPreview.set(null);
   }
 
@@ -246,5 +261,38 @@ export class TaskModal implements AfterViewInit {
       source: 'manual',
       tagsInput: '',
     };
+  }
+
+  setDueDate(value: string) {
+    const normalized = value.trim();
+    if (!normalized) {
+      this.draft.update(current => ({ ...current, dueAt: '' }));
+      return;
+    }
+
+    const time = this.extractDueTime(this.draft().dueAt) || this.pendingDueTime();
+    this.draft.update(current => ({ ...current, dueAt: `${normalized}T${time}` }));
+  }
+
+  setDueTime(value: string) {
+    const normalized = value.trim() || '09:00';
+    this.pendingDueTime.set(normalized);
+
+    const date = this.extractDueDate(this.draft().dueAt);
+    if (!date) return;
+
+    this.draft.update(current => ({ ...current, dueAt: `${date}T${normalized}` }));
+  }
+
+  private extractDueDate(value: string): string {
+    const normalized = String(value ?? '').trim();
+    const match = normalized.match(/^(\d{4}-\d{2}-\d{2})/);
+    return match?.[1] ?? '';
+  }
+
+  private extractDueTime(value: string): string {
+    const normalized = String(value ?? '').trim();
+    const match = normalized.match(/T(\d{2}:\d{2})/);
+    return match?.[1] ?? '';
   }
 }

@@ -32,7 +32,7 @@
 
 .board-columns {
   display: grid;
-  grid-template-columns: repeat(4, minmax(220px, 1fr));
+  grid-template-columns: repeat(6, minmax(220px, 1fr));
   gap: 14px;
   align-items: start;
 }
@@ -56,6 +56,8 @@
 .board-column-new .column-dot         { background: var(--color-info); }
 .board-column-contacted .column-dot   { background: var(--color-success); }
 .board-column-negotiating .column-dot { background: var(--color-warning); }
+.board-column-showing .column-dot     { background: #14B8A6; }
+.board-column-deposit .column-dot     { background: #10B981; }
 .board-column-lost .column-dot        { background: var(--color-danger); }
 
 .column-header {
