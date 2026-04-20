@@ -15,9 +15,9 @@
       </div>
 
       <div class="fancy-date-popover__header">
-        <select class="fancy-date-year" [value]="viewDate().getFullYear()" (change)="setYear(($any($event.target).value))">
+        <select class="fancy-date-year" (change)="setYear(($any($event.target).value))">
           @for (year of yearOptions(); track year) {
-            <option [value]="year">{{ year }}</option>
+            <option [value]="year" [selected]="year === viewDate().getFullYear()">{{ year }}</option>
           }
         </select>
         <div class="fancy-date-month-nav">
