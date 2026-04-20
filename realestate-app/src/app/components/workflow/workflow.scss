@@ -1,0 +1,423 @@
+.workflow {
+  padding: var(--space-lg);
+  max-width: 1400px;
+  margin: 0 auto;
+
+  // ─── Header ────────────────────────────────────────────────────────────────
+
+  &__header {
+    margin-bottom: var(--space-xl);
+    animation: wf-fade-up 0.4s var(--ease-out) both;
+  }
+
+  &__eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    margin: 0 0 var(--space-xs);
+  }
+
+  &__title {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--color-text);
+    margin: 0 0 var(--space-xs);
+    line-height: 1.2;
+  }
+
+  &__subtitle {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    max-width: 560px;
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  // ─── Diagram ───────────────────────────────────────────────────────────────
+
+  &__diagram {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  // ─── Phase ─────────────────────────────────────────────────────────────────
+
+  &__phase {
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--phase-border);
+    background: var(--phase-bg);
+    padding: var(--space-lg);
+    animation: wf-fade-up 0.4s var(--ease-out) both;
+
+    &.phase--green {
+      --phase-color: #1B4332;
+      --phase-color-rgb: 27, 67, 50;
+      --phase-bg: rgba(27, 67, 50, 0.04);
+      --phase-border: rgba(27, 67, 50, 0.14);
+      animation-delay: 0.05s;
+    }
+
+    &.phase--blue {
+      --phase-color: #3B82F6;
+      --phase-color-rgb: 59, 130, 246;
+      --phase-bg: rgba(59, 130, 246, 0.04);
+      --phase-border: rgba(59, 130, 246, 0.14);
+      animation-delay: 0.10s;
+    }
+
+    &.phase--gold {
+      --phase-color: #C49010;
+      --phase-color-rgb: 196, 144, 16;
+      --phase-bg: rgba(196, 144, 16, 0.04);
+      --phase-border: rgba(196, 144, 16, 0.14);
+      animation-delay: 0.15s;
+    }
+
+    &.phase--purple {
+      --phase-color: #7C3AED;
+      --phase-color-rgb: 124, 58, 237;
+      --phase-bg: rgba(124, 58, 237, 0.04);
+      --phase-border: rgba(124, 58, 237, 0.14);
+      animation-delay: 0.20s;
+    }
+
+    &.phase--teal {
+      --phase-color: #0D9488;
+      --phase-color-rgb: 13, 148, 136;
+      --phase-bg: rgba(13, 148, 136, 0.04);
+      --phase-border: rgba(13, 148, 136, 0.14);
+      animation-delay: 0.25s;
+    }
+  }
+
+  &__phase-label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+
+    .phase-num {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--phase-color);
+      color: white;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .phase-name {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--phase-color);
+    }
+
+    .phase-step-count {
+      font-size: 11px;
+      color: var(--color-text-muted);
+      margin-left: auto;
+    }
+  }
+
+  // ─── Steps row ─────────────────────────────────────────────────────────────
+
+  &__steps {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+
+  &__step-arrow {
+    display: flex;
+    align-items: center;
+    padding: 0 6px;
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+    opacity: 0.5;
+  }
+
+  // ─── Phase connector ───────────────────────────────────────────────────────
+
+  &__phase-connector {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0 0 0 calc(var(--space-lg) + 13px);
+    gap: 0;
+    color: var(--color-text-muted);
+    opacity: 0.4;
+  }
+
+  .phase-connector__line {
+    width: 1px;
+    height: 12px;
+    background: currentColor;
+    margin-left: 9px;
+  }
+
+  // ─── Legend ────────────────────────────────────────────────────────────────
+
+  &__legend {
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+    margin-top: var(--space-lg);
+    padding-top: var(--space-md);
+    border-top: 1px solid var(--color-border);
+    flex-wrap: wrap;
+    animation: wf-fade-up 0.4s var(--ease-out) 0.3s both;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-size: 12px;
+    color: var(--color-text-secondary);
+  }
+
+  .legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    border: 2px solid var(--color-text-muted);
+    flex-shrink: 0;
+
+    &--solid {
+      border-style: solid;
+    }
+
+    &--dashed {
+      border-style: dashed;
+    }
+  }
+}
+
+// ─── Step card ─────────────────────────────────────────────────────────────────
+
+.workflow__step {
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  border-top: 3px solid var(--phase-color);
+  padding: var(--space-md);
+  flex: 1 1 170px;
+  min-width: 160px;
+  max-width: 240px;
+  cursor: pointer;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+  transition:
+    transform var(--duration-base) var(--ease-out),
+    box-shadow var(--duration-base) var(--ease-out),
+    border-color var(--duration-base) ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px -6px rgba(var(--phase-color-rgb), 0.18),
+                0 4px 10px -4px rgba(0, 0, 0, 0.08);
+    border-color: rgba(var(--phase-color-rgb), 0.3);
+
+    .step__details {
+      max-height: 100px;
+      opacity: 1;
+      margin-top: 4px;
+    }
+
+    .step__footer {
+      border-color: rgba(var(--phase-color-rgb), 0.25);
+    }
+
+    .step__page {
+      color: var(--phase-color);
+    }
+  }
+
+  &:active {
+    transform: translateY(-2px);
+  }
+
+  &--conditional {
+    border-top-style: dashed;
+    opacity: 0.9;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+
+.step {
+  &__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+  }
+
+  &__num {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--phase-color);
+    opacity: 0.65;
+    text-transform: uppercase;
+  }
+
+  &__badge {
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 5px;
+    border-radius: var(--radius-full);
+    background: rgba(124, 58, 237, 0.1);
+    color: #7C3AED;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  &__icon {
+    color: var(--phase-color);
+    display: flex;
+    align-items: center;
+    margin-top: 2px;
+  }
+
+  &__title {
+    font-size: 13px;
+    font-weight: 650;
+    color: var(--color-text);
+    line-height: 1.3;
+    margin: 0;
+  }
+
+  &__desc {
+    font-size: 11px;
+    color: var(--color-text-secondary);
+    line-height: 1.45;
+    margin: 0;
+  }
+
+  &__details {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition:
+      max-height var(--duration-slow) var(--ease-out),
+      opacity var(--duration-base) ease,
+      margin-top var(--duration-base) ease;
+
+    li {
+      font-size: 10px;
+      color: var(--color-text-secondary);
+      line-height: 1.5;
+      padding: 1px 0 1px 10px;
+      position: relative;
+
+      &::before {
+        content: '·';
+        position: absolute;
+        left: 2px;
+        color: var(--phase-color);
+        font-weight: 700;
+      }
+    }
+  }
+
+  &__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+    margin-top: auto;
+    padding-top: 8px;
+    border-top: 1px solid var(--color-border);
+    transition: border-color var(--duration-base) ease;
+  }
+
+  &__page {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    transition: color var(--duration-base) ease;
+  }
+}
+
+// ─── Animations ────────────────────────────────────────────────────────────────
+
+@keyframes wf-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ─── Responsive ────────────────────────────────────────────────────────────────
+
+@media (max-width: 900px) {
+  .workflow__step {
+    flex: 1 1 140px;
+    min-width: 140px;
+  }
+}
+
+@media (max-width: 640px) {
+  .workflow {
+    padding: var(--space-md);
+
+    &__title {
+      font-size: 22px;
+    }
+
+    &__steps {
+      flex-direction: column;
+      overflow-x: visible;
+      gap: 0;
+    }
+
+    &__step-arrow {
+      justify-content: center;
+      padding: 4px 0;
+
+      svg {
+        transform: rotate(90deg);
+      }
+    }
+
+    &__phase-connector {
+      padding-left: calc(var(--space-md) + 13px);
+    }
+
+    &__legend {
+      gap: var(--space-md);
+    }
+  }
+
+  .workflow__step {
+    max-width: none;
+    min-width: 0;
+    flex: none;
+    width: 100%;
+  }
+}

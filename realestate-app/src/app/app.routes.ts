@@ -20,6 +20,7 @@ export const routes: Routes = [
   { path: 'clients', children: [] },
   { path: 'properties', children: [] },
   { path: 'tasks', children: [] },
+  { path: 'workflow', children: [] },
   { path: 'leads', pathMatch: 'full', redirectTo: 'leads/board' },
   { path: 'leads/board', children: [] },
   { path: 'leads/table', children: [] },
@@ -42,6 +43,10 @@ export function parseAppUrl(url: string): AppRouteState {
 
   if (segments[0] === 'tasks') {
     return leadRouteState('tasks');
+  }
+
+  if (segments[0] === 'workflow') {
+    return leadRouteState('workflow');
   }
 
   if (segments[0] === 'leads') {
@@ -71,6 +76,8 @@ export function routeForTab(tab: TabType): string {
       return '/properties';
     case 'tasks':
       return '/tasks';
+    case 'workflow':
+      return '/workflow';
   }
 }
 
