@@ -7,6 +7,7 @@ import { ContactNote } from '../../models/contact-note.model';
 import { formatCommissionValue, normalizeCommissionType } from '../../utils/commission.utils';
 import { RelatedTasks } from '../related-tasks/related-tasks';
 import { TaskRelatedEntityType } from '../../models/task.model';
+import { FancyDateInput } from '../fancy-date-input/fancy-date-input';
 
 export interface FieldDefinition {
   key: string;
@@ -20,7 +21,7 @@ export interface FieldDefinition {
 @Component({
   selector: 'app-row-detail',
   standalone: true,
-  imports: [NgClass, FormsModule, TranslatePipe, ContactNotes, RelatedTasks],
+  imports: [NgClass, FormsModule, TranslatePipe, ContactNotes, RelatedTasks, FancyDateInput],
   templateUrl: './row-detail.html',
   styleUrl: './row-detail.scss'
 })
@@ -100,6 +101,10 @@ export class RowDetail {
   setDraftNumber(key: string, val: unknown) {
     const n = Number(val);
     this.draft[key] = isNaN(n) ? 0 : n;
+  }
+
+  asText(value: unknown): string {
+    return String(value ?? '');
   }
 
   getNotes(value: unknown): ContactNote[] {

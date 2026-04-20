@@ -29,15 +29,16 @@ export class ClientService {
     this.loading.set(false);
   }
 
-  async add(client: Omit<Client, 'id'>, action: 'created' | 'converted' = 'created'): Promise<{ error: string | null }> {
-    if (!this.supabase) return { error: 'Supabase not configured.' };
+  async add(client: Omit<Client, 'id'>, action: 'created' | 'converted' = 'created'): Promise<{ error: string | null; client: Client | null }> {
+    if (!this.supabase) return { error: 'Supabase not configured.', client: null };
     const { data, error } = await this.supabase
       .from('clients').insert(this.serializeClient(client))
       .select().single();
-    if (error) return { error: error.message };
-    this.clients.update(list => [...list, this.hydrateClient(data)]);
+    if (error) return { error: error.message, client: null };
+    const createdClient = this.hydrateClient(data);
+    this.clients.update(list => [...list, createdClient]);
     this.activity.log(action, 'client', client.name);
-    return { error: null };
+    return { error: null, client: createdClient };
   }
 
   async update(client: Client): Promise<{ error: string | null }> {

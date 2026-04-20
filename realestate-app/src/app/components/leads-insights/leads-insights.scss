@@ -426,6 +426,16 @@
     color: #7C3AED;
   }
 
+  &--showing {
+    background: rgba(20, 184, 166, 0.14);
+    color: #0F766E;
+  }
+
+  &--deposit {
+    background: rgba(16, 185, 129, 0.14);
+    color: #047857;
+  }
+
   &--lost {
     background: rgba(239, 68, 68, 0.12);
     color: #DC2626;

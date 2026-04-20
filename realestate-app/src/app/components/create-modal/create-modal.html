@@ -81,7 +81,7 @@
         @if (client.status !== 'inactive') {
           <div class="field-group">
             <label>{{ 'form.purchaseDate' | translate }}</label>
-            <input [(ngModel)]="client.purchaseDate" type="date" />
+            <app-fancy-date-input [(value)]="client.purchaseDate" />
           </div>
         }
         <div class="field-group">
@@ -206,7 +206,7 @@
         </div>
         <div class="field-group">
           <label>{{ 'form.firstContact' | translate }}</label>
-          <input [(ngModel)]="lead.firstInteractionDate" type="date" />
+          <app-fancy-date-input [(value)]="lead.firstInteractionDate" />
         </div>
         <div class="field-group">
           <label>{{ 'form.budgetMin' | translate }}</label>
@@ -218,7 +218,7 @@
         </div>
         <div class="field-group">
           <label>{{ 'form.followUpDate' | translate }}</label>
-          <input [(ngModel)]="lead.followUpDate" type="date" />
+          <app-fancy-date-input [(value)]="lead.followUpDate" />
         </div>
 
         <div class="field-group section-divider full"><span>{{ 'form.sectionSource' | translate }}</span></div>

@@ -53,11 +53,11 @@
             </button>
 
             <div class="followups-reschedule">
-              <input
+              <app-fancy-date-input
                 class="followups-date-input"
-                type="date"
+                variant="compact"
                 [value]="currentRescheduleDate(lead)"
-                (input)="setRescheduleDate(lead.id, $any($event.target).value)" />
+                (valueChange)="setRescheduleDate(lead.id, $event)" />
               <button
                 class="followups-btn"
                 type="button"

@@ -1,4 +1,8 @@
-<aside class="sidebar" [class.collapsed]="collapsed()">
+<aside
+  class="sidebar"
+  [class.collapsed]="effectiveCollapsed()"
+  (mouseenter)="onMouseEnterSidebar()"
+  (mouseleave)="onMouseLeaveSidebar()">
   <!-- Logo area -->
   <div class="sidebar-logo">
     <div class="logo-icon">
@@ -7,7 +11,7 @@
         <path d="M8 22V14L16 8L24 14V22H19V17H13V22H8Z" fill="white"/>
       </svg>
     </div>
-    @if (!collapsed()) {
+    @if (!effectiveCollapsed()) {
       <span class="logo-text">Zoclli</span>
     }
   </div>
@@ -59,7 +63,7 @@
             }
           }
         </span>
-        @if (!collapsed()) {
+        @if (!effectiveCollapsed()) {
           <span class="nav-label">{{ item.labelKey | translate }}</span>
         }
         @if (activeTab() === item.id) {

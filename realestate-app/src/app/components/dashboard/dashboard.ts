@@ -97,9 +97,11 @@ export class Dashboard implements OnInit {
       new: '#3B82F6',
       contacted: '#F59E0B',
       negotiating: '#8B5CF6',
+      showing: '#14B8A6',
+      deposit: '#10B981',
       lost: '#EF4444',
     };
-    const order = ['new', 'contacted', 'negotiating', 'lost'];
+    const order = ['new', 'contacted', 'negotiating', 'showing', 'deposit', 'lost'];
     return order.map(s => ({
       label: s.charAt(0).toUpperCase() + s.slice(1),
       count: leads.filter(l => l.status === s).length,

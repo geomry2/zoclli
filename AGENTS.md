@@ -1,149 +1,218 @@
-# Agent Context
+# AGENTS.md
 
-This repository contains a single frontend app in `realestate-app`.
+Use this file as the primary onboarding context for coding agents working in this repository.
 
-If you are a new agent entering this codebase, start there. The repo root may also contain workflow or repo-level files, but the product code lives in `realestate-app/`.
+## Quick Start
 
-## Project Summary
+- Main product code lives in `realestate-app/`.
+- Treat `realestate-app/` as the default working directory for installs, builds, tests, and code changes.
+- This is an Angular 21 standalone app for a real estate CRM / backoffice.
+- Main domains: dashboard, clients, leads, properties, tasks.
+- Backend: Supabase.
+- UI state: mostly Angular signals, with limited RxJS where routing or interop needs it.
+- Localization: English and Russian via `TranslationService`.
 
-- App type: Angular 21 standalone application
-- Domain: real estate CRM / backoffice
-- Core areas: dashboard, clients, leads, property catalogue, units
-- Data backend: Supabase
-- Local persistence: `localStorage` for activity feed, `sessionStorage` for password gate session
-- Localization: built-in English/Russian translation service
+If you are new to the repo, start by reading:
 
-## Working Directory
+1. `realestate-app/src/app/app.ts`
+2. `realestate-app/src/app/app.html`
+3. `realestate-app/src/app/app.routes.ts`
+4. The service or component closest to the requested feature
 
-Use `realestate-app` as the main app working directory for installs, builds, tests, and most code changes.
+## Repo Layout
 
-## Dev Commands
+- `realestate-app/`: application code
+- `realestate-app/src/app/components/`: UI components
+- `realestate-app/src/app/services/`: data access and app services
+- `realestate-app/src/app/models/`: core entities
+- `realestate-app/src/app/utils/`: exports, PDF/XLSX, filters, table helpers, notes helpers
+- `realestate-app/src/environments/`: environment defaults merged with runtime config
+- `realestate-app/public/env.local.example.js`: runtime env example
+- `realestate-app/supabase/`: SQL files for expected backend tables
 
-Run these from `realestate-app`:
+The repo root may contain lightweight repo-level files, but most meaningful product work should happen under `realestate-app/`.
 
-```bash
-npm install
-npm run start
-npm run build
-npm run test
-```
+## App Overview
 
-## App Architecture
+### Shell And Navigation
 
-### Shell
+- Root component: `realestate-app/src/app/app.ts`
+- Root template: `realestate-app/src/app/app.html`
+- Routes: `realestate-app/src/app/app.routes.ts`
+- Top-level tabs: `dashboard`, `clients`, `leads`, `properties`, `tasks`
+- Lead subviews: `board`, `table`, `followups`, `insights`
 
-- Root component: `src/app/app.ts`
-- Root template: `src/app/app.html`
-- Tabs: `dashboard`, `clients`, `leads`, `properties`
-- The app uses Angular signals heavily for local UI state.
+The app shell owns:
+
+- active tab and route-derived state
+- global search
+- create / edit modals for clients, leads, units, and tasks
+- XLSX export for clients and leads
+- password gate rendering
 
 ### Main Components
 
-- `src/app/components/dashboard/`: KPIs and recent activity
-- `src/app/components/clients-table/`: client list and editing entry point
-- `src/app/components/leads-board/`: kanban pipeline grouped by lead status
-- `src/app/components/lead-follow-ups/`: due-date-oriented follow-up queue with quick actions
-- `src/app/components/leads-table/`: lead list and conversion/editing entry point
-- `src/app/components/property-catalogue/`: grouped building/unit view
-- `src/app/components/create-modal/`: create/edit client or lead, including lead-to-client conversion
-- `src/app/components/contact-notes/`: reusable chronological notes timeline for clients and leads
-- `src/app/components/add-unit-modal/`: create/edit units
-- `src/app/components/password-gate/`: simple password gate backed by `environment.appPassword`
+- `dashboard/`: KPI cards, recent activity, top realtors, overview stats
+- `clients-table/`: client list, filters, sorting, column visibility, mobile cards
+- `leads-table/`: lead table view and edit / convert entry points
+- `leads-board/`: kanban pipeline by lead status
+- `lead-follow-ups/`: due-date-focused lead queue
+- `leads-insights/`: lead analytics / summary view
+- `property-catalogue/`: grouped building and unit catalogue
+- `task-board/`: task kanban area
+- `task-modal/`: task create / edit modal
+- `related-tasks/`: contextual task list for entities
+- `create-modal/`: create / edit client or lead, including lead-to-client conversion
+- `add-unit-modal/`: create / edit unit
+- `contact-notes/`: chronological notes timeline reused across clients and leads
+- `row-detail/`: detail presentation for records
+- `search-bar/`: app-wide search UI
+- `password-gate/`: gate backed by `environment.appPassword`
 
-### Services
+## Core Data Model
 
-- `ClientService`: loads and mutates `clients`
-- `LeadService`: loads and mutates `leads`
-- `UnitService`: loads and mutates `units`
-- `BuildingService`: manages building names
-- `AgencyService`: manages agency names
-- `ActivityService`: writes recent activity to `localStorage`
-- `TranslationService`: app copy and EN/RU toggle
-- `SupabaseService`: safely initializes the Supabase client from environment values
+Primary models live in `realestate-app/src/app/models/`.
 
-### Models
+- `Client`: contact, deal, commission, property linkage, serialized notes
+- `Lead`: prospect, funnel status, follow-up data, serialized notes
+- `Unit`: property inventory row
+- `Task`: internal work item with status and related entity context
+- `ContactNote`: timeline note entry used by notes helpers / UI
 
-- `Client`: contact + purchase/deal data, commission fields, serialized notes timeline
-- `Lead`: prospect + follow-up data with serialized notes timeline
-- `Unit`: property inventory row, aligned closely with client property fields
+## Services
 
-## Data And Environment
+- `ClientService`: load, map, create, update, delete `clients`
+- `LeadService`: load, map, create, update, delete `leads`
+- `UnitService`: manage `units`
+- `TaskService`: manage `tasks`
+- `BuildingService`: manage building names
+- `AgencyService`: manage agency names
+- `ActivityService`: recent activity feed persisted in `localStorage`
+- `TranslationService`: EN/RU dictionary and language switching
+- `SupabaseService`: creates the Supabase client when runtime env is valid
+- `TaskParserService`: optional AI/freeform task parsing with fallback behavior
 
-Environment values are merged from `window.__env`:
+## Runtime And Environment
+
+Environment defaults are defined in:
+
+- `realestate-app/src/environments/environment.ts`
+
+Runtime overrides come from:
+
+- `window.__env`
+- example file: `realestate-app/public/env.local.example.js`
+
+Relevant env keys:
 
 - `supabaseUrl`
 - `supabaseAnonKey`
 - `appPassword`
-
-Reference files:
-
-- `src/environments/environment.ts`
-- `public/env.local.example.js`
+- `taskParserUrl`
 
 Important behavior:
 
-- If Supabase credentials are placeholders or missing, `SupabaseService` returns `null`.
-- In that state, data services surface `"Supabase not configured."` instead of loading records.
-- The password gate compares the entered password against `environment.appPassword`.
+- If Supabase credentials are missing or still placeholders, `SupabaseService` returns `null`.
+- In that case, data services surface `"Supabase not configured."` instead of loading records.
+- The password gate compares entered password with `environment.appPassword`.
+- If `taskParserUrl` is unavailable, the app falls back to local heuristic task parsing.
 
 ## Backend Expectations
 
-Supabase tables currently implied by the app:
+The frontend expects these Supabase tables:
 
 - `clients`
 - `leads`
 - `units`
 - `buildings`
 - `agencies`
+- `tasks`
 
-There are SQL files in `supabase/` for some schema pieces:
+Known schema files in `realestate-app/supabase/`:
 
-- `supabase/buildings.sql`
-- `supabase/clients-commission.sql`
-- `supabase/units.sql`
+- `buildings.sql`
+- `clients-commission.sql`
+- `units.sql`
+- `tasks.sql`
 
-The services expect snake_case rows from Supabase and convert them to camelCase in the app using `case.utils.ts`.
+Supabase rows are expected in `snake_case` and converted to app-friendly `camelCase` via `realestate-app/src/app/services/case.utils.ts`.
 
 ## Product Behavior Notes
 
 - Clients and leads are searchable from the app shell.
 - Client and lead tables support sorting, structured filters, per-table column visibility, and responsive mobile card layouts.
-- The leads area has multiple operational views: kanban board, table, and follow-up list.
-- Leads can be converted into clients through `CreateModal`.
-- Contact notes are handled as a chronological timeline and serialized into the existing `notes` field for persistence/backward compatibility.
-- Dashboard metrics are derived client-side from loaded clients, leads, and activity entries.
-- Dashboard `Top Realtors` reflects commission earnings, not just deal counts.
-- Property catalogue combines building names, client records, and standalone units into grouped property rows.
-- XLSX export is available from the shell for clients and leads.
-- Print-friendly PDF export is available for client summaries and property sheets.
-- Translation strings live in `TranslationService`; new user-facing copy should usually be added in both EN and RU.
+- Leads are accessible in board, table, follow-up, and insights modes.
+- Leads can be converted into clients through `create-modal`.
+- Contact notes are stored as a chronological timeline, serialized into the legacy `notes` field for persistence compatibility.
+- Dashboard metrics are computed client-side from loaded entities and activity entries.
+- `Top Realtors` reflects commission volume, not only deal count.
+- Property catalogue combines building names, client-linked properties, and standalone units.
+- XLSX export exists for clients and leads.
+- Print-friendly PDF export exists for client summaries and property sheets.
+- Tasks can be created manually and from app context, and may use an AI parser endpoint when configured.
 
-## Editing Guidance For Agents
+## Editing Guidance
 
-- Prefer minimal, surgical changes that preserve the current standalone Angular style.
-- Follow existing signal-based patterns instead of introducing RxJS-heavy state unless there is a strong reason.
-- Keep snake_case/camelCase conversions consistent with `case.utils.ts`.
-- When changing forms, check both create and edit flows.
-- When changing clients or leads list UX, review both desktop table behavior and the mobile card presentation.
-- When changing lead or client fields, also review:
-  - models
-  - create modal
-  - table components
-  - dashboard-derived stats
-  - XLSX/search helpers if relevant
-- When changing notes behavior, also review `contact-notes`, `row-detail`, and notes serialization helpers.
-- When changing copy, update both EN and RU translations.
+- Prefer minimal, surgical changes that fit the current standalone Angular style.
+- Follow the existing signal-based patterns before introducing heavier reactive abstractions.
+- Keep `snake_case` / `camelCase` conversions aligned with `case.utils.ts`.
+- Reuse current helpers in `utils/` when possible instead of re-implementing export, filtering, or notes logic.
+- Preserve mobile behavior when changing table or board UIs.
+
+When changing forms, review both create and edit flows.
+
+When changing client or lead fields, also review:
+
+- models
+- `create-modal`
+- table / board / follow-up views as relevant
+- dashboard-derived stats
+- search / export helpers if applicable
+
+When changing tasks, also review:
+
+- `task-board`
+- `task-modal`
+- `related-tasks`
+- `TaskService`
+- `TaskParserService`
+- `task.utils.ts`
+
+When changing notes behavior, also review:
+
+- `contact-notes`
+- `row-detail`
+- `contact-notes.utils.ts`
+
+When changing copy, update both EN and RU strings in `TranslationService`.
+
+## Preferred Workflow For Agents
+
+1. Read the closest feature component and its backing service.
+2. Check model shape and shared helpers before editing fields.
+3. Preserve existing UX patterns unless the task explicitly asks for redesign.
+4. Validate translations when adding user-facing copy.
+5. Run relevant verification before finishing.
 
 ## Validation Checklist
 
-Before finishing, when relevant:
+Run from `realestate-app/` when relevant:
 
-1. Run `npm run build`.
-2. Run `npm run test`.
-3. Confirm any new env assumptions are documented.
-4. Confirm changed UI text has translation coverage.
+```bash
+npm install
+npm run build
+npm run test
+```
 
-## Repo Notes
+Before finishing, confirm:
 
-- Current repository root is lightweight; most meaningful changes should happen under `realestate-app/`.
-- There may be unrelated repo-level files outside the app, so avoid broad assumptions from the root alone.
+1. The change works in both desktop and mobile flows if UI was touched.
+2. New user-facing text exists in both English and Russian.
+3. New env assumptions are documented.
+4. Related create/edit/conversion flows still behave correctly.
+
+## Notes For Future Agents
+
+- Start in `realestate-app/`, not repo root.
+- Do not assume README is fully up to date; prefer source files when in doubt.
+- If `AGENTS.md` and source disagree, trust the source and update this file if the mismatch matters.

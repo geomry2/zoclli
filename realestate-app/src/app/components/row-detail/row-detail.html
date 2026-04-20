@@ -19,11 +19,11 @@
               }
             </select>
           } @else if (field.type === 'date') {
-            <input
-              type="date"
+            <app-fancy-date-input
               class="field-input"
-              [ngModel]="draft[field.key]"
-              (ngModelChange)="draft[field.key] = $event" />
+              [value]="asText(draft[field.key])"
+              (valueChange)="draft[field.key] = $event"
+              variant="compact" />
           } @else if (field.type === 'currency' || field.type === 'commission') {
             <input
               type="number"

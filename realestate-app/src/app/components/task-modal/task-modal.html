@@ -51,9 +51,22 @@
         <input #titleInput [ngModel]="draft().title" (ngModelChange)="draft.update(v => ({...v, title: $event}))" />
       </label>
 
-      <label>
+      <label class="task-form-grid__full">
         {{ 'tasks.fieldDue' | translate }}
-        <input type="datetime-local" [ngModel]="draft().dueAt" (ngModelChange)="draft.update(v => ({...v, dueAt: $event}))" />
+        <div class="task-due-row">
+          <app-fancy-date-input
+            class="task-due-date"
+            [value]="dueDateValue()"
+            (valueChange)="setDueDate($event)" />
+          <label class="task-time-field task-time-select">
+            <span>{{ 'picker.selectTime' | translate }}</span>
+            <select [ngModel]="dueTimeValue()" (ngModelChange)="setDueTime($event)">
+              @for (time of dueTimeOptions; track time) {
+                <option [value]="time">{{ time }}</option>
+              }
+            </select>
+          </label>
+        </div>
       </label>
 
       <label>

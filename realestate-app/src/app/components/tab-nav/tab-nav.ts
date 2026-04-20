@@ -1,4 +1,4 @@
-import { Component, input, output, signal } from '@angular/core';
+import { Component, computed, input, output, signal } from '@angular/core';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 
 export type TabType = 'clients' | 'leads' | 'dashboard' | 'properties' | 'tasks';
@@ -19,8 +19,12 @@ interface SidebarItem {
 })
 export class TabNav {
   readonly activeTab = input<TabType>('clients');
+  readonly collapsed = input(true);
   readonly tabChange = output<TabType>();
-  readonly collapsed = signal(true);
+  readonly collapsedChange = output<boolean>();
+  readonly previewExpandedChange = output<boolean>();
+  private readonly previewExpanded = signal(false);
+  readonly effectiveCollapsed = computed(() => this.collapsed() && !this.previewExpanded());
 
   readonly items: SidebarItem[] = [
     { id: 'dashboard',  labelKey: 'nav.dashboard',  icon: 'dashboard',  group: 'main' },
@@ -35,6 +39,25 @@ export class TabNav {
   }
 
   toggleCollapse() {
-    this.collapsed.set(!this.collapsed());
+    const nextCollapsed = !this.collapsed();
+    this.previewExpanded.set(false);
+    this.previewExpandedChange.emit(false);
+    this.collapsedChange.emit(nextCollapsed);
+  }
+
+  onMouseEnterSidebar() {
+    if (!this.collapsed() || !this.supportsHover()) return;
+    this.previewExpanded.set(true);
+    this.previewExpandedChange.emit(true);
+  }
+
+  onMouseLeaveSidebar() {
+    if (!this.previewExpanded()) return;
+    this.previewExpanded.set(false);
+    this.previewExpandedChange.emit(false);
+  }
+
+  private supportsHover(): boolean {
+    return typeof window === 'undefined' || window.matchMedia('(hover: hover)').matches;
   }
 }

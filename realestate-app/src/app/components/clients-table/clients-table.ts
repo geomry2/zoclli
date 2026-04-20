@@ -2,6 +2,7 @@ import { Component, computed, inject, input, output, signal } from '@angular/cor
 import { ClientService } from '../../services/client.service';
 import { Client, ClientStatus, PropertyType } from '../../models/client.model';
 import { RowDetail, FieldDefinition } from '../row-detail/row-detail';
+import { FancyDateInput } from '../fancy-date-input/fancy-date-input';
 import { TranslationService } from '../../services/translation.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { applySearch } from '../../utils/csv.utils';
@@ -52,7 +53,7 @@ const CLIENT_MOBILE_HEADER_KEYS: ClientColumnKey[] = ['name', 'propertyType', 's
 @Component({
   selector: 'app-clients-table',
   standalone: true,
-  imports: [RowDetail, TranslatePipe],
+  imports: [RowDetail, TranslatePipe, FancyDateInput],
   templateUrl: './clients-table.html',
   styleUrl: './clients-table.scss'
 })

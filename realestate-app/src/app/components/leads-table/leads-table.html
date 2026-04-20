@@ -35,17 +35,17 @@
     <div class="filter-group filter-group-range">
       <span class="filter-label">{{ 'filter.followUpDate' | translate }}</span>
       <div class="filter-range-row">
-        <input
-          class="filter-input"
-          type="date"
+        <app-fancy-date-input
+          class="filter-input-date"
+          variant="filter"
           [value]="followUpDateRange().from"
-          (input)="setFollowUpDate('from', $any($event.target).value)" />
+          (valueChange)="setFollowUpDate('from', $event)" />
         <span class="filter-separator">{{ 'filter.to' | translate }}</span>
-        <input
-          class="filter-input"
-          type="date"
+        <app-fancy-date-input
+          class="filter-input-date"
+          variant="filter"
           [value]="followUpDateRange().to"
-          (input)="setFollowUpDate('to', $any($event.target).value)" />
+          (valueChange)="setFollowUpDate('to', $event)" />
       </div>
     </div>
 

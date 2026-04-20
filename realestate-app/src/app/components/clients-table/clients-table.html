@@ -50,17 +50,17 @@
     <div class="filter-group filter-group-range">
       <span class="filter-label">{{ 'filter.purchaseDate' | translate }}</span>
       <div class="filter-range-row">
-        <input
-          class="filter-input"
-          type="date"
+        <app-fancy-date-input
+          class="filter-input-date"
+          variant="filter"
           [value]="purchaseDateRange().from"
-          (input)="setPurchaseDate('from', $any($event.target).value)" />
+          (valueChange)="setPurchaseDate('from', $event)" />
         <span class="filter-separator">{{ 'filter.to' | translate }}</span>
-        <input
-          class="filter-input"
-          type="date"
+        <app-fancy-date-input
+          class="filter-input-date"
+          variant="filter"
           [value]="purchaseDateRange().to"
-          (input)="setPurchaseDate('to', $any($event.target).value)" />
+          (valueChange)="setPurchaseDate('to', $event)" />
       </div>
     </div>
 
@@ -212,68 +212,70 @@
       }
     </div>
 
-    <table class="data-table">
-      <thead>
-        <tr>
-          @for (column of visibleClientColumns(); track column.key) {
-            <th [attr.aria-sort]="ariaSort(column.key)">
-              <button class="sort-button" type="button" [class.active]="sortDirection(column.key) !== null" (click)="toggleSort(column.key)">
-                <span>{{ column.label | translate }}</span>
-                <span class="sort-indicator">{{ sortDirection(column.key) === 'asc' ? '▲' : sortDirection(column.key) === 'desc' ? '▼' : '↕' }}</span>
-              </button>
-            </th>
-          }
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (client of filteredClients(); track client.id) {
-          <tr class="data-row" [class.expanded]="expandedRowId() === client.id" (click)="toggleRow(client.id)">
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead>
+          <tr>
             @for (column of visibleClientColumns(); track column.key) {
-              <td [class.col-name]="column.key === 'name'">
-                @switch (column.key) {
-                  @case ('name') { {{ client.name }} }
-                  @case ('phone') { {{ client.phone }} }
-                  @case ('buildingName') { {{ client.buildingName || '—' }} }
-                  @case ('apartmentNumber') { {{ client.apartmentNumber || '—' }} }
-                  @case ('propertyType') { <span class="badge badge-{{ client.propertyType }}">{{ ('proptype.' + client.propertyType) | translate }}</span> }
-                  @case ('status') { <span class="badge badge-{{ client.status }}">{{ ('status.' + client.status) | translate }}</span> }
-                  @case ('dealValue') { {{ formatDealValue(client.dealValue) }} }
-                  @case ('realtorName') { {{ client.realtorName }} }
-                }
-              </td>
+              <th [attr.aria-sort]="ariaSort(column.key)">
+                <button class="sort-button" type="button" [class.active]="sortDirection(column.key) !== null" (click)="toggleSort(column.key)">
+                  <span>{{ column.label | translate }}</span>
+                  <span class="sort-indicator">{{ sortDirection(column.key) === 'asc' ? '▲' : sortDirection(column.key) === 'desc' ? '▼' : '↕' }}</span>
+                </button>
+              </th>
             }
-            <td class="col-actions">
-              <button class="action-btn pdf-btn" [title]="'btn.pdf' | translate" (click)="exportClientSummary($event, client)">{{ 'btn.pdf' | translate }}</button>
-              <button class="action-btn edit-btn" [title]="'btn.edit' | translate" (click)="requestEdit($event, client)">✏</button>
-              <button class="action-btn" [title]="'tasks.newTask' | translate" (click)="requestTask($event, client)">✓</button>
-              <button class="action-btn delete-btn" [title]="'btn.delete' | translate" (click)="startDelete($event, client.id)">✕</button>
-            </td>
+            <th></th>
           </tr>
-          @if (deletingId() === client.id) {
-            <tr class="confirm-row">
-              <td [attr.colspan]="detailColspan()">
-                <div class="delete-confirm">
-                  @if (deleteError()) {
-                    <span class="delete-err">{{ deleteError() }}</span>
-                  } @else {
-                    <span [innerHTML]="('delete.title' | translate : {name: client.name})"></span>
+        </thead>
+        <tbody>
+          @for (client of filteredClients(); track client.id) {
+            <tr class="data-row" [class.expanded]="expandedRowId() === client.id" (click)="toggleRow(client.id)">
+              @for (column of visibleClientColumns(); track column.key) {
+                <td [class.col-name]="column.key === 'name'">
+                  @switch (column.key) {
+                    @case ('name') { {{ client.name }} }
+                    @case ('phone') { {{ client.phone }} }
+                    @case ('buildingName') { {{ client.buildingName || '—' }} }
+                    @case ('apartmentNumber') { {{ client.apartmentNumber || '—' }} }
+                    @case ('propertyType') { <span class="badge badge-{{ client.propertyType }}">{{ ('proptype.' + client.propertyType) | translate }}</span> }
+                    @case ('status') { <span class="badge badge-{{ client.status }}">{{ ('status.' + client.status) | translate }}</span> }
+                    @case ('dealValue') { {{ formatDealValue(client.dealValue) }} }
+                    @case ('realtorName') { {{ client.realtorName }} }
                   }
-                  <button class="btn-confirm-delete" (click)="confirmDelete(client.id)">{{ 'btn.confirmDelete' | translate }}</button>
-                  <button class="btn-cancel-delete" (click)="cancelDelete()">{{ 'btn.cancelDelete' | translate }}</button>
-                </div>
+                </td>
+              }
+              <td class="col-actions">
+                <button class="action-btn pdf-btn" [title]="'btn.pdf' | translate" (click)="exportClientSummary($event, client)">{{ 'btn.pdf' | translate }}</button>
+                <button class="action-btn edit-btn" [title]="'btn.edit' | translate" (click)="requestEdit($event, client)">✏</button>
+                <button class="action-btn" [title]="'tasks.newTask' | translate" (click)="requestTask($event, client)">✓</button>
+                <button class="action-btn delete-btn" [title]="'btn.delete' | translate" (click)="startDelete($event, client.id)">✕</button>
               </td>
             </tr>
+            @if (deletingId() === client.id) {
+              <tr class="confirm-row">
+                <td [attr.colspan]="detailColspan()">
+                  <div class="delete-confirm">
+                    @if (deleteError()) {
+                      <span class="delete-err">{{ deleteError() }}</span>
+                    } @else {
+                      <span [innerHTML]="('delete.title' | translate : {name: client.name})"></span>
+                    }
+                    <button class="btn-confirm-delete" (click)="confirmDelete(client.id)">{{ 'btn.confirmDelete' | translate }}</button>
+                    <button class="btn-cancel-delete" (click)="cancelDelete()">{{ 'btn.cancelDelete' | translate }}</button>
+                  </div>
+                </td>
+              </tr>
+            }
+            @if (expandedRowId() === client.id) {
+              <tr class="detail-row">
+                <td [attr.colspan]="detailColspan()">
+                  <app-row-detail [entry]="asRecord(client)" [fields]="clientFields" [relatedEntityType]="'client'" [relatedEntityId]="client.id" (entrySave)="onClientSave($event)" />
+                </td>
+              </tr>
+            }
           }
-          @if (expandedRowId() === client.id) {
-            <tr class="detail-row">
-              <td [attr.colspan]="detailColspan()">
-                <app-row-detail [entry]="asRecord(client)" [fields]="clientFields" [relatedEntityType]="'client'" [relatedEntityId]="client.id" (entrySave)="onClientSave($event)" />
-              </td>
-            </tr>
-          }
-        }
-      </tbody>
-    </table>
+        </tbody>
+      </table>
+    </div>
   }
 </div>
