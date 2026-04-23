@@ -43,6 +43,18 @@
   word-break: break-word;
 }
 
+.field-email-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  .field-value,
+  .field-input {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
 .field-badge {
   display: inline-block;
   padding: 3px 10px;

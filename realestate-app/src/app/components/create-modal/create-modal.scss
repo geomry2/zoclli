@@ -172,6 +172,16 @@
   }
 }
 
+.email-field-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  input {
+    flex: 1;
+  }
+}
+
 .btn-back {
   flex-shrink: 0;
   height: 40px;

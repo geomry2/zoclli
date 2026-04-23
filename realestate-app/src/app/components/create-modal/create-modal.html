@@ -35,7 +35,14 @@
         </div>
         <div class="field-group">
           <label>{{ 'form.email' | translate }}</label>
-          <input [(ngModel)]="client.email" type="email" placeholder="jane@email.com" />
+          <div class="email-field-row">
+            <input [(ngModel)]="client.email" type="email" placeholder="jane@email.com" />
+            <app-email-confirmation-control
+              [email]="client.email"
+              [status]="clientEmailStatusPreview()"
+              [compact]="true"
+              (statusChange)="setClientEmailStatus($event)" />
+          </div>
         </div>
 
         <div class="field-group section-divider full"><span>{{ 'form.sectionProperty' | translate }}</span></div>
@@ -155,7 +162,14 @@
         </div>
         <div class="field-group">
           <label>{{ 'form.email' | translate }}</label>
-          <input [(ngModel)]="lead.email" type="email" placeholder="john@email.com" />
+          <div class="email-field-row">
+            <input [(ngModel)]="lead.email" type="email" placeholder="john@email.com" />
+            <app-email-confirmation-control
+              [email]="lead.email"
+              [status]="leadEmailStatusPreview()"
+              [compact]="true"
+              (statusChange)="setLeadEmailStatus($event)" />
+          </div>
         </div>
 
         <div class="field-group section-divider full"><span>{{ 'form.sectionInterest' | translate }}</span></div>

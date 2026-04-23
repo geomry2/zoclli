@@ -5,6 +5,7 @@ import { RowDetail, FieldDefinition } from '../row-detail/row-detail';
 import { FancyDateInput } from '../fancy-date-input/fancy-date-input';
 import { TranslationService } from '../../services/translation.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { EmailConfirmationControl } from '../email-confirmation-control/email-confirmation-control';
 import { applySearch } from '../../utils/csv.utils';
 import { formatCommissionValue, getCommissionAmount } from '../../utils/commission.utils';
 import {
@@ -27,7 +28,7 @@ import {
   uniqueValues,
 } from '../../utils/table.utils';
 
-type ClientSortKey = 'name' | 'phone' | 'buildingName' | 'apartmentNumber' | 'propertyType' | 'status' | 'dealValue' | 'realtorName';
+type ClientSortKey = 'name' | 'phone' | 'email' | 'buildingName' | 'apartmentNumber' | 'propertyType' | 'status' | 'dealValue' | 'realtorName';
 type ClientColumnKey = ClientSortKey;
 
 interface ClientColumnDefinition {
@@ -38,6 +39,7 @@ interface ClientColumnDefinition {
 const CLIENT_COLUMNS: ClientColumnDefinition[] = [
   { key: 'name', label: 'col.name' },
   { key: 'phone', label: 'col.phone' },
+  { key: 'email', label: 'col.email' },
   { key: 'buildingName', label: 'col.building' },
   { key: 'apartmentNumber', label: 'col.unit' },
   { key: 'propertyType', label: 'col.propertyType' },
@@ -48,12 +50,12 @@ const CLIENT_COLUMNS: ClientColumnDefinition[] = [
 
 const CLIENT_COLUMN_KEYS = CLIENT_COLUMNS.map(column => column.key) as ClientColumnKey[];
 const CLIENT_COLUMN_STORAGE_KEY = 'clients-table-visible-columns';
-const CLIENT_MOBILE_HEADER_KEYS: ClientColumnKey[] = ['name', 'propertyType', 'status'];
+const CLIENT_MOBILE_HEADER_KEYS: ClientColumnKey[] = ['name', 'propertyType', 'status', 'email'];
 
 @Component({
   selector: 'app-clients-table',
   standalone: true,
-  imports: [RowDetail, TranslatePipe, FancyDateInput],
+  imports: [RowDetail, TranslatePipe, FancyDateInput, EmailConfirmationControl],
   templateUrl: './clients-table.html',
   styleUrl: './clients-table.scss'
 })
@@ -159,7 +161,16 @@ export class ClientsTable {
 
   async onClientSave(record: Record<string, unknown>) {
     const client = record as unknown as Client;
-    const { error } = await this.clientService.update(client);
+    const existing = this.clientService.clients().find(item => item.id === client.id);
+    const normalizedEmail = String(client.email ?? '').trim().toLowerCase();
+    const existingEmail = String(existing?.email ?? '').trim().toLowerCase();
+    const nextClient: Client = {
+      ...client,
+      emailConfirmationStatus: normalizedEmail && normalizedEmail === existingEmail
+        ? client.emailConfirmationStatus
+        : 'not_sent',
+    };
+    const { error } = await this.clientService.update(nextClient);
     if (error) this.saveError.set(error);
     else this.saveError.set(null);
   }
@@ -199,6 +210,8 @@ export class ClientsTable {
         return client.name || '-';
       case 'phone':
         return client.phone || '-';
+      case 'email':
+        return client.email || '-';
       case 'buildingName':
         return client.buildingName || '-';
       case 'apartmentNumber':
@@ -387,6 +400,7 @@ export class ClientsTable {
   private readonly sortAccessors: Record<ClientSortKey, (client: Client) => unknown> = {
     name: client => client.name,
     phone: client => client.phone,
+    email: client => client.email,
     buildingName: client => client.buildingName,
     apartmentNumber: client => client.apartmentNumber,
     propertyType: client => this.ts.t(`proptype.${client.propertyType}`),

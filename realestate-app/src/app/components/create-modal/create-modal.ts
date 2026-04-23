@@ -10,8 +10,10 @@ import { Client, PropertyType, ClientStatus, CommissionType } from '../../models
 import { Lead, LeadStatus } from '../../models/lead.model';
 import { ContactNotes } from '../contact-notes/contact-notes';
 import { FancyDateInput } from '../fancy-date-input/fancy-date-input';
+import { EmailConfirmationControl } from '../email-confirmation-control/email-confirmation-control';
 import { normalizeContactNotes } from '../../utils/contact-notes.utils';
 import { getCommissionAmount, normalizeCommissionType, normalizeCommissionValue } from '../../utils/commission.utils';
+import { EmailConfirmationStatus } from '../../models/email-confirmation.model';
 
 type Tab = 'clients' | 'leads';
 type FieldMode = 'select' | 'new';
@@ -20,7 +22,7 @@ type InterestMode = 'text' | 'building';
 @Component({
   selector: 'app-create-modal',
   standalone: true,
-  imports: [FormsModule, TranslatePipe, ContactNotes, FancyDateInput],
+  imports: [FormsModule, TranslatePipe, ContactNotes, FancyDateInput, EmailConfirmationControl],
   templateUrl: './create-modal.html',
   styleUrl: './create-modal.scss',
 })
@@ -153,6 +155,7 @@ export class CreateModal implements OnInit {
       this.client.name = cl.name;
       this.client.phone = cl.phone;
       this.client.email = cl.email;
+      this.client.emailConfirmationStatus = cl.emailConfirmationStatus;
       this.client.realtorName = cl.realtorName;
       this.client.realtorAgency = cl.realtorAgency;
       this.client.dealValue = cl.budgetMax || cl.budgetMin || 0;
@@ -168,7 +171,7 @@ export class CreateModal implements OnInit {
 
   private emptyClient(): Omit<Client, 'id'> {
     return {
-      name: '', phone: '', email: '',
+      name: '', phone: '', email: '', emailConfirmationStatus: 'not_sent',
       buildingName: '', apartmentNumber: '',
       propertyType: 'apartment', status: 'active',
       purchaseDate: '', dealValue: 0,
@@ -180,7 +183,7 @@ export class CreateModal implements OnInit {
 
   private emptyLead(): Omit<Lead, 'id'> {
     return {
-      name: '', phone: '', email: '',
+      name: '', phone: '', email: '', emailConfirmationStatus: 'not_sent',
       interestedIn: '', realtorName: '', realtorAgency: '',
       firstInteractionDate: '', status: 'new',
       budgetMin: 0, budgetMax: 0, followUpDate: '', notes: [],
@@ -281,11 +284,14 @@ export class CreateModal implements OnInit {
   }
 
   private normalizeClient(client: Omit<Client, 'id'>): Omit<Client, 'id'> {
+    const normalizedEmail = this.normalizeEmail(client.email);
+    const originalEmail = this.editClient() ? this.normalizeEmail(this.editClient()!.email) : null;
     return {
       ...client,
       name: this.normalizeName(client.name),
       phone: this.normalizeLooseText(client.phone),
-      email: this.normalizeEmail(client.email),
+      email: normalizedEmail,
+      emailConfirmationStatus: this.nextEmailConfirmationStatus(client.emailConfirmationStatus, normalizedEmail, originalEmail),
       buildingName: this.normalizeLooseText(client.buildingName),
       apartmentNumber: this.normalizeLooseText(client.apartmentNumber),
       realtorName: this.normalizeName(client.realtorName),
@@ -297,11 +303,14 @@ export class CreateModal implements OnInit {
   }
 
   private normalizeLead(lead: Omit<Lead, 'id'>): Omit<Lead, 'id'> {
+    const normalizedEmail = this.normalizeEmail(lead.email);
+    const originalEmail = this.editLead() ? this.normalizeEmail(this.editLead()!.email) : null;
     return {
       ...lead,
       name: this.normalizeName(lead.name),
       phone: this.normalizeLooseText(lead.phone),
-      email: this.normalizeEmail(lead.email),
+      email: normalizedEmail,
+      emailConfirmationStatus: this.nextEmailConfirmationStatus(lead.emailConfirmationStatus, normalizedEmail, originalEmail),
       interestedIn: this.normalizeLooseText(lead.interestedIn),
       realtorName: this.normalizeName(lead.realtorName),
       realtorAgency: this.normalizeAgency(lead.realtorAgency),
@@ -405,5 +414,45 @@ export class CreateModal implements OnInit {
 
   private normalizePhoneForCompare(value: string): string {
     return value.replace(/[^\d+]/g, '');
+  }
+
+  clientEmailStatusPreview(): EmailConfirmationStatus {
+    const currentEmail = this.normalizeEmail(this.client.email);
+    const originalEmail = this.editClient() ? this.normalizeEmail(this.editClient()!.email) : '';
+    return currentEmail && currentEmail === originalEmail
+      ? this.client.emailConfirmationStatus
+      : 'not_sent';
+  }
+
+  leadEmailStatusPreview(): EmailConfirmationStatus {
+    const currentEmail = this.normalizeEmail(this.lead.email);
+    const originalEmail = this.editLead() ? this.normalizeEmail(this.editLead()!.email) : '';
+    return currentEmail && currentEmail === originalEmail
+      ? this.lead.emailConfirmationStatus
+      : 'not_sent';
+  }
+
+  setClientEmailStatus(status: EmailConfirmationStatus) {
+    this.client.emailConfirmationStatus = status;
+  }
+
+  setLeadEmailStatus(status: EmailConfirmationStatus) {
+    this.lead.emailConfirmationStatus = status;
+  }
+
+  private nextEmailConfirmationStatus(
+    status: EmailConfirmationStatus,
+    normalizedEmail: string,
+    originalEmail: string | null,
+  ): EmailConfirmationStatus {
+    if (!normalizedEmail) {
+      return 'not_sent';
+    }
+
+    if (originalEmail && normalizedEmail !== originalEmail) {
+      return 'not_sent';
+    }
+
+    return status;
   }
 }

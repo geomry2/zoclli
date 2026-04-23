@@ -10,6 +10,7 @@ function buildLead(overrides: Partial<Lead>): Lead {
     name: 'Lead',
     phone: '',
     email: '',
+    emailConfirmationStatus: 'not_sent',
     interestedIn: '',
     realtorName: '',
     realtorAgency: '',
