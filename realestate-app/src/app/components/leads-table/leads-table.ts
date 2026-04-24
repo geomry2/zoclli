@@ -5,6 +5,7 @@ import { RowDetail, FieldDefinition } from '../row-detail/row-detail';
 import { FancyDateInput } from '../fancy-date-input/fancy-date-input';
 import { TranslationService } from '../../services/translation.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { EmailConfirmationControl } from '../email-confirmation-control/email-confirmation-control';
 import { applySearch } from '../../utils/csv.utils';
 import {
   loadVisibleColumnKeys,
@@ -24,7 +25,7 @@ import {
   uniqueValues,
 } from '../../utils/table.utils';
 
-type LeadSortKey = 'name' | 'phone' | 'status' | 'budgetRange' | 'interestedIn' | 'followUpDate' | 'realtorName';
+type LeadSortKey = 'name' | 'phone' | 'email' | 'status' | 'budgetRange' | 'interestedIn' | 'followUpDate' | 'realtorName';
 type LeadColumnKey = LeadSortKey;
 
 interface LeadColumnDefinition {
@@ -35,6 +36,7 @@ interface LeadColumnDefinition {
 const LEAD_COLUMNS: LeadColumnDefinition[] = [
   { key: 'name', label: 'col.name' },
   { key: 'phone', label: 'col.phone' },
+  { key: 'email', label: 'col.email' },
   { key: 'status', label: 'col.status' },
   { key: 'budgetRange', label: 'col.budgetRange' },
   { key: 'interestedIn', label: 'col.interestedIn' },
@@ -44,12 +46,12 @@ const LEAD_COLUMNS: LeadColumnDefinition[] = [
 
 const LEAD_COLUMN_KEYS = LEAD_COLUMNS.map(column => column.key) as LeadColumnKey[];
 const LEAD_COLUMN_STORAGE_KEY = 'leads-table-visible-columns';
-const LEAD_MOBILE_HEADER_KEYS: LeadColumnKey[] = ['name', 'status', 'followUpDate'];
+const LEAD_MOBILE_HEADER_KEYS: LeadColumnKey[] = ['name', 'status', 'followUpDate', 'email'];
 
 @Component({
   selector: 'app-leads-table',
   standalone: true,
-  imports: [RowDetail, TranslatePipe, FancyDateInput],
+  imports: [RowDetail, TranslatePipe, FancyDateInput, EmailConfirmationControl],
   templateUrl: './leads-table.html',
   styleUrl: './leads-table.scss'
 })
@@ -158,7 +160,16 @@ export class LeadsTable {
 
   async onLeadSave(record: Record<string, unknown>) {
     const lead = record as unknown as Lead;
-    const { error } = await this.leadService.update(lead);
+    const existing = this.leadService.leads().find(item => item.id === lead.id);
+    const normalizedEmail = String(lead.email ?? '').trim().toLowerCase();
+    const existingEmail = String(existing?.email ?? '').trim().toLowerCase();
+    const nextLead: Lead = {
+      ...lead,
+      emailConfirmationStatus: normalizedEmail && normalizedEmail === existingEmail
+        ? lead.emailConfirmationStatus
+        : 'not_sent',
+    };
+    const { error } = await this.leadService.update(nextLead);
     if (error) this.saveError.set(error);
     else this.saveError.set(null);
   }
@@ -201,6 +212,8 @@ export class LeadsTable {
         return lead.name || '-';
       case 'phone':
         return lead.phone || '-';
+      case 'email':
+        return lead.email || '-';
       case 'status':
         return this.ts.t(`status.${lead.status}`);
       case 'budgetRange':
@@ -302,6 +315,7 @@ export class LeadsTable {
   private readonly sortAccessors: Record<LeadSortKey, (lead: Lead) => unknown> = {
     name: lead => lead.name,
     phone: lead => lead.phone,
+    email: lead => lead.email,
     status: lead => this.ts.t(`status.${lead.status}`),
     budgetRange: lead => lead.budgetMax,
     interestedIn: lead => lead.interestedIn,

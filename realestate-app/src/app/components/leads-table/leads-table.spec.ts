@@ -10,6 +10,7 @@ function buildLead(overrides: Partial<Lead>): Lead {
     name: 'Lead',
     phone: '',
     email: '',
+    emailConfirmationStatus: 'not_sent',
     interestedIn: '',
     realtorName: '',
     realtorAgency: '',
@@ -164,6 +165,7 @@ describe('LeadsTable', () => {
     expect(table.visibleLeadColumns().map(column => column.key)).toEqual([
       'name',
       'phone',
+      'email',
       'status',
       'budgetRange',
       'interestedIn',

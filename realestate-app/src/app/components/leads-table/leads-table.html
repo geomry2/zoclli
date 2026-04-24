@@ -230,7 +230,22 @@
             @for (column of visibleLeadColumns(); track column.key) {
               <td [class.col-name]="column.key === 'name'" [class.col-interest]="column.key === 'interestedIn'">
                 @switch (column.key) {
-                  @case ('name') { {{ lead.name }} }
+                  @case ('name') {
+                    <div>
+                      <span>{{ lead.name }}</span>
+                    </div>
+                  }
+                  @case ('email') {
+                    <div class="email-cell">
+                      <span>{{ lead.email || '—' }}</span>
+                      <app-email-confirmation-control
+                        [email]="lead.email"
+                        [status]="lead.emailConfirmationStatus"
+                        [entityType]="'lead'"
+                        [entityId]="lead.id"
+                        [compact]="true" />
+                    </div>
+                  }
                   @case ('phone') { {{ lead.phone }} }
                   @case ('status') { <span class="badge badge-{{ lead.status }}">{{ ('status.' + lead.status) | translate }}</span> }
                   @case ('budgetRange') { {{ formatBudget(lead) }} }

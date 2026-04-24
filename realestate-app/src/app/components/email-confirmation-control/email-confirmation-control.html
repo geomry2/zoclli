@@ -1,0 +1,79 @@
+<span class="email-status-wrap">
+  <button
+    class="email-status-btn"
+    type="button"
+    [class.compact]="compact()"
+    [class.status-not-sent]="hasEmail() && visibleStatus() === 'not_sent'"
+    [class.status-pending]="hasEmail() && visibleStatus() === 'pending'"
+    [class.status-resolved]="hasEmail() && visibleStatus() === 'resolved'"
+    [class.no-email]="!hasEmail()"
+    [disabled]="!hasEmail()"
+    (click)="openModal($event)">
+    <span class="email-status-glyph" aria-hidden="true">{{ statusGlyph() }}</span>
+    @if (!compact()) {
+      <span class="email-status-label">
+        @if (!hasEmail()) {
+          {{ 'emailConfirm.noEmail' | translate }}
+        } @else {
+          {{ statusLabel() }}
+        }
+      </span>
+    }
+  </button>
+
+  <span class="email-status-tooltip" role="tooltip">
+    @if (!hasEmail()) {
+      {{ 'emailConfirm.noEmail' | translate }}
+    } @else {
+      {{ statusLabel() }}
+    }
+  </span>
+</span>
+
+@if (showModal()) {
+  <div class="email-modal-backdrop" (click)="closeModal()"></div>
+  <div class="email-modal" (click)="$event.stopPropagation()">
+    <div class="email-modal-header">
+      <div>
+        <h3 class="email-modal-title">{{ 'emailConfirm.modalTitle' | translate }}</h3>
+        <p class="email-modal-subtitle">{{ normalizedEmail() }}</p>
+      </div>
+      <button class="email-modal-close" type="button" (click)="closeModal()">✕</button>
+    </div>
+
+    <div class="email-modal-body">
+      <label class="email-preview-label">{{ 'emailConfirm.previewLabel' | translate }}</label>
+      <textarea class="email-preview" readonly [value]="confirmationMessage()"></textarea>
+
+      @if (copyFeedback() === 'done') {
+        <div class="email-feedback email-feedback-success">{{ 'emailConfirm.copySuccess' | translate }}</div>
+      } @else if (sendState() === 'sent') {
+        <div class="email-feedback email-feedback-success">{{ 'emailConfirm.sendSuccess' | translate }}</div>
+      }
+
+      @if (errorMessage()) {
+        <div class="email-feedback email-feedback-error">{{ errorMessage() }}</div>
+      }
+    </div>
+
+    <div class="email-modal-actions">
+      <button
+        class="email-action email-action-secondary"
+        type="button"
+        [disabled]="updatingStatus()"
+        (click)="toggleResolved()">
+        {{ resolveActionLabel() }}
+      </button>
+      <button class="email-action email-action-secondary" type="button" (click)="copyMessage()">
+        {{ 'emailConfirm.copyButton' | translate }}
+      </button>
+      <button class="email-action email-action-primary" type="button" [disabled]="!canSend()" (click)="sendMessage()">
+        {{
+          sendState() === 'sending'
+            ? ('emailConfirm.sending' | translate)
+            : ('emailConfirm.sendButton' | translate)
+        }}
+      </button>
+    </div>
+  </div>
+}

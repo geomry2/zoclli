@@ -8,6 +8,8 @@ import { formatCommissionValue, normalizeCommissionType } from '../../utils/comm
 import { RelatedTasks } from '../related-tasks/related-tasks';
 import { TaskRelatedEntityType } from '../../models/task.model';
 import { FancyDateInput } from '../fancy-date-input/fancy-date-input';
+import { EmailConfirmationControl } from '../email-confirmation-control/email-confirmation-control';
+import { EmailConfirmationStatus } from '../../models/email-confirmation.model';
 
 export interface FieldDefinition {
   key: string;
@@ -21,7 +23,7 @@ export interface FieldDefinition {
 @Component({
   selector: 'app-row-detail',
   standalone: true,
-  imports: [NgClass, FormsModule, TranslatePipe, ContactNotes, RelatedTasks, FancyDateInput],
+  imports: [NgClass, FormsModule, TranslatePipe, ContactNotes, RelatedTasks, FancyDateInput, EmailConfirmationControl],
   templateUrl: './row-detail.html',
   styleUrl: './row-detail.scss'
 })
@@ -113,5 +115,33 @@ export class RowDetail {
 
   setDraftNotes(key: string, notes: ContactNote[]) {
     this.draft[key] = notes;
+  }
+
+  isEmail(field: FieldDefinition): boolean {
+    return field.key === 'email';
+  }
+
+  emailStatusInDraft(): EmailConfirmationStatus {
+    const currentEmail = this.asText(this.draft['email']).trim().toLowerCase();
+    const savedEmail = this.asText(this.entry()['email']).trim().toLowerCase();
+    const savedStatus = this.asEmailStatus(this.entry()['emailConfirmationStatus']);
+    return currentEmail && currentEmail === savedEmail ? savedStatus : 'not_sent';
+  }
+
+  asEmailStatus(value: unknown): EmailConfirmationStatus {
+    if (value === 'pending' || value === 'resolved' || value === 'not_sent') {
+      return value;
+    }
+
+    return 'not_sent';
+  }
+
+  setDraftEmailStatus(status: EmailConfirmationStatus) {
+    this.draft['emailConfirmationStatus'] = status;
+  }
+
+  emailStatusEntityType(): 'client' | 'lead' | null {
+    const entityType = this.relatedEntityType();
+    return entityType === 'client' || entityType === 'lead' ? entityType : null;
   }
 }

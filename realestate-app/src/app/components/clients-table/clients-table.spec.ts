@@ -10,6 +10,7 @@ function buildClient(overrides: Partial<Client>): Client {
     name: 'Client',
     phone: '',
     email: '',
+    emailConfirmationStatus: 'not_sent',
     buildingName: '',
     apartmentNumber: '',
     propertyType: 'apartment',
@@ -145,6 +146,7 @@ describe('ClientsTable', () => {
     expect(table.visibleClientColumns().map(column => column.key)).toEqual([
       'name',
       'phone',
+      'email',
       'buildingName',
       'apartmentNumber',
       'propertyType',
@@ -159,6 +161,7 @@ describe('ClientsTable', () => {
     expect(table.visibleClientColumns().map(column => column.key)).toEqual([
       'name',
       'phone',
+      'email',
       'buildingName',
       'apartmentNumber',
       'propertyType',
@@ -169,6 +172,7 @@ describe('ClientsTable', () => {
     expect(JSON.parse(localStorage.getItem('clients-table-visible-columns') ?? '[]')).toEqual([
       'name',
       'phone',
+      'email',
       'buildingName',
       'apartmentNumber',
       'propertyType',
@@ -182,6 +186,7 @@ describe('ClientsTable', () => {
     table.toggleColumnVisibility('propertyType');
     table.toggleColumnVisibility('status');
     table.toggleColumnVisibility('realtorName');
+    table.toggleColumnVisibility('email');
     table.toggleColumnVisibility('name');
 
     expect(table.visibleClientColumns().map(column => column.key)).toEqual(['name']);
@@ -191,6 +196,7 @@ describe('ClientsTable', () => {
     expect(table.visibleClientColumns().map(column => column.key)).toEqual([
       'name',
       'phone',
+      'email',
       'buildingName',
       'apartmentNumber',
       'propertyType',

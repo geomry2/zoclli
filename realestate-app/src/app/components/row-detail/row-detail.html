@@ -36,11 +36,26 @@
               [ngModel]="draft[field.key]"
               (ngModelChange)="draft[field.key] = $event"></textarea>
           } @else {
-            <input
-              type="text"
-              class="field-input"
-              [ngModel]="draft[field.key]"
-              (ngModelChange)="draft[field.key] = $event" />
+            @if (isEmail(field)) {
+              <div class="field-email-row">
+                <input
+                  type="text"
+                  class="field-input"
+                  [ngModel]="draft[field.key]"
+                  (ngModelChange)="draft[field.key] = $event" />
+                <app-email-confirmation-control
+                  [email]="asText(draft[field.key])"
+                  [status]="emailStatusInDraft()"
+                  [compact]="true"
+                  (statusChange)="setDraftEmailStatus($event)" />
+              </div>
+            } @else {
+              <input
+                type="text"
+                class="field-input"
+                [ngModel]="draft[field.key]"
+                (ngModelChange)="draft[field.key] = $event" />
+            }
           }
         } @else {
           @if (isNotes(field)) {
@@ -49,6 +64,16 @@
             <span class="field-badge" [ngClass]="'badge-' + getBadgeValue(entry()[field.key])">
               {{ getDisplayBadgeValue(field, entry()[field.key]) | translate }}
             </span>
+          } @else if (isEmail(field)) {
+            <div class="field-email-row">
+              <span class="field-value">{{ formatValue(field, entry()[field.key]) }}</span>
+              <app-email-confirmation-control
+                [email]="asText(entry()[field.key])"
+                [status]="asEmailStatus(entry()['emailConfirmationStatus'])"
+                [compact]="true"
+                [entityType]="emailStatusEntityType()"
+                [entityId]="relatedEntityId()" />
+            </div>
           } @else {
             <span class="field-value">{{ formatValue(field, entry()[field.key]) }}</span>
           }

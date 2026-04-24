@@ -5,6 +5,7 @@ import { Client } from '../models/client.model';
 import { toCamelCase, toSnakeCase } from './case.utils';
 import { deserializeContactNotes, serializeContactNotes } from '../utils/contact-notes.utils';
 import { normalizeCommissionType, normalizeCommissionValue } from '../utils/commission.utils';
+import { EmailConfirmationStatus } from '../models/email-confirmation.model';
 
 @Injectable({ providedIn: 'root' })
 export class ClientService {
@@ -67,13 +68,16 @@ export class ClientService {
   }
 
   private hydrateClient(row: Record<string, unknown>): Client {
-    const camelRow = toCamelCase(row) as unknown as Omit<Client, 'notes' | 'commissionType' | 'commissionValue'> & {
+    const camelRow = toCamelCase(row) as unknown as Omit<Client, 'notes' | 'commissionType' | 'commissionValue' | 'emailConfirmationStatus'> & {
       notes?: unknown;
       commissionType?: unknown;
       commissionValue?: unknown;
+      emailConfirmationStatus?: unknown;
+      emailConfirmed?: unknown;
     };
     return {
       ...camelRow,
+      emailConfirmationStatus: this.normalizeEmailConfirmationStatus(camelRow.emailConfirmationStatus, camelRow.emailConfirmed),
       commissionType: normalizeCommissionType(camelRow.commissionType),
       commissionValue: normalizeCommissionValue(camelRow.commissionValue),
       notes: deserializeContactNotes(camelRow.notes),
@@ -85,5 +89,13 @@ export class ClientService {
       ...client,
       notes: serializeContactNotes(client.notes),
     } as unknown as Record<string, unknown>);
+  }
+
+  private normalizeEmailConfirmationStatus(value: unknown, legacyConfirmed: unknown): EmailConfirmationStatus {
+    if (value === 'not_sent' || value === 'pending' || value === 'resolved') {
+      return value;
+    }
+
+    return legacyConfirmed ? 'resolved' : 'not_sent';
   }
 }

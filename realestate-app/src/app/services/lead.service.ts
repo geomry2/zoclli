@@ -4,6 +4,7 @@ import { ActivityService } from './activity.service';
 import { Lead } from '../models/lead.model';
 import { toCamelCase, toSnakeCase } from './case.utils';
 import { deserializeContactNotes, serializeContactNotes } from '../utils/contact-notes.utils';
+import { EmailConfirmationStatus } from '../models/email-confirmation.model';
 
 @Injectable({ providedIn: 'root' })
 export class LeadService {
@@ -65,9 +66,14 @@ export class LeadService {
   }
 
   private hydrateLead(row: Record<string, unknown>): Lead {
-    const camelRow = toCamelCase(row) as unknown as Omit<Lead, 'notes'> & { notes?: unknown };
+    const camelRow = toCamelCase(row) as unknown as Omit<Lead, 'notes' | 'emailConfirmationStatus'> & {
+      notes?: unknown;
+      emailConfirmationStatus?: unknown;
+      emailConfirmed?: unknown;
+    };
     return {
       ...camelRow,
+      emailConfirmationStatus: this.normalizeEmailConfirmationStatus(camelRow.emailConfirmationStatus, camelRow.emailConfirmed),
       notes: deserializeContactNotes(camelRow.notes),
     };
   }
@@ -77,5 +83,13 @@ export class LeadService {
       ...lead,
       notes: serializeContactNotes(lead.notes),
     } as unknown as Record<string, unknown>);
+  }
+
+  private normalizeEmailConfirmationStatus(value: unknown, legacyConfirmed: unknown): EmailConfirmationStatus {
+    if (value === 'not_sent' || value === 'pending' || value === 'resolved') {
+      return value;
+    }
+
+    return legacyConfirmed ? 'resolved' : 'not_sent';
   }
 }

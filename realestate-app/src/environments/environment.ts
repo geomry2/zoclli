@@ -4,6 +4,8 @@ type EnvConfig = {
   supabaseAnonKey: string;
   appPassword: string;
   taskParserUrl: string;
+  emailConfirmationSendUrl: string;
+  emailConfirmationSendToken: string;
 };
 
 declare global {
@@ -18,5 +20,7 @@ export const environment: EnvConfig = {
   supabaseAnonKey: 'SUPABASE_ANON_KEY_PLACEHOLDER',
   appPassword: 'APP_PASSWORD_PLACEHOLDER',
   taskParserUrl: 'TASK_PARSER_URL_PLACEHOLDER',
+  emailConfirmationSendUrl: 'EMAIL_CONFIRMATION_SEND_URL_PLACEHOLDER',
+  emailConfirmationSendToken: '',
   ...(window.__env ?? {}),
 };

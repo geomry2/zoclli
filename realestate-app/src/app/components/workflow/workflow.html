@@ -1,187 +1,135 @@
 <div class="workflow">
+  <div class="workflow__hero">
+    <div class="workflow__header">
+      <p class="workflow__eyebrow">Cyprus property buying map</p>
+      <h2 class="workflow__title">{{ t('How We Work', 'Как мы работаем') }}</h2>
+      <p class="workflow__subtitle">
+        {{ t(
+          'A clear view of how we guide a buyer from agent handoff and arrival planning to documents, signing, approval, and final re-registration.',
+          'Понятная схема того, как мы ведём покупателя от передачи от агента и подготовки приезда до документов, подписи, разрешения и финального переоформления.'
+        ) }}
+      </p>
+    </div>
 
-  <div class="workflow__header">
-    <p class="workflow__eyebrow">Cyprus Real Estate</p>
-    <h2 class="workflow__title">{{ t('Sales Workflow', 'Воркфлоу продаж') }}</h2>
-    <p class="workflow__subtitle">{{ t('Step-by-step process from first inquiry to title deed. Click any step to go to the relevant section.', 'Полный процесс от первого запроса до получения свидетельства. Нажмите на шаг, чтобы перейти в нужный раздел.') }}</p>
-  </div>
-
-  <div class="workflow__diagram">
-    @for (phase of phases; track phase.labelEn; let phaseIdx = $index; let lastPhase = $last) {
-
-      <div class="workflow__phase {{ phase.colorClass }}">
-        <div class="workflow__phase-label">
-          <span class="phase-num">{{ phaseIdx + 1 }}</span>
-          <span class="phase-name">{{ t(phase.labelEn, phase.labelRu) }}</span>
-          <span class="phase-step-count">{{ phase.steps.length }} {{ t('steps', 'шага') }}</span>
-        </div>
-
-        <div class="workflow__steps">
-          @for (step of phase.steps; track step.num; let lastStep = $last) {
-
-            <button
-              class="workflow__step"
-              [class.workflow__step--conditional]="step.isConditional"
-              (click)="navigate(step.route)"
-              [title]="t(step.titleEn, step.titleRu)">
-
-              <div class="step__head">
-                <span class="step__num">{{ t('Step', 'Шаг') }} {{ step.num }}</span>
-                @if (step.isConditional) {
-                  <span class="step__badge">non-EU</span>
-                }
-              </div>
-
-              <div class="step__icon">
-                @switch (step.icon) {
-                  @case ('signal') {
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"/>
-                      <path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5"/>
-                      <circle cx="12" cy="12" r="1" fill="currentColor"/>
-                      <path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5"/>
-                      <path d="M19.1 4.9C23 8.8 23 15.2 19.1 19.1"/>
-                    </svg>
-                  }
-                  @case ('check-user') {
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-                      <circle cx="9" cy="7" r="4"/>
-                      <polyline points="16 11 18 13 22 9"/>
-                    </svg>
-                  }
-                  @case ('phone') {
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.13 12 19.79 19.79 0 0 1 1.06 3.4 2 2 0 0 1 3.04 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
-                    </svg>
-                  }
-                  @case ('map-pin') {
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                      <circle cx="12" cy="10" r="3"/>
-                    </svg>
-                  }
-                  @case ('eye') {
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                      <circle cx="12" cy="12" r="3"/>
-                    </svg>
-                  }
-                  @case ('tag') {
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
-                      <line x1="7" y1="7" x2="7.01" y2="7"/>
-                    </svg>
-                  }
-                  @case ('file-check') {
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                      <polyline points="14 2 14 8 20 8"/>
-                      <polyline points="9 15 11 17 15 13"/>
-                    </svg>
-                  }
-                  @case ('user-plus') {
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                      <circle cx="8.5" cy="7" r="4"/>
-                      <line x1="20" y1="8" x2="20" y2="14"/>
-                      <line x1="23" y1="11" x2="17" y2="11"/>
-                    </svg>
-                  }
-                  @case ('file-text') {
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                      <polyline points="14 2 14 8 20 8"/>
-                      <line x1="16" y1="13" x2="8" y2="13"/>
-                      <line x1="16" y1="17" x2="8" y2="17"/>
-                      <polyline points="10 9 9 9 8 9"/>
-                    </svg>
-                  }
-                  @case ('shield') {
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                    </svg>
-                  }
-                  @case ('credit-card') {
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                      <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
-                      <line x1="1" y1="10" x2="23" y2="10"/>
-                    </svg>
-                  }
-                  @case ('award') {
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                      <circle cx="12" cy="8" r="7"/>
-                      <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>
-                    </svg>
-                  }
-                  @case ('briefcase') {
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                      <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
-                      <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
-                    </svg>
-                  }
-                }
-              </div>
-
-              <div class="step__body">
-                <h4 class="step__title">{{ t(step.titleEn, step.titleRu) }}</h4>
-                <p class="step__desc">{{ t(step.descEn, step.descRu) }}</p>
-              </div>
-
-              <ul class="step__details">
-                @for (d of (ts.lang() === 'ru' ? step.detailsRu : step.detailsEn); track d) {
-                  <li>{{ d }}</li>
-                }
-              </ul>
-
-              <div class="step__footer">
-                <span class="step__page">{{ t(step.pageLabelEn, step.pageLabelRu) }}</span>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="9 18 15 12 9 6"/>
-                </svg>
-              </div>
-
-            </button>
-
-            @if (!lastStep) {
-              <div class="workflow__step-arrow" aria-hidden="true">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="9 18 15 12 9 6"/>
-                </svg>
-              </div>
-            }
-
-          }
-        </div>
+    <aside class="workflow__notes">
+      <div class="workflow__notes-head">
+        <span class="workflow__notes-eyebrow">{{ t('Scheme notes', 'Заметки со схемы') }}</span>
+        <h3>{{ t('4 Core Blocks', '4 основных блока') }}</h3>
       </div>
 
-      @if (!lastPhase) {
-        <div class="workflow__phase-connector" aria-hidden="true">
-          <div class="phase-connector__line"></div>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="6 9 12 15 18 9"/>
-          </svg>
-        </div>
-      }
+      <ol class="workflow__notes-list">
+        @for (note of notes; track note.num) {
+          <li class="workflow__note-item">
+            <span class="workflow__note-num">{{ note.num }}</span>
+            <span class="workflow__note-text">{{ t(note.textEn, note.textRu) }}</span>
+          </li>
+        }
+      </ol>
+    </aside>
+  </div>
 
+  <div class="workflow__stages">
+    @for (stage of stages; track stage.num) {
+      <section class="workflow__stage">
+        <div class="workflow__stage-head">
+          <div class="workflow__stage-num">{{ stage.num }}</div>
+          <div class="workflow__stage-copy">
+            <h3 class="workflow__stage-title">{{ t(stage.titleEn, stage.titleRu) }}</h3>
+            <p class="workflow__stage-summary">{{ t(stage.summaryEn, stage.summaryRu) }}</p>
+          </div>
+        </div>
+
+        <div class="workflow__sections">
+          @for (section of stage.sections; track section.id; let lastSection = $last) {
+            <div class="workflow__section" [attr.data-layout]="section.layout">
+              @if (section.titleEn || section.titleRu) {
+                <div class="workflow__section-head">
+                  <h4 class="workflow__section-title">{{ t(section.titleEn ?? '', section.titleRu ?? '') }}</h4>
+                  @if (section.captionEn || section.captionRu) {
+                    <p class="workflow__section-caption">{{ t(section.captionEn ?? '', section.captionRu ?? '') }}</p>
+                  }
+                </div>
+              }
+
+              @switch (section.layout) {
+                @case ('lanes') {
+                  <div class="workflow__lanes">
+                    @for (lane of section.lanes ?? []; track lane.titleEn) {
+                      <div class="workflow__lane">
+                        <div class="workflow__lane-title">{{ t(lane.titleEn, lane.titleRu) }}</div>
+                        <div class="workflow__cards workflow__cards--lane">
+                          @for (card of lane.cards; track card.titleEn; let lastCard = $last) {
+                            <button
+                              type="button"
+                              class="workflow__card"
+                              [attr.data-tone]="card.tone ?? 'neutral'"
+                              (click)="navigate(card.route)">
+                              <div class="workflow__card-meta">
+                                @if (card.badgeEn || card.badgeRu) {
+                                  <span class="workflow__badge">{{ t(card.badgeEn ?? '', card.badgeRu ?? '') }}</span>
+                                }
+                                <span class="workflow__page">{{ t(card.pageLabelEn, card.pageLabelRu) }}</span>
+                              </div>
+                              <h5 class="workflow__card-title">{{ t(card.titleEn, card.titleRu) }}</h5>
+                              <p class="workflow__card-desc">{{ t(card.descEn, card.descRu) }}</p>
+                            </button>
+
+                            @if (!lastCard) {
+                              <div class="workflow__arrow workflow__arrow--small" aria-hidden="true"></div>
+                            }
+                          }
+                        </div>
+                      </div>
+                    }
+                  </div>
+                }
+
+                @default {
+                  <div class="workflow__cards" [attr.data-layout]="section.layout">
+                    @for (card of section.cards ?? []; track card.titleEn; let lastCard = $last) {
+                      <button
+                        type="button"
+                        class="workflow__card"
+                        [attr.data-tone]="card.tone ?? 'neutral'"
+                        (click)="navigate(card.route)">
+                        <div class="workflow__card-meta">
+                          @if (card.badgeEn || card.badgeRu) {
+                            <span class="workflow__badge">{{ t(card.badgeEn ?? '', card.badgeRu ?? '') }}</span>
+                          }
+                          <span class="workflow__page">{{ t(card.pageLabelEn, card.pageLabelRu) }}</span>
+                        </div>
+                        <h5 class="workflow__card-title">{{ t(card.titleEn, card.titleRu) }}</h5>
+                        <p class="workflow__card-desc">{{ t(card.descEn, card.descRu) }}</p>
+                      </button>
+
+                      @if (section.layout === 'stack' && !lastCard) {
+                        <div class="workflow__arrow workflow__arrow--small" aria-hidden="true"></div>
+                      }
+                    }
+                  </div>
+                }
+              }
+            </div>
+
+            @if (!lastSection) {
+              <div class="workflow__arrow" aria-hidden="true"></div>
+            }
+          }
+        </div>
+      </section>
     }
   </div>
 
   <div class="workflow__legend">
-    <div class="legend-item">
-      <span class="legend-dot legend-dot--solid"></span>
-      <span>{{ t('Required step', 'Обязательный шаг') }}</span>
-    </div>
-    <div class="legend-item">
-      <span class="legend-dot legend-dot--dashed"></span>
-      <span>{{ t('Conditional step (non-EU buyers)', 'Условный шаг (не-граждане ЕС)') }}</span>
-    </div>
-    <div class="legend-item">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-text-muted)">
-        <polyline points="9 18 15 12 9 6"/>
-      </svg>
-      <span>{{ t('Click any step to navigate', 'Нажмите на шаг для перехода') }}</span>
+    @for (item of legend; track item.labelEn) {
+      <div class="workflow__legend-item">
+        <span class="workflow__legend-dot" [attr.data-tone]="item.tone"></span>
+        <span>{{ t(item.labelEn, item.labelRu) }}</span>
+      </div>
+    }
+    <div class="workflow__legend-item">
+      <span class="workflow__legend-arrow" aria-hidden="true"></span>
+      <span>{{ t('Cards open the closest app section', 'Карточки открывают ближайший раздел приложения') }}</span>
     </div>
   </div>
-
 </div>

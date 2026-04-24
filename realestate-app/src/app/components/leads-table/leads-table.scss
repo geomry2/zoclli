@@ -102,6 +102,13 @@
   }
 }
 
+.email-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
 @media (max-width: 760px) {
   .budget-range-row {
     flex-wrap: wrap;

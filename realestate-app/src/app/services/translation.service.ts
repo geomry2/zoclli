@@ -25,6 +25,8 @@ const EN: Translations = {
   'btn.saveChanges': 'Save Changes',
   'btn.saving': 'Saving…',
   'btn.pdf': 'PDF',
+  'btn.copy': 'Copy',
+  'btn.send': 'Send',
   'btn.cancel': 'Cancel',
   'btn.delete': 'Delete',
   'btn.confirmDelete': 'Delete',
@@ -42,6 +44,7 @@ const EN: Translations = {
   // Table columns
   'col.name': 'Name',
   'col.phone': 'Phone',
+  'col.email': 'Email',
   'col.building': 'Project',
   'col.propertyType': 'Property Type',
   'col.status': 'Status',
@@ -58,6 +61,7 @@ const EN: Translations = {
   'field.fullName': 'Full Name',
   'field.phone': 'Phone',
   'field.email': 'Email',
+  'field.emailConfirmed': 'Email Confirmation',
   'field.building': 'Building / Project',
   'field.apartmentNumber': 'Apartment / Unit',
   'field.propertyType': 'Property Type',
@@ -294,6 +298,7 @@ const EN: Translations = {
   'form.fullName': 'Full Name *',
   'form.phone': 'Phone',
   'form.email': 'Email',
+  'form.emailConfirmed': 'Email Confirmation',
   'form.building': 'Building / Project',
   'form.selectBuilding': '— Select building —',
   'form.addNewBuilding': '＋ Add new building',
@@ -330,6 +335,30 @@ const EN: Translations = {
   'form.budgetMin': 'Budget Min (€)',
   'form.budgetMax': 'Budget Max (€)',
   'form.followUpDate': 'Follow-up Date',
+  // Email confirmation
+  'emailConfirm.subject': 'Please confirm your email address',
+  'emailConfirm.modalTitle': 'Email Confirmation',
+  'emailConfirm.statusNotSent': 'Not confirmed',
+  'emailConfirm.statusPending': 'Pending',
+  'emailConfirm.statusResolved': 'Resolved',
+  'emailConfirm.noEmail': 'No email',
+  'emailConfirm.greeting': 'Thank you for your interest in Zortive Homes.',
+  'emailConfirm.prompt': 'Please confirm your email address so we can get in touch with you.',
+  'emailConfirm.cta': 'Confirm email',
+  'emailConfirm.signoff': 'We look forward to speaking with you.',
+  'emailConfirm.signature': 'Zortive Homes',
+  'emailConfirm.previewLabel': 'Message Preview',
+  'emailConfirm.copyButton': 'Copy Text',
+  'emailConfirm.sendButton': 'Send Email',
+  'emailConfirm.sending': 'Sending…',
+  'emailConfirm.copySuccess': 'Confirmation message copied.',
+  'emailConfirm.copyFailed': 'Could not copy the confirmation message.',
+  'emailConfirm.sendSuccess': 'Confirmation email sent.',
+  'emailConfirm.sendFailed': 'Could not send the confirmation email.',
+  'emailConfirm.sendNotConfigured': 'Direct sending is not configured yet.',
+  'emailConfirm.markResolved': 'Mark as Resolved',
+  'emailConfirm.unmarkResolved': 'Unmark as Resolved',
+  'emailConfirm.recordMissing': 'Could not find this record anymore.',
   // Add unit
   'addUnit.addBtn': 'Add Unit',
   'addUnit.unassignedHint': 'This creates a standalone unit. You can link a client to it later by using the same building and unit number.',
@@ -340,7 +369,7 @@ const EN: Translations = {
   'notes.empty': 'No notes yet. Add the first timeline entry.',
   'notes.legacy': 'Imported note',
 
-  'nav.workflow': 'Workflow',
+  'nav.workflow': 'How We Work',
   // Tasks
   'nav.tasks': 'Tasks',
   'tasks.title': 'Task Board',
@@ -434,6 +463,8 @@ const RU: Translations = {
   'btn.saveChanges': 'Сохранить изменения',
   'btn.saving': 'Сохранение…',
   'btn.pdf': 'PDF',
+  'btn.copy': 'Копировать',
+  'btn.send': 'Отправить',
   'btn.cancel': 'Отмена',
   'btn.delete': 'Удалить',
   'btn.confirmDelete': 'Удалить',
@@ -451,6 +482,7 @@ const RU: Translations = {
   // Table columns
   'col.name': 'Имя',
   'col.phone': 'Телефон',
+  'col.email': 'Email',
   'col.building': 'Комплекс',
   'col.propertyType': 'Тип объекта',
   'col.status': 'Статус',
@@ -467,6 +499,7 @@ const RU: Translations = {
   'field.fullName': 'Полное имя',
   'field.phone': 'Телефон',
   'field.email': 'Email',
+  'field.emailConfirmed': 'Подтверждение email',
   'field.building': 'Здание / Проект',
   'field.apartmentNumber': 'Квартира / Юнит',
   'field.propertyType': 'Тип объекта',
@@ -703,6 +736,7 @@ const RU: Translations = {
   'form.fullName': 'Полное имя *',
   'form.phone': 'Телефон',
   'form.email': 'Email',
+  'form.emailConfirmed': 'Подтверждение email',
   'form.building': 'Здание / Проект',
   'form.selectBuilding': '— Выберите здание —',
   'form.addNewBuilding': '＋ Добавить здание',
@@ -739,6 +773,30 @@ const RU: Translations = {
   'form.budgetMin': 'Мин. бюджет (€)',
   'form.budgetMax': 'Макс. бюджет (€)',
   'form.followUpDate': 'Дата следующего контакта',
+  // Email confirmation
+  'emailConfirm.subject': 'Пожалуйста, подтвердите ваш email',
+  'emailConfirm.modalTitle': 'Подтверждение email',
+  'emailConfirm.statusNotSent': 'Не подтверждено',
+  'emailConfirm.statusPending': 'Ожидает',
+  'emailConfirm.statusResolved': 'Подтверждено',
+  'emailConfirm.noEmail': 'Без email',
+  'emailConfirm.greeting': 'Спасибо за интерес к Zortive Homes.',
+  'emailConfirm.prompt': 'Пожалуйста, подтвердите ваш email, чтобы мы могли с вами связаться.',
+  'emailConfirm.cta': 'Подтвердить email',
+  'emailConfirm.signoff': 'Будем рады с вами поговорить.',
+  'emailConfirm.signature': 'Zortive Homes',
+  'emailConfirm.previewLabel': 'Текст сообщения',
+  'emailConfirm.copyButton': 'Скопировать текст',
+  'emailConfirm.sendButton': 'Отправить email',
+  'emailConfirm.sending': 'Отправляем…',
+  'emailConfirm.copySuccess': 'Сообщение для подтверждения скопировано.',
+  'emailConfirm.copyFailed': 'Не удалось скопировать сообщение для подтверждения.',
+  'emailConfirm.sendSuccess': 'Письмо с подтверждением отправлено.',
+  'emailConfirm.sendFailed': 'Не удалось отправить письмо с подтверждением.',
+  'emailConfirm.sendNotConfigured': 'Прямая отправка пока не настроена.',
+  'emailConfirm.markResolved': 'Отметить как подтверждено',
+  'emailConfirm.unmarkResolved': 'Не подтверждено',
+  'emailConfirm.recordMissing': 'Не удалось найти эту запись.',
   // Add unit
   'addUnit.addBtn': 'Добавить юнит',
   'addUnit.unassignedHint': 'Это создаст отдельный юнит. Позже можно связать его с клиентом, указав то же здание и номер юнита.',
@@ -749,7 +807,7 @@ const RU: Translations = {
   'notes.empty': 'Заметок пока нет. Добавьте первую запись в таймлайн.',
   'notes.legacy': 'Импортированная заметка',
 
-  'nav.workflow': 'Воркфлоу',
+  'nav.workflow': 'Как мы работаем',
   // Tasks
   'nav.tasks': 'Задачи',
   'tasks.title': 'Доска задач',
@@ -830,8 +888,8 @@ export class TranslationService {
     (localStorage.getItem('lang') as Lang) ?? 'en'
   );
 
-  t(key: string, params?: Record<string, string | number>): string {
-    let str = DICTS[this.lang()][key] ?? key;
+  t(key: string, params?: Record<string, string | number>, lang?: Lang): string {
+    let str = DICTS[lang ?? this.lang()][key] ?? key;
     if (params) {
       for (const [k, v] of Object.entries(params)) {
         str = str.replace(`{${k}}`, String(v));

@@ -233,7 +233,22 @@
               @for (column of visibleClientColumns(); track column.key) {
                 <td [class.col-name]="column.key === 'name'">
                   @switch (column.key) {
-                    @case ('name') { {{ client.name }} }
+                    @case ('name') {
+                      <div>
+                        <span>{{ client.name }}</span>
+                      </div>
+                    }
+                    @case ('email') {
+                      <div class="email-cell">
+                        <span>{{ client.email || '—' }}</span>
+                        <app-email-confirmation-control
+                          [email]="client.email"
+                          [status]="client.emailConfirmationStatus"
+                          [entityType]="'client'"
+                          [entityId]="client.id"
+                          [compact]="true" />
+                      </div>
+                    }
                     @case ('phone') { {{ client.phone }} }
                     @case ('buildingName') { {{ client.buildingName || '—' }} }
                     @case ('apartmentNumber') { {{ client.apartmentNumber || '—' }} }
