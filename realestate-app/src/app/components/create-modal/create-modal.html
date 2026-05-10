@@ -49,8 +49,8 @@
 
         <div class="field-group">
           <label>{{ 'form.building' | translate }}</label>
-          @if (buildingMode() === 'select') {
-            <select [(ngModel)]="selectedBuilding">
+          @if (!buildingIsNew()) {
+            <select [ngModel]="client.buildingName" (ngModelChange)="onBuildingChange($event)">
               <option value="">{{ 'form.selectBuilding' | translate }}</option>
               @for (b of allBuildings; track b) {
                 <option [value]="b">{{ b }}</option>
@@ -60,7 +60,7 @@
           } @else {
             <div class="inline-new">
               <input [(ngModel)]="client.buildingName" [attr.placeholder]="'form.newBuildingPlaceholder' | translate" autofocus />
-              <button class="btn-back" type="button" (click)="buildingMode.set('select')">↩</button>
+              <button class="btn-back" type="button" (click)="buildingIsNew.set(false)">↩</button>
             </div>
           }
         </div>
@@ -105,8 +105,8 @@
 
         <div class="field-group">
           <label>{{ 'form.agency' | translate }}</label>
-          @if (agencyMode() === 'select') {
-            <select [(ngModel)]="selectedClientAgency">
+          @if (!agencyIsNew()) {
+            <select [ngModel]="client.realtorAgency" (ngModelChange)="onClientAgencyChange($event)">
               <option value="">{{ 'form.selectAgency' | translate }}</option>
               @for (a of allAgencies; track a) {
                 <option [value]="a">{{ a }}</option>
@@ -116,7 +116,7 @@
           } @else {
             <div class="inline-new">
               <input [(ngModel)]="client.realtorAgency" [attr.placeholder]="'form.newAgencyPlaceholder' | translate" autofocus />
-              <button class="btn-back" type="button" (click)="agencyMode.set('select')">↩</button>
+              <button class="btn-back" type="button" (click)="agencyIsNew.set(false)">↩</button>
             </div>
           }
         </div>
@@ -180,24 +180,24 @@
             <button
               class="interest-mode-btn"
               type="button"
-              [class.active]="leadInterestMode() === 'text'"
+              [class.active]="!leadInterestIsBuilding()"
               (click)="useLeadInterestText()">
               {{ 'form.interestManual' | translate }}
             </button>
             <button
               class="interest-mode-btn"
               type="button"
-              [class.active]="leadInterestMode() === 'building'"
+              [class.active]="leadInterestIsBuilding()"
               (click)="useLeadInterestBuilding()">
               {{ 'form.interestPickExisting' | translate }}
             </button>
           </div>
 
-          @if (leadInterestMode() === 'text') {
+          @if (!leadInterestIsBuilding()) {
             <input [(ngModel)]="lead.interestedIn" [attr.placeholder]="'form.interestedInPlaceholder' | translate" />
           } @else {
             <div class="interest-select-wrap">
-              <select [(ngModel)]="selectedInterestBuilding">
+              <select [(ngModel)]="lead.interestedIn">
                 @if (!allBuildings.length) {
                   <option value="">{{ 'form.noExistingBuildings' | translate }}</option>
                 } @else {
@@ -244,8 +244,8 @@
 
         <div class="field-group">
           <label>{{ 'form.agency' | translate }}</label>
-          @if (agencyMode() === 'select') {
-            <select [(ngModel)]="selectedLeadAgency">
+          @if (!agencyIsNew()) {
+            <select [ngModel]="lead.realtorAgency" (ngModelChange)="onLeadAgencyChange($event)">
               <option value="">{{ 'form.selectAgency' | translate }}</option>
               @for (a of allAgencies; track a) {
                 <option [value]="a">{{ a }}</option>
@@ -255,7 +255,7 @@
           } @else {
             <div class="inline-new">
               <input [(ngModel)]="lead.realtorAgency" [attr.placeholder]="'form.newAgencyPlaceholder' | translate" autofocus />
-              <button class="btn-back" type="button" (click)="agencyMode.set('select')">↩</button>
+              <button class="btn-back" type="button" (click)="agencyIsNew.set(false)">↩</button>
             </div>
           }
         </div>

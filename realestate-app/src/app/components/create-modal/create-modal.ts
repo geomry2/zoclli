@@ -16,8 +16,6 @@ import { getCommissionAmount, normalizeCommissionType, normalizeCommissionValue 
 import { EmailConfirmationStatus } from '../../models/email-confirmation.model';
 
 type Tab = 'clients' | 'leads';
-type FieldMode = 'select' | 'new';
-type InterestMode = 'text' | 'building';
 
 @Component({
   selector: 'app-create-modal',
@@ -43,9 +41,9 @@ export class CreateModal implements OnInit {
   readonly saving = signal(false);
   readonly saveError = signal<string | null>(null);
 
-  readonly buildingMode = signal<FieldMode>('select');
-  readonly agencyMode = signal<FieldMode>('select');
-  readonly leadInterestMode = signal<InterestMode>('text');
+  readonly buildingIsNew = signal(false);
+  readonly agencyIsNew = signal(false);
+  readonly leadInterestIsBuilding = signal(false);
 
   client: Omit<Client, 'id'> = this.emptyClient();
   lead: Omit<Lead, 'id'> = this.emptyLead();
@@ -83,54 +81,34 @@ export class CreateModal implements OnInit {
     return [...new Set([...fromClients, ...fromUnits].filter(Boolean))].sort();
   }
 
-  // ----- Building select/new toggle -----
-  get selectedBuilding(): string {
-    return this.buildingMode() === 'new' ? '__new__' : (this.client.buildingName || '');
-  }
-  set selectedBuilding(value: string) {
+  onBuildingChange(value: string) {
     if (value === '__new__') {
-      this.buildingMode.set('new');
+      this.buildingIsNew.set(true);
       this.client.buildingName = '';
     } else {
-      this.buildingMode.set('select');
+      this.buildingIsNew.set(false);
       this.client.buildingName = value;
     }
   }
 
-  // ----- Agency select/new toggle (client) -----
-  get selectedClientAgency(): string {
-    return this.agencyMode() === 'new' ? '__new__' : (this.client.realtorAgency || '');
-  }
-  set selectedClientAgency(value: string) {
+  onClientAgencyChange(value: string) {
     if (value === '__new__') {
-      this.agencyMode.set('new');
+      this.agencyIsNew.set(true);
       this.client.realtorAgency = '';
     } else {
-      this.agencyMode.set('select');
+      this.agencyIsNew.set(false);
       this.client.realtorAgency = value;
     }
   }
 
-  // ----- Agency select/new toggle (lead) -----
-  get selectedLeadAgency(): string {
-    return this.agencyMode() === 'new' ? '__new__' : (this.lead.realtorAgency || '');
-  }
-  set selectedLeadAgency(value: string) {
+  onLeadAgencyChange(value: string) {
     if (value === '__new__') {
-      this.agencyMode.set('new');
+      this.agencyIsNew.set(true);
       this.lead.realtorAgency = '';
     } else {
-      this.agencyMode.set('select');
+      this.agencyIsNew.set(false);
       this.lead.realtorAgency = value;
     }
-  }
-
-  get selectedInterestBuilding(): string {
-    return this.leadInterestMode() === 'building' ? (this.lead.interestedIn || '') : '';
-  }
-  set selectedInterestBuilding(value: string) {
-    this.leadInterestMode.set('building');
-    this.lead.interestedIn = value;
   }
 
   ngOnInit() {
@@ -138,16 +116,13 @@ export class CreateModal implements OnInit {
     if (ec) {
       const { id, ...rest } = ec;
       this.client = structuredClone(rest);
-      if (ec.buildingName) this.buildingMode.set('select');
-      if (ec.realtorAgency) this.agencyMode.set('select');
     }
     const el = this.editLead();
     if (el) {
       const { id, ...rest } = el;
       this.lead = structuredClone(rest);
-      if (el.realtorAgency) this.agencyMode.set('select');
       if (el.interestedIn && this.allBuildings.includes(el.interestedIn)) {
-        this.leadInterestMode.set('building');
+        this.leadInterestIsBuilding.set(true);
       }
     }
     const cl = this.convertLead();
@@ -160,12 +135,10 @@ export class CreateModal implements OnInit {
       this.client.realtorAgency = cl.realtorAgency;
       this.client.dealValue = cl.budgetMax || cl.budgetMin || 0;
       this.client.notes = structuredClone(cl.notes);
-      if (cl.realtorAgency) this.agencyMode.set('select');
     }
     const pb = this.prefillBuilding();
     if (pb) {
       this.client.buildingName = pb;
-      this.buildingMode.set('select');
     }
   }
 
@@ -259,11 +232,11 @@ export class CreateModal implements OnInit {
   readonly leadStatuses: LeadStatus[] = ['new', 'contacted', 'negotiating', 'showing', 'deposit', 'lost'];
 
   useLeadInterestText() {
-    this.leadInterestMode.set('text');
+    this.leadInterestIsBuilding.set(false);
   }
 
   useLeadInterestBuilding() {
-    this.leadInterestMode.set('building');
+    this.leadInterestIsBuilding.set(true);
     this.lead.interestedIn = this.lead.interestedIn && this.allBuildings.includes(this.lead.interestedIn)
       ? this.lead.interestedIn
       : (this.allBuildings[0] ?? '');

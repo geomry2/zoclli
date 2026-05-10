@@ -9,8 +9,6 @@ import { Unit } from '../../models/unit.model';
 import { UnitService } from '../../services/unit.service';
 import { FancyDateInput } from '../fancy-date-input/fancy-date-input';
 
-type FieldMode = 'select' | 'new';
-
 @Component({
   selector: 'app-add-unit-modal',
   standalone: true,
@@ -30,8 +28,7 @@ export class AddUnitModal {
 
   readonly saving = signal(false);
   readonly saveError = signal<string | null>(null);
-  readonly agencyMode = signal<FieldMode>('select');
-  readonly showUnitDropdown = signal(false);
+  readonly agencyIsNew = signal(false);
 
   unit: Omit<Unit, 'id'> = this.emptyUnit();
 
@@ -50,25 +47,26 @@ export class AddUnitModal {
           realtorAgency: editUnit.realtorAgency,
           notes: editUnit.notes,
         };
-        this.agencyMode.set(editUnit.realtorAgency ? 'select' : 'select');
+        this.agencyIsNew.set(false);
         this.saveError.set(null);
         return;
       }
 
       this.unit = this.emptyUnit();
       this.unit.buildingName = this.buildingName();
-      this.agencyMode.set('select');
+      this.agencyIsNew.set(false);
       this.saveError.set(null);
     });
   }
 
-selectUnit(n: string) {
-    this.unit.apartmentNumber = n;
-    this.showUnitDropdown.set(false);
-  }
-
-  closeUnitDropdown() {
-    setTimeout(() => this.showUnitDropdown.set(false), 150);
+  onAgencyChange(value: string) {
+    if (value === '__new__') {
+      this.agencyIsNew.set(true);
+      this.unit.realtorAgency = '';
+    } else {
+      this.agencyIsNew.set(false);
+      this.unit.realtorAgency = value;
+    }
   }
 
   get allAgencies(): string[] {
@@ -87,19 +85,6 @@ selectUnit(n: string) {
         .map(unit => unit.apartmentNumber),
     ].filter(Boolean);
     return [...new Set(nums)].sort();
-  }
-
-  get selectedAgency(): string {
-    return this.agencyMode() === 'new' ? '__new__' : (this.unit.realtorAgency || '');
-  }
-  set selectedAgency(value: string) {
-    if (value === '__new__') {
-      this.agencyMode.set('new');
-      this.unit.realtorAgency = '';
-    } else {
-      this.agencyMode.set('select');
-      this.unit.realtorAgency = value;
-    }
   }
 
   private emptyUnit(): Omit<Unit, 'id'> {
