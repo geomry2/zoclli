@@ -1,6 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 import { ActivityService } from './activity.service';
+import { TaskParserService } from './task-parser.service';
 import { toCamelCase, toSnakeCase } from './case.utils';
 import { Task, TaskCreateInput, TaskRelatedEntityType } from '../models/task.model';
 import { extractTaskTopic, serializeTaskTags, stripTaskMetaTags, toTaskInputDateTime, toTaskStorageDateTime } from '../utils/task.utils';
@@ -9,6 +10,7 @@ import { extractTaskTopic, serializeTaskTags, stripTaskMetaTags, toTaskInputDate
 export class TaskService {
   private readonly supabase = inject(SupabaseService).client;
   private readonly activity = inject(ActivityService);
+  private readonly taskParser = inject(TaskParserService);
 
   readonly tasks = signal<Task[]>([]);
   readonly loading = signal(false);
@@ -32,7 +34,9 @@ export class TaskService {
         this.error.set(error.message);
       } else {
         this.error.set(null);
-        this.tasks.set((data ?? []).map(row => this.hydrateTask(row)));
+        const loadedTasks = (data ?? []).map(row => this.hydrateTask(row));
+        this.tasks.set(loadedTasks);
+        void this.backfillShortTitles(loadedTasks);
       }
     } catch (error) {
       this.error.set(error instanceof Error ? error.message : 'Unable to load tasks.');
@@ -45,9 +49,10 @@ export class TaskService {
     if (!this.supabase) return { error: 'Supabase not configured.' };
 
     try {
+      const payload = await this.withShortTitle(task);
       const { data, error } = await this.supabase
         .from('tasks')
-        .insert(this.serializeTask(task))
+        .insert(this.serializeTask(payload))
         .select()
         .maybeSingle();
 
@@ -67,10 +72,11 @@ export class TaskService {
 
     try {
       const { id, createdAt, updatedAt, ...rest } = task;
+      const payload = await this.withShortTitle(rest as TaskCreateInput, this.tasks().find(entry => entry.id === id));
       const { data, error } = await this.supabase
         .from('tasks')
         .update({
-          ...this.serializeTask(rest as TaskCreateInput),
+          ...this.serializeTask(payload),
           updated_at: new Date().toISOString(),
         })
         .eq('id', id)
@@ -124,6 +130,7 @@ export class TaskService {
     return {
       ...task,
       title: String(task.title ?? ''),
+      shortTitle: String(task.shortTitle ?? ''),
       topic,
       tags: stripTaskMetaTags(rawTags),
       description: String(task.description ?? ''),
@@ -138,6 +145,7 @@ export class TaskService {
     return toSnakeCase({
       ...task,
       title: task.title.trim(),
+      shortTitle: String(task.shortTitle ?? '').trim(),
       description: task.description.trim(),
       dueAt: toTaskStorageDateTime(task.dueAt),
       assignee: task.assignee.trim(),
@@ -145,5 +153,57 @@ export class TaskService {
       relatedEntityId: task.relatedEntityId.trim(),
       tags: serializeTaskTags(task.tags, task.topic),
     } as unknown as Record<string, unknown>);
+  }
+
+  private async withShortTitle(task: TaskCreateInput, existing?: Task): Promise<TaskCreateInput> {
+    const title = task.title.trim();
+    const description = task.description.trim();
+
+    if (!title) {
+      return { ...task, shortTitle: '' };
+    }
+
+    const existingTitle = existing?.title.trim() ?? '';
+    const existingDescription = existing?.description.trim() ?? '';
+    const existingShortTitle = existing?.shortTitle.trim() ?? '';
+    const titleUnchanged = existing && existingTitle === title && existingDescription === description && existingShortTitle;
+
+    if (titleUnchanged) {
+      return { ...task, shortTitle: existingShortTitle };
+    }
+
+    const shortTitle = await this.taskParser.summarizeTitle(title, description);
+    return {
+      ...task,
+      shortTitle: shortTitle.trim(),
+    };
+  }
+
+  private async backfillShortTitles(tasks: Task[]): Promise<void> {
+    if (!this.supabase) return;
+
+    const pending = tasks.filter(task => !task.shortTitle.trim() && task.title.trim());
+    if (pending.length === 0) return;
+
+    for (const task of pending) {
+      try {
+        const shortTitle = (await this.taskParser.summarizeTitle(task.title, task.description)).trim();
+
+        if (!shortTitle) continue;
+
+        const { error } = await this.supabase
+          .from('tasks')
+          .update({ short_title: shortTitle })
+          .eq('id', task.id);
+
+        if (error) continue;
+
+        this.tasks.update(list =>
+          list.map(entry => entry.id === task.id ? { ...entry, shortTitle } : entry)
+        );
+      } catch {
+        // Ignore backfill failures and keep the task usable without shortTitle.
+      }
+    }
   }
 }

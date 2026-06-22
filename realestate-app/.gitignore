@@ -45,3 +45,6 @@ Thumbs.db
 
 # Local runtime config
 /public/env.local.js
+
+# Supabase local/project files
+/supabase/

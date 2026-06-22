@@ -25,6 +25,11 @@ interface TaskDraft {
   tagsInput: string;
 }
 
+interface TaskAssigneeOption {
+  value: string;
+  label: string;
+}
+
 @Component({
   selector: 'app-task-modal',
   standalone: true,
@@ -64,6 +69,25 @@ export class TaskModal implements AfterViewInit {
   readonly priorities: TaskPriority[] = ['low', 'medium', 'high', 'urgent'];
   readonly topics = [...TASK_TOPICS];
   readonly sources: TaskSource[] = ['manual', 'voice', 'ai', 'automation'];
+  readonly assigneeOptions = computed<TaskAssigneeOption[]>(() => {
+    this.ts.lang();
+
+    return [
+      { value: 'Agis', label: this.ts.t('tasks.assignee.agis') },
+      { value: 'Tanya', label: this.ts.t('tasks.assignee.tanya') },
+      { value: 'Julia', label: this.ts.t('tasks.assignee.julia') },
+      { value: 'George', label: this.ts.t('tasks.assignee.george') },
+    ];
+  });
+  readonly customAssigneeOption = computed<TaskAssigneeOption | null>(() => {
+    const value = this.draft().assignee.trim();
+    if (!value) return null;
+
+    const knownValues = new Set(this.assigneeOptions().map(option => option.value));
+    if (knownValues.has(value)) return null;
+
+    return { value, label: value };
+  });
   readonly pendingDueTime = signal('09:00');
   readonly dueTimeOptions = Array.from({ length: 24 * 4 }, (_, index) => {
     const hour = Math.floor(index / 4);
@@ -168,8 +192,9 @@ export class TaskModal implements AfterViewInit {
     this.saving.set(true);
 
     const payload: TaskCreateInput = {
-      title: draft.title.trim(),
-      description: draft.description.trim(),
+      title: '',
+      shortTitle: '',
+      description: '',
       status: draft.status,
       priority: draft.priority,
       topic: draft.topic,
@@ -184,6 +209,9 @@ export class TaskModal implements AfterViewInit {
         .map(tag => tag.trim())
         .filter(Boolean),
     };
+
+    payload.title = draft.title.trim();
+    payload.description = draft.description.trim();
 
     try {
       const editTask = this.editTask();

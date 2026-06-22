@@ -133,4 +133,14 @@ describe('TaskParserService', () => {
     expect(fridayMorning.dueAt).toBe('2026-04-10T09:00');
     expect(endOfWeek.dueAt).toBe('2026-04-10T18:00');
   });
+
+  it('returns an empty short title when remote summarization is unavailable', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('offline')));
+
+    const created = createTaskParser();
+    injector = created.injector;
+
+    await expect(created.service.summarizeTitle('Call Michael on Friday about Villa 12 and send updated renders'))
+      .resolves.toBe('');
+  });
 });

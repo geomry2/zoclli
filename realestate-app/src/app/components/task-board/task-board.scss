@@ -1,5 +1,8 @@
 .tasks-shell {
-  padding: 4px 0 24px;
+  box-sizing: border-box;
+  width: calc(100% + (var(--space-lg) * 2));
+  margin-inline: calc(var(--space-lg) * -1);
+  padding: 4px var(--space-lg) 24px;
 }
 
 .tasks-board-head {
@@ -74,6 +77,43 @@
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 18px;
+}
+
+.tasks-assignee-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+  padding: 7px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+}
+
+.tasks-assignee-filter__label {
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.tasks-assignee-filter select {
+  min-height: 32px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  padding: 0 12px;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+
+  &:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(27, 67, 50, 0.10);
+  }
 }
 
 .tasks-topic-filters {
@@ -173,12 +213,13 @@
 
 .tasks-columns {
   display: grid;
-  grid-template-columns: repeat(5, minmax(248px, 248px));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 12px;
-  min-width: max-content;
+  width: 100%;
 }
 
 .tasks-column {
+  min-width: 220px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   background: var(--color-surface);
@@ -219,6 +260,75 @@
       font-weight: 700;
     }
   }
+}
+
+.tasks-column--inbox {
+  border-color: rgba(100, 116, 139, 0.16);
+  background: linear-gradient(180deg, rgba(100, 116, 139, 0.05) 0%, rgba(100, 116, 139, 0.02) 100%);
+}
+
+.tasks-column--todo {
+  border-color: rgba(37, 99, 235, 0.14);
+  background: linear-gradient(180deg, rgba(37, 99, 235, 0.06) 0%, rgba(37, 99, 235, 0.02) 100%);
+}
+
+.tasks-column--in-progress {
+  border-color: rgba(14, 165, 233, 0.18);
+  background: linear-gradient(180deg, rgba(14, 165, 233, 0.07) 0%, rgba(14, 165, 233, 0.03) 100%);
+}
+
+.tasks-column--waiting {
+  border-color: rgba(245, 158, 11, 0.18);
+  background: linear-gradient(180deg, rgba(245, 158, 11, 0.07) 0%, rgba(245, 158, 11, 0.03) 100%);
+}
+
+.tasks-column--done {
+  border-color: rgba(34, 197, 94, 0.22);
+  background: linear-gradient(180deg, rgba(34, 197, 94, 0.08) 0%, rgba(34, 197, 94, 0.03) 100%);
+
+  > header {
+    border-bottom-color: rgba(34, 197, 94, 0.16);
+
+    h4 {
+      color: #166534;
+    }
+
+    span {
+      background: rgba(34, 197, 94, 0.14);
+      color: #166534;
+    }
+  }
+
+  .task-card {
+    border-color: rgba(34, 197, 94, 0.18);
+  }
+
+  .task-card__key {
+    color: #15803D;
+  }
+}
+
+.tasks-column--todo > header span {
+  background: rgba(37, 99, 235, 0.12);
+  color: #1D4ED8;
+}
+
+.tasks-column--in-progress > header h4 {
+  color: #0369A1;
+}
+
+.tasks-column--in-progress > header span {
+  background: rgba(14, 165, 233, 0.14);
+  color: #0369A1;
+}
+
+.tasks-column--waiting > header h4 {
+  color: #B45309;
+}
+
+.tasks-column--waiting > header span {
+  background: rgba(245, 158, 11, 0.14);
+  color: #B45309;
 }
 
 .tasks-list {
@@ -273,6 +383,15 @@
   color: var(--color-text-secondary);
 }
 
+.task-card__description {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  min-height: 36px;
+}
+
 .task-card__tags {
   display: flex;
   flex-wrap: wrap;
@@ -297,9 +416,35 @@
 .task-card__meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 8px;
   font-size: 11px;
   color: var(--color-text-muted);
+}
+
+.task-card__meta-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: var(--radius-full);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.task-card__assignee {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 2px;
+  color: var(--color-text);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 .task-card__actions {
@@ -374,6 +519,8 @@
 
 @media (max-width: 760px) {
   .tasks-shell {
+    width: 100%;
+    margin-inline: 0;
     padding: 8px 0 16px;
   }
 

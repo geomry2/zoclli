@@ -304,6 +304,20 @@ dd {
   background-repeat: no-repeat;
 }
 
+.task-assignee-select {
+  appearance: none;
+  cursor: pointer;
+  padding-right: 30px;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--color-text-secondary) 50%),
+    linear-gradient(135deg, var(--color-text-secondary) 50%, transparent 50%);
+  background-position:
+    calc(100% - 15px) calc(50% - 2px),
+    calc(100% - 10px) calc(50% - 2px);
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+}
+
 .priority-select {
   font-weight: 800;
 }

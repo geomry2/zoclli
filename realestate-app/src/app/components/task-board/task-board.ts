@@ -1,4 +1,5 @@
 import { Component, computed, inject, input, output, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { TASK_TOPICS, Task, TaskStatus, TaskTopic } from '../../models/task.model';
 import { TaskService } from '../../services/task.service';
@@ -18,11 +19,17 @@ interface TaskSection {
 }
 
 type TaskTopicFilter = 'all' | TaskTopic;
+type TaskAssigneeFilter = 'all' | 'unassigned' | 'Agis' | 'Tanya' | 'Julia' | 'George';
+
+interface TaskAssigneeOption {
+  value: TaskAssigneeFilter;
+  label: string;
+}
 
 @Component({
   selector: 'app-task-board',
   standalone: true,
-  imports: [TranslatePipe],
+  imports: [FormsModule, TranslatePipe],
   templateUrl: './task-board.html',
   styleUrl: './task-board.scss'
 })
@@ -39,11 +46,26 @@ export class TaskBoard {
   readonly statuses: TaskStatus[] = ['inbox', 'todo', 'in_progress', 'waiting', 'done'];
   readonly draggedTaskId = signal<string | null>(null);
   readonly selectedTopic = signal<TaskTopicFilter>('all');
+  readonly selectedAssignee = signal<TaskAssigneeFilter>('all');
   readonly dropTargetKey = signal<string | null>(null);
   readonly taskError = computed(() => this.taskService.error());
 
+  readonly assigneeOptions = computed<TaskAssigneeOption[]>(() => {
+    this.ts.lang();
+
+    return [
+      { value: 'all', label: this.ts.t('tasks.allPeople') },
+      { value: 'unassigned', label: this.ts.t('tasks.unassigned') },
+      { value: 'Agis', label: this.ts.t('tasks.assignee.agis') },
+      { value: 'Tanya', label: this.ts.t('tasks.assignee.tanya') },
+      { value: 'Julia', label: this.ts.t('tasks.assignee.julia') },
+      { value: 'George', label: this.ts.t('tasks.assignee.george') },
+    ];
+  });
+
   readonly filteredTasks = computed(() =>
-    applySearch(this.taskService.tasks() as unknown as Record<string, unknown>[], this.searchQuery()) as unknown as Task[]
+    (applySearch(this.taskService.tasks() as unknown as Record<string, unknown>[], this.searchQuery()) as unknown as Task[])
+      .filter(task => this.matchesAssigneeFilter(task))
   );
 
   readonly visibleSections = computed((): TaskSection[] => {
@@ -77,6 +99,10 @@ export class TaskBoard {
 
   setTopicFilter(topic: TaskTopicFilter) {
     this.selectedTopic.set(topic);
+  }
+
+  setAssigneeFilter(assignee: TaskAssigneeFilter) {
+    this.selectedAssignee.set(assignee);
   }
 
   onDragStart(event: DragEvent, task: Task) {
@@ -124,6 +150,18 @@ export class TaskBoard {
 
   async removeTask(task: Task) {
     await this.taskService.remove(task.id);
+  }
+
+  displayTitle(task: Task): string {
+    return task.shortTitle?.trim() || task.title.trim();
+  }
+
+  private matchesAssigneeFilter(task: Task): boolean {
+    const filter = this.selectedAssignee();
+    if (filter === 'all') return true;
+    if (filter === 'unassigned') return !task.assignee.trim();
+
+    return task.assignee.trim() === filter;
   }
 
   private dropKey(status: TaskStatus, topic: TaskTopic): string {
