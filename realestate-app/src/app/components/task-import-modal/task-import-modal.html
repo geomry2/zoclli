@@ -1,0 +1,39 @@
+<div class="task-import-backdrop" (click)="close()"></div>
+
+<section class="task-import-modal" (click)="$event.stopPropagation()">
+  <header class="task-import-modal__header">
+    <div>
+      <h2>{{ 'tasks.importTitle' | translate }}</h2>
+      <p>{{ 'tasks.importHint' | translate }}</p>
+    </div>
+    <button type="button" class="task-import-modal__close" (click)="close()">x</button>
+  </header>
+
+  <div class="task-import-modal__body">
+    <div class="task-import-preview">
+      @if (importPreview().length > 0) {
+        <span>{{ 'tasks.importPreview' | translate: { count: importPreview().length } }}</span>
+      } @else {
+        <span>{{ 'tasks.importPreviewEmpty' | translate }}</span>
+      }
+    </div>
+
+    <textarea
+      [value]="importText()"
+      (input)="updateImportText($any($event.target).value)"
+      [attr.placeholder]="'tasks.importPlaceholder' | translate"></textarea>
+
+    @if (importError()) {
+      <div class="task-import-message task-import-message--error">{{ importError() }}</div>
+    } @else if (importedCount() > 0) {
+      <div class="task-import-message task-import-message--success">{{ 'tasks.importSuccess' | translate: { count: importedCount() } }}</div>
+    }
+  </div>
+
+  <footer class="task-import-modal__footer">
+    <button type="button" class="ghost" (click)="close()">{{ 'btn.cancel' | translate }}</button>
+    <button type="button" class="primary" (click)="importTasks()" [disabled]="importing() || importPreview().length === 0">
+      {{ importing() ? ('tasks.importing' | translate) : ('tasks.importAction' | translate) }}
+    </button>
+  </footer>
+</section>

@@ -198,19 +198,17 @@
 }
 
 .lead-budget {
-  flex: 0 1 100%;
+  flex: 0 1 auto;
+  width: fit-content;
   max-width: 100%;
-  margin-left: auto;
-  padding: 4px 10px;
-  border-radius: var(--radius-full);
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
   background: var(--color-info-bg);
   color: #1E40AF;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
-  line-height: 1.35;
-  text-align: right;
-  white-space: normal;
-  overflow-wrap: anywhere;
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
 .lead-interest {

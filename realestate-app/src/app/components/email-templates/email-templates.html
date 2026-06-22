@@ -1,0 +1,96 @@
+<section class="emails">
+  <div class="emails__hero">
+    <div>
+      <p class="emails__eyebrow">{{ t('Communication Library', 'Библиотека коммуникаций') }}</p>
+      <h2>{{ t('Email Templates', 'Шаблоны писем') }}</h2>
+      <p>
+        {{ t(
+          'Ready-to-use messages for buyers, investors, and partner agents. Pick the situation, copy the text, then personalize the placeholders.',
+          'Готовые письма для покупателей, инвесторов и партнёрских агентов. Выберите ситуацию, скопируйте текст и персонализируйте плейсхолдеры.'
+        ) }}
+      </p>
+    </div>
+
+    <div class="emails__stats" aria-label="Template stats">
+      <div>
+        <strong>{{ totalTemplates }}</strong>
+        <span>{{ t('templates', 'шаблонов') }}</span>
+      </div>
+      <div>
+        <strong>3</strong>
+        <span>{{ t('audiences', 'аудитории') }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="emails__toolbar">
+    <div class="emails__audiences" role="tablist" [attr.aria-label]="t('Email audiences', 'Аудитории писем')">
+      @for (audience of audiences; track audience.id) {
+        <button
+          type="button"
+          class="emails__audience"
+          [class.active]="activeAudience() === audience.id"
+          (click)="setAudience(audience.id)">
+          <span>{{ audienceLabel(audience) }}</span>
+          <small>{{ audienceDescription(audience) }}</small>
+        </button>
+      }
+    </div>
+
+    <label class="emails__search">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/>
+        <path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input
+        type="search"
+        [value]="query()"
+        (input)="setQuery($event)"
+        [placeholder]="t('Search templates...', 'Поиск по шаблонам...')" />
+    </label>
+  </div>
+
+  <div class="emails__section-head">
+    <div>
+      <p>{{ t('Selected audience', 'Выбранная аудитория') }}</p>
+      <h3>{{ audienceLabel(activeAudienceMeta()) }}</h3>
+    </div>
+    <span>{{ templates().length }} {{ t('shown', 'показано') }}</span>
+  </div>
+
+  <div class="emails__grid">
+    @for (template of templates(); track template.id) {
+      <article class="email-card">
+        <div class="email-card__top">
+          <span class="email-card__badge">{{ audienceLabel(activeAudienceMeta()) }}</span>
+          <button type="button" class="email-card__copy" (click)="copyTemplate(template)">
+            @if (copiedTemplateId() === template.id) {
+              {{ t('Copied', 'Скопировано') }}
+            } @else {
+              {{ t('Copy', 'Копировать') }}
+            }
+          </button>
+        </div>
+
+        <h4>{{ templateTitle(template) }}</h4>
+        <p class="email-card__scenario">{{ templateScenario(template) }}</p>
+
+        <div class="email-card__subject">
+          <span>Subject</span>
+          <strong>{{ template.subject }}</strong>
+        </div>
+
+        <div class="email-card__body">
+          @for (paragraph of template.body; track $index) {
+            <p>{{ paragraph }}</p>
+          }
+        </div>
+      </article>
+    } @empty {
+      <div class="emails__empty">
+        <h3>{{ t('No templates found', 'Шаблоны не найдены') }}</h3>
+        <p>{{ t('Try another search query or audience.', 'Попробуйте другой поиск или аудиторию.') }}</p>
+      </div>
+    }
+  </div>
+</section>

@@ -1,4 +1,4 @@
-import { extractTaskTopic, normalizeTaskTopic, serializeTaskTags, stripTaskMetaTags, toTaskInputDateTime, toTaskStorageDateTime } from './task.utils';
+import { extractTaskTopic, normalizeTaskTopic, parseImportedTasks, serializeTaskTags, stripTaskMetaTags, toTaskInputDateTime, toTaskStorageDateTime } from './task.utils';
 
 function formatLocalDateTime(value: Date): string {
   const year = value.getFullYear();
@@ -34,5 +34,42 @@ describe('task utils', () => {
     expect(serialized).toEqual(['topic:documents', 'follow-up', 'contract']);
     expect(extractTaskTopic(serialized)).toBe('documents');
     expect(stripTaskMetaTags(serialized)).toEqual(['follow-up', 'contract']);
+  });
+
+  it('parses markdown checklist imports into task drafts', () => {
+    const imported = parseImportedTasks(`
+- [x]  Отправить фото счётчиков воды и электричества в папку на Google Drive
+- [ ]  Tatiana Zortive: отправить коммунальные платежи всем клиентам с корпоративной почты
+- [x]  George Mryasov: проверить и при необходимости загрузить таблицы в KPMG
+- [ ]  George Mryasov: исправить ошибку в коде CRM
+not a task
+`);
+
+    expect(imported).toEqual([
+      {
+        title: 'Отправить фото счётчиков воды и электричества в папку на Google Drive',
+        assignee: '',
+        status: 'done',
+        topic: 'office',
+      },
+      {
+        title: 'отправить коммунальные платежи всем клиентам с корпоративной почты',
+        assignee: 'Tatiana Zortive',
+        status: 'todo',
+        topic: 'documents',
+      },
+      {
+        title: 'проверить и при необходимости загрузить таблицы в KPMG',
+        assignee: 'George Mryasov',
+        status: 'done',
+        topic: 'documents',
+      },
+      {
+        title: 'исправить ошибку в коде CRM',
+        assignee: 'George Mryasov',
+        status: 'todo',
+        topic: 'it',
+      },
+    ]);
   });
 });

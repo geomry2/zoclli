@@ -4,7 +4,10 @@
       <div class="tasks-board-title">{{ 'tasks.title' | translate }}</div>
       <div class="tasks-board-subtitle">{{ 'tasks.subtitle' | translate }}</div>
     </div>
-    <button type="button" class="tasks-new-btn" (click)="openCreate()">{{ 'tasks.newTask' | translate }}</button>
+    <div class="tasks-board-actions">
+      <button type="button" class="tasks-import-btn" (click)="openImport()">{{ 'tasks.importAction' | translate }}</button>
+      <button type="button" class="tasks-new-btn" (click)="openCreate()">{{ 'tasks.newTask' | translate }}</button>
+    </div>
   </div>
 
   <div class="tasks-toolbar">
@@ -65,7 +68,8 @@
                   } @else {
                     <div class="tasks-list">
                       @for (task of column.tasks; track task.id) {
-                        <article class="task-card" draggable="true" (dragstart)="onDragStart($event, task)">
+                        <article class="task-card" draggable="true" (dragstart)="onDragStart($event, task)" (click)="openEdit(task)">
+                          <div class="task-card__key">TASK-{{ task.id.slice(0, 4).toUpperCase() }}</div>
                           <div class="task-card__top">
                             <h5>{{ task.title }}</h5>
                             <span class="task-priority task-priority-{{ task.priority }}">{{ ('tasks.priority.' + task.priority) | translate }}</span>
@@ -88,8 +92,8 @@
                           </div>
 
                           <div class="task-card__actions">
-                            <button type="button" (click)="openEdit(task)">{{ 'btn.edit' | translate }}</button>
-                            <button type="button" (click)="removeTask(task)">{{ 'btn.delete' | translate }}</button>
+                            <button type="button" (click)="openEdit(task); $event.stopPropagation()">{{ 'btn.edit' | translate }}</button>
+                            <button type="button" (click)="removeTask(task); $event.stopPropagation()">{{ 'btn.delete' | translate }}</button>
                           </div>
                         </article>
                       }
