@@ -29,6 +29,15 @@
         </button>
       }
     </div>
+
+    <div class="tasks-assignee-filter">
+      <span class="tasks-assignee-filter__label">{{ 'tasks.peopleTitle' | translate }}</span>
+      <select [ngModel]="selectedAssignee()" (ngModelChange)="setAssigneeFilter($event)">
+        @for (option of assigneeOptions(); track option.value) {
+          <option [value]="option.value">{{ option.label }}</option>
+        }
+      </select>
+    </div>
   </div>
 
   @if (taskError() && filteredTasks().length > 0) {
@@ -54,6 +63,11 @@
               @for (column of section.columns; track column.status) {
                 <section
                   class="tasks-column"
+                  [class.tasks-column--inbox]="column.status === 'inbox'"
+                  [class.tasks-column--todo]="column.status === 'todo'"
+                  [class.tasks-column--in-progress]="column.status === 'in_progress'"
+                  [class.tasks-column--waiting]="column.status === 'waiting'"
+                  [class.tasks-column--done]="column.status === 'done'"
                   [class.drop-target]="dropTargetKey() === column.topic + ':' + column.status"
                   (dragover)="onDragOver($event, column.status, column.topic)"
                   (dragleave)="onDragLeave()"
@@ -71,11 +85,11 @@
                         <article class="task-card" draggable="true" (dragstart)="onDragStart($event, task)" (click)="openEdit(task)">
                           <div class="task-card__key">TASK-{{ task.id.slice(0, 4).toUpperCase() }}</div>
                           <div class="task-card__top">
-                            <h5>{{ task.title }}</h5>
+                            <h5>{{ displayTitle(task) }}</h5>
                             <span class="task-priority task-priority-{{ task.priority }}">{{ ('tasks.priority.' + task.priority) | translate }}</span>
                           </div>
 
-                          <p>{{ task.description || ('tasks.noDescription' | translate) }}</p>
+                          <p class="task-card__description">{{ task.description || ('tasks.noDescription' | translate) }}</p>
 
                           @if (task.tags.length > 0) {
                             <div class="task-card__tags">
@@ -86,8 +100,8 @@
                           }
 
                           <div class="task-card__meta">
-                            <span>{{ 'tasks.fieldDue' | translate }}: {{ formatDueAt(task) }}</span>
-                            @if (task.assignee) { <span>{{ task.assignee }}</span> }
+                            <span class="task-card__meta-chip">{{ formatDueAt(task) }}</span>
+                            @if (task.assignee) { <span class="task-card__assignee">{{ task.assignee }}</span> }
                             @if (task.relatedEntityType) { <span>{{ ('tasks.related.' + task.relatedEntityType) | translate }}</span> }
                           </div>
 

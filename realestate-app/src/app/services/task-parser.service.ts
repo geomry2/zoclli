@@ -22,14 +22,25 @@ export class TaskParserService {
     return this.normalizeDraft(heuristic, input.source);
   }
 
+  async summarizeTitle(title: string, description = ''): Promise<string> {
+    const source = [title, description].map(value => String(value ?? '').trim()).filter(Boolean).join('\n\n');
+    if (!source) return '';
+
+    return await this.tryRemoteSummary(source);
+  }
+
   private async tryRemoteParse(input: TaskParserInput): Promise<Partial<ParsedTaskDraft> | null> {
     const url = environment.taskParserUrl?.trim();
     if (!url) return null;
 
     try {
+      const authHeaders = this.createFunctionHeaders();
       const response = await fetch(url, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          ...authHeaders,
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({ text: input.text }),
       });
 
@@ -38,6 +49,72 @@ export class TaskParserService {
     } catch {
       return null;
     }
+  }
+
+  private async tryRemoteSummary(text: string): Promise<string> {
+    const url = environment.taskParserUrl?.trim();
+    if (!url) return '';
+
+    try {
+      const authHeaders = this.createFunctionHeaders();
+      console.info('[TaskParserService] Requesting AI short title', {
+        endpoint: url,
+        textLength: text.length,
+      });
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          ...authHeaders,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text, mode: 'short_title' }),
+      });
+
+      if (!response.ok) {
+        console.warn('[TaskParserService] AI short title request failed', {
+          status: response.status,
+        });
+        return '';
+      }
+
+      const payload = await response.json() as Record<string, unknown>;
+      const candidates = [
+        payload['shortTitle'],
+        payload['short_title'],
+        payload['summary'],
+        payload['title'],
+      ];
+
+      for (const candidate of candidates) {
+        if (typeof candidate !== 'string') continue;
+        const normalized = candidate.trim().replace(/\s+/g, ' ');
+        if (!normalized) continue;
+        if (normalized.length > Math.min(text.trim().length, 80)) continue;
+        console.info('[TaskParserService] AI short title received', {
+          shortTitle: normalized,
+        });
+        return normalized;
+      }
+
+      console.warn('[TaskParserService] AI short title response was empty');
+      return '';
+    } catch {
+      console.warn('[TaskParserService] AI short title request threw an error');
+      return '';
+    }
+  }
+
+  private createFunctionHeaders(): Record<string, string> {
+    const headers: Record<string, string> = {};
+    const supabaseAnonKey = environment.supabaseAnonKey?.trim();
+
+    if (supabaseAnonKey && !supabaseAnonKey.includes('PLACEHOLDER')) {
+      headers['apikey'] = supabaseAnonKey;
+      headers['Authorization'] = `Bearer ${supabaseAnonKey}`;
+    }
+
+    return headers;
   }
 
   private heuristicParse(text: string): Partial<ParsedTaskDraft> {

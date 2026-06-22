@@ -51,6 +51,7 @@ export class TaskImportModal {
       for (const draft of drafts) {
         const payload: TaskCreateInput = {
           title: draft.title,
+          shortTitle: '',
           description: '',
           status: draft.status,
           priority: 'medium',

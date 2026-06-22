@@ -147,7 +147,18 @@
           <h3>{{ 'tasks.peopleTitle' | translate }}</h3>
           <label>
             <span>{{ 'tasks.fieldAssignee' | translate }}</span>
-            <input [ngModel]="draft().assignee" (ngModelChange)="draft.update(v => ({...v, assignee: $event}))" [attr.placeholder]="'tasks.unassigned' | translate" />
+            <select
+              class="task-assignee-select"
+              [ngModel]="draft().assignee"
+              (ngModelChange)="draft.update(v => ({...v, assignee: $event}))">
+              <option value="">{{ 'tasks.unassigned' | translate }}</option>
+              @if (customAssigneeOption()) {
+                <option [value]="customAssigneeOption()?.value">{{ customAssigneeOption()?.label }}</option>
+              }
+              @for (option of assigneeOptions(); track option.value) {
+                <option [value]="option.value">{{ option.label }}</option>
+              }
+            </select>
           </label>
           <label>
             <span>{{ 'tasks.fieldCreatedBy' | translate }}</span>

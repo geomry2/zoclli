@@ -8,6 +8,7 @@ export type TaskTopic = typeof TASK_TOPICS[number];
 export interface Task {
   id: string;
   title: string;
+  shortTitle: string;
   description: string;
   status: TaskStatus;
   priority: TaskPriority;
@@ -23,7 +24,7 @@ export interface Task {
   updatedAt: string;
 }
 
-export type TaskCreateInput = Omit<Task, 'id' | 'createdAt' | 'updatedAt'>;
+export type TaskCreateInput = Omit<Task, 'id' | 'createdAt' | 'updatedAt'> & { shortTitle?: string };
 
 export interface ParsedTaskDraft {
   title: string;

@@ -10,6 +10,11 @@ export interface ImportedTaskDraft {
   assignee: string;
 }
 
+export interface SplitTaskTitleResult {
+  title: string;
+  body: string;
+}
+
 function pad(value: number): string {
   return `${value}`.padStart(2, '0');
 }
