@@ -57,7 +57,7 @@ function createLeadsBoard(
 
   const board = runInInjectionContext(injector, () => new LeadsBoard());
 
-  return { board, injector, leadService };
+  return { board, injector, leadService, translationService };
 }
 
 describe('LeadsBoard', () => {
@@ -66,6 +66,7 @@ describe('LeadsBoard', () => {
   afterEach(() => {
     injector?.destroy();
     injector = undefined;
+    localStorage.clear();
   });
 
   it('groups leads by status and sorts cards with upcoming follow-ups first', () => {
@@ -85,6 +86,27 @@ describe('LeadsBoard', () => {
     expect(columns.find(column => column.status === 'showing')?.leads).toEqual([]);
     expect(columns.find(column => column.status === 'deposit')?.leads).toEqual([]);
     expect(columns.find(column => column.status === 'lost')?.leads).toEqual([]);
+  });
+
+  it('formats compact budget values without throwing', () => {
+    const { board, injector: createdInjector, translationService } = createLeadsBoard([
+      buildLead({
+        id: 'l1',
+        budgetMin: null as unknown as number,
+        budgetMax: null as unknown as number,
+      }),
+      buildLead({ id: 'l2', budgetMin: 250000, budgetMax: 0 }),
+      buildLead({ id: 'l3', budgetMin: 250000, budgetMax: 250000 }),
+    ]);
+    injector = createdInjector;
+    const leads = board.columns()[0].leads;
+
+    expect(board.formatBudget(leads.find(lead => lead.id === 'l1')!)).toBe('€0');
+    expect(board.formatBudget(leads.find(lead => lead.id === 'l2')!)).toBe('from €250,000');
+    expect(board.formatBudget(leads.find(lead => lead.id === 'l3')!)).toBe('€250,000');
+
+    translationService.setLang('ru');
+    expect(board.formatBudget(leads.find(lead => lead.id === 'l2')!)).toBe('от €250,000');
   });
 
   it('moves a lead optimistically and persists the new status on success', async () => {

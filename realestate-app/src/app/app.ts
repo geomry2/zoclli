@@ -15,8 +15,10 @@ import { LeadsBoard } from './components/leads-board/leads-board';
 import { LeadFollowUps } from './components/lead-follow-ups/lead-follow-ups';
 import { LeadsInsights } from './components/leads-insights/leads-insights';
 import { TaskBoard } from './components/task-board/task-board';
+import { TaskImportModal } from './components/task-import-modal/task-import-modal';
 import { TaskModal } from './components/task-modal/task-modal';
 import { Workflow } from './components/workflow/workflow';
+import { EmailTemplates } from './components/email-templates/email-templates';
 import { Client } from './models/client.model';
 import { Lead } from './models/lead.model';
 import { Task } from './models/task.model';
@@ -34,7 +36,7 @@ import { parseAppUrl, routeForLeadView, routeForTab, type LeadViewMode } from '.
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [SearchBar, TabNav, ClientsTable, LeadsTable, LeadsBoard, LeadFollowUps, LeadsInsights, TaskBoard, TaskModal, CreateModal, AddUnitModal, PasswordGate, Dashboard, PropertyCatalogue, Workflow, TranslatePipe],
+  imports: [SearchBar, TabNav, ClientsTable, LeadsTable, LeadsBoard, LeadFollowUps, LeadsInsights, TaskBoard, TaskImportModal, TaskModal, CreateModal, AddUnitModal, PasswordGate, Dashboard, PropertyCatalogue, Workflow, EmailTemplates, TranslatePipe],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
@@ -56,6 +58,7 @@ export class App {
   readonly taskRelationPrefill = signal<{ type: 'lead' | 'client' | 'property' | 'deal'; id: string; sourceLabel?: string } | null>(null);
   readonly editingTask = signal<Task | null>(null);
   readonly showTaskModal = signal(false);
+  readonly showTaskImportModal = signal(false);
   readonly leadsViewMode = computed<LeadViewMode>(() => this.routeState().leadsViewMode);
   readonly leadFollowUpFilter = computed<FollowUpFilter>(() => this.routeState().leadFollowUpFilter);
   readonly searchQuery = signal<string>('');
@@ -82,6 +85,7 @@ export class App {
       properties: 'nav.properties',
       tasks: 'nav.tasks',
       workflow: 'nav.workflow',
+      emails: 'nav.emails',
     };
     return labels[this.activeTab()];
   });
@@ -165,6 +169,16 @@ export class App {
     this.taskRelationPrefill.set(prefill ?? null);
     this.editingTask.set(null);
     this.showTaskModal.set(true);
+  }
+
+  openTaskImport() {
+    this.searchQuery.set('');
+    void this.router.navigateByUrl(routeForTab('tasks'));
+    this.showTaskImportModal.set(true);
+  }
+
+  closeTaskImportModal() {
+    this.showTaskImportModal.set(false);
   }
 
   clearTaskPrefill() {

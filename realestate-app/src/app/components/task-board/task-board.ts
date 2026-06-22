@@ -30,6 +30,7 @@ export class TaskBoard {
   readonly ts = inject(TranslationService);
   readonly searchQuery = input<string>('');
   readonly createRequest = output<void>();
+  readonly importRequest = output<void>();
   readonly editRequest = output<Task>();
 
   private readonly taskService = inject(TaskService);
@@ -64,6 +65,10 @@ export class TaskBoard {
 
   openCreate() {
     this.createRequest.emit();
+  }
+
+  openImport() {
+    this.importRequest.emit();
   }
 
   openEdit(task: Task) {

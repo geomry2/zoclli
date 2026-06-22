@@ -12,7 +12,7 @@
       </svg>
     </div>
     @if (!effectiveCollapsed()) {
-      <span class="logo-text">Zoclli</span>
+      <span class="logo-text">Zortive CRM</span>
     }
   </div>
 
@@ -73,6 +73,14 @@
                 <line x1="19" y1="8" x2="19" y2="16"/>
               </svg>
             }
+            @case ('emails') {
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="5" width="18" height="14" rx="2"/>
+                <path d="m3 7 9 6 9-6"/>
+                <path d="M7 15h4"/>
+                <path d="M7 12h2"/>
+              </svg>
+            }
           }
         </span>
         @if (!effectiveCollapsed()) {
@@ -87,6 +95,42 @@
 
   <!-- Bottom section -->
   <div class="sidebar-bottom">
+    <div class="sidebar-footer-links">
+      @for (link of footerLinks; track link.href) {
+        <a
+          class="nav-item footer-link"
+          [href]="link.href"
+          target="_blank"
+          rel="noopener noreferrer"
+          [title]="link.labelKey | translate">
+          <span class="nav-icon">
+            @switch (link.icon) {
+              @case ('clients-info') {
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="9" cy="8" r="3"/>
+                  <path d="M3.5 19a5.5 5.5 0 0 1 11 0"/>
+                  <circle cx="18" cy="13" r="3"/>
+                  <path d="M18 12.2v1.6"/>
+                  <path d="M18 15.2h.01"/>
+                </svg>
+              }
+              @case ('investment-request') {
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 19V5"/>
+                  <path d="M4 19h16"/>
+                  <path d="M8 15l4-4 3 3 5-7"/>
+                  <path d="M18 7h2v2"/>
+                </svg>
+              }
+            }
+          </span>
+          @if (!effectiveCollapsed()) {
+            <span class="nav-label">{{ link.labelKey | translate }}</span>
+          }
+        </a>
+      }
+    </div>
+
     <button class="nav-item collapse-btn" (click)="toggleCollapse()" [title]="collapsed() ? 'Expand' : 'Collapse'">
       <span class="nav-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"

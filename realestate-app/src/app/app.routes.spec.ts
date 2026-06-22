@@ -17,6 +17,11 @@ describe('app.routes', () => {
       leadsViewMode: 'board',
       leadFollowUpFilter: 'all',
     });
+    expect(parseAppUrl('/emails')).toEqual({
+      tab: 'emails',
+      leadsViewMode: 'board',
+      leadFollowUpFilter: 'all',
+    });
   });
 
   it('maps lead subviews and follow-up filters from the URL', () => {
@@ -40,6 +45,7 @@ describe('app.routes', () => {
   it('builds canonical URLs for tabs and lead views', () => {
     expect(routeForTab('dashboard')).toBe('/dashboard');
     expect(routeForTab('leads')).toBe('/leads/board');
+    expect(routeForTab('emails')).toBe('/emails');
     expect(routeForLeadView('board')).toBe('/leads/board');
     expect(routeForLeadView('followups', 'all')).toBe('/leads/followups');
     expect(routeForLeadView('followups', 'upcoming')).toBe('/leads/followups?filter=upcoming');

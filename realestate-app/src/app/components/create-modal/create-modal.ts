@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, input, output, signal } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, QueryList, ViewChildren, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { ClientService } from '../../services/client.service';
@@ -14,6 +14,9 @@ import { EmailConfirmationControl } from '../email-confirmation-control/email-co
 import { normalizeContactNotes } from '../../utils/contact-notes.utils';
 import { getCommissionAmount, normalizeCommissionType, normalizeCommissionValue } from '../../utils/commission.utils';
 import { EmailConfirmationStatus } from '../../models/email-confirmation.model';
+import { NgModel } from '@angular/forms';
+import { Subscription } from 'rxjs';
+import { CreateModalDraftService } from '../../services/create-modal-draft.service';
 
 type Tab = 'clients' | 'leads';
 type FieldMode = 'select' | 'new';
@@ -26,7 +29,7 @@ type InterestMode = 'text' | 'building';
   templateUrl: './create-modal.html',
   styleUrl: './create-modal.scss',
 })
-export class CreateModal implements OnInit {
+export class CreateModal implements AfterViewInit, OnDestroy {
   readonly tab = input<Tab>('clients');
   readonly editClient = input<Client | null>(null);
   readonly editLead = input<Lead | null>(null);
@@ -39,6 +42,10 @@ export class CreateModal implements OnInit {
   private readonly buildingService = inject(BuildingService);
   private readonly agencyService = inject(AgencyService);
   private readonly unitService = inject(UnitService);
+  private readonly draftService = inject(CreateModalDraftService);
+  @ViewChildren(NgModel) private readonly formModels!: QueryList<NgModel>;
+  private draftSubscription = new Subscription();
+  private formModelsChangesSubscription?: Subscription;
 
   readonly saving = signal(false);
   readonly saveError = signal<string | null>(null);
@@ -149,6 +156,12 @@ export class CreateModal implements OnInit {
       if (el.interestedIn && this.allBuildings.includes(el.interestedIn)) {
         this.leadInterestMode.set('building');
       }
+    } else {
+      this.lead = this.draftService.leadDraft() ? structuredClone(this.draftService.leadDraft()!) : this.emptyLead();
+      if (this.lead.realtorAgency) this.agencyMode.set('select');
+      if (this.lead.interestedIn && this.allBuildings.includes(this.lead.interestedIn)) {
+        this.leadInterestMode.set('building');
+      }
     }
     const cl = this.convertLead();
     if (cl) {
@@ -161,12 +174,26 @@ export class CreateModal implements OnInit {
       this.client.dealValue = cl.budgetMax || cl.budgetMin || 0;
       this.client.notes = structuredClone(cl.notes);
       if (cl.realtorAgency) this.agencyMode.set('select');
+    } else if (!ec) {
+      this.client = this.draftService.clientDraft() ? structuredClone(this.draftService.clientDraft()!) : this.emptyClient();
+      if (this.client.buildingName) this.buildingMode.set('select');
+      if (this.client.realtorAgency) this.agencyMode.set('select');
     }
     const pb = this.prefillBuilding();
     if (pb) {
       this.client.buildingName = pb;
       this.buildingMode.set('select');
     }
+  }
+
+  ngAfterViewInit() {
+    this.bindDraftPersistence();
+    this.formModelsChangesSubscription = this.formModels.changes.subscribe(() => this.bindDraftPersistence());
+  }
+
+  ngOnDestroy() {
+    this.draftSubscription.unsubscribe();
+    this.formModelsChangesSubscription?.unsubscribe();
   }
 
   private emptyClient(): Omit<Client, 'id'> {
@@ -248,7 +275,17 @@ export class CreateModal implements OnInit {
     }
 
     this.saving.set(false);
-    if (result.error) { this.saveError.set(result.error); } else { this.closed.emit(); }
+    if (result.error) {
+      this.saveError.set(result.error);
+    } else {
+      if (this.tab() === 'clients' && !this.editClient()) {
+        this.draftService.clearClientDraft();
+      }
+      if (this.tab() === 'leads' && !this.editLead()) {
+        this.draftService.clearLeadDraft();
+      }
+      this.closed.emit();
+    }
   }
 
   close() { this.closed.emit(); }
@@ -267,6 +304,7 @@ export class CreateModal implements OnInit {
     this.lead.interestedIn = this.lead.interestedIn && this.allBuildings.includes(this.lead.interestedIn)
       ? this.lead.interestedIn
       : (this.allBuildings[0] ?? '');
+    this.persistDraft();
   }
 
   commissionValueLabel(): string {
@@ -434,10 +472,37 @@ export class CreateModal implements OnInit {
 
   setClientEmailStatus(status: EmailConfirmationStatus) {
     this.client.emailConfirmationStatus = status;
+    this.persistDraft();
   }
 
   setLeadEmailStatus(status: EmailConfirmationStatus) {
     this.lead.emailConfirmationStatus = status;
+    this.persistDraft();
+  }
+
+  private bindDraftPersistence() {
+    this.draftSubscription.unsubscribe();
+    this.draftSubscription = new Subscription();
+
+    for (const model of this.formModels.toArray()) {
+      const sub = model.valueChanges?.subscribe(() => this.persistDraft());
+      if (sub) {
+        this.draftSubscription.add(sub);
+      }
+    }
+  }
+
+  private persistDraft() {
+    if (this.editClient() || this.editLead() || this.convertLead()) {
+      return;
+    }
+
+    if (this.tab() === 'leads') {
+      this.draftService.setLeadDraft(this.lead);
+      return;
+    }
+
+    this.draftService.setClientDraft(this.client);
   }
 
   private nextEmailConfirmationStatus(

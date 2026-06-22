@@ -258,7 +258,15 @@ export class LeadsBoard implements OnDestroy {
   }
 
   formatBudget(lead: Lead): string {
-    return '€' + lead.budgetMin.toLocaleString('en-US') + ' - €' + lead.budgetMax.toLocaleString('en-US');
+    const budgetMin = lead.budgetMin ?? 0;
+    const budgetMax = lead.budgetMax ?? 0;
+    const formattedMin = this.formatCurrency(budgetMin);
+    const formattedMax = this.formatCurrency(budgetMax);
+
+    if (budgetMin === budgetMax) return formattedMin;
+    if (budgetMin > 0 && budgetMax === 0) return `${this.ts.t('budget.from')} ${formattedMin}`;
+
+    return `${formattedMin} – ${formattedMax}`;
   }
 
   formatFollowUp(date: string): string {
@@ -317,5 +325,9 @@ export class LeadsBoard implements OnDestroy {
 
     const parsed = new Date(value).getTime();
     return Number.isNaN(parsed) ? null : parsed;
+  }
+
+  private formatCurrency(value: number): string {
+    return '€' + value.toLocaleString('en-US');
   }
 }

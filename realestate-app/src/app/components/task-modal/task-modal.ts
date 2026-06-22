@@ -38,6 +38,7 @@ export class TaskModal implements AfterViewInit {
   readonly closed = output<void>();
   readonly saved = output<void>();
   readonly titleInput = viewChild<ElementRef<HTMLInputElement>>('titleInput');
+  readonly commentInput = viewChild<ElementRef<HTMLTextAreaElement>>('commentInput');
 
   readonly ts = inject(TranslationService);
   private readonly taskParser = inject(TaskParserService);
@@ -71,6 +72,15 @@ export class TaskModal implements AfterViewInit {
   });
   readonly dueDateValue = computed(() => this.extractDueDate(this.draft().dueAt));
   readonly dueTimeValue = computed(() => this.extractDueTime(this.draft().dueAt) || this.pendingDueTime());
+  readonly taskKey = computed(() => {
+    const existingId = this.editTask()?.id;
+    if (existingId) return `TASK-${existingId.slice(0, 4).toUpperCase()}`;
+    return this.ts.t('tasks.newIssueKey');
+  });
+  readonly taskInitial = computed(() => {
+    const title = this.draft().title.trim();
+    return (title[0] || 'T').toUpperCase();
+  });
   readonly linkedContext = computed(() => {
     this.ts.lang();
 
@@ -137,6 +147,14 @@ export class TaskModal implements AfterViewInit {
 
   close() {
     this.closed.emit();
+  }
+
+  focusTitle() {
+    this.titleInput()?.nativeElement.focus({ preventScroll: true });
+  }
+
+  focusComment() {
+    this.commentInput()?.nativeElement.focus({ preventScroll: false });
   }
 
   async submit() {
@@ -244,6 +262,21 @@ export class TaskModal implements AfterViewInit {
     };
 
     recognition.start();
+  }
+
+  formatDate(value: string | undefined): string {
+    if (!value) return this.ts.t('tasks.none');
+
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return value;
+
+    return parsed.toLocaleString(this.ts.lang() === 'ru' ? 'ru-RU' : 'en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   }
 
   private defaultDraft(): TaskDraft {

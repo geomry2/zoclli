@@ -1,13 +1,19 @@
 import { Component, computed, input, output, signal } from '@angular/core';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 
-export type TabType = 'clients' | 'leads' | 'dashboard' | 'properties' | 'tasks' | 'workflow';
+export type TabType = 'clients' | 'leads' | 'dashboard' | 'properties' | 'tasks' | 'workflow' | 'emails';
 
 interface SidebarItem {
   id: TabType;
   labelKey: string;
   icon: string;
   group: string;
+}
+
+interface SidebarLink {
+  labelKey: string;
+  href: string;
+  icon: string;
 }
 
 @Component({
@@ -33,6 +39,12 @@ export class TabNav {
     { id: 'properties', labelKey: 'nav.properties', icon: 'properties', group: 'main' },
     { id: 'tasks',      labelKey: 'nav.tasks',      icon: 'tasks',      group: 'main' },
     { id: 'workflow',   labelKey: 'nav.workflow',   icon: 'workflow',   group: 'main' },
+    { id: 'emails',     labelKey: 'nav.emails',     icon: 'emails',     group: 'main' },
+  ];
+
+  readonly footerLinks: SidebarLink[] = [
+    { labelKey: 'nav.clientsInfo', href: 'https://zortive.homes/clients-info', icon: 'clients-info' },
+    { labelKey: 'nav.investmentRequest', href: 'https://zortive.homes/investment-request', icon: 'investment-request' },
   ];
 
   switchTab(tab: TabType) {

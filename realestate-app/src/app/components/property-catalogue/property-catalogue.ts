@@ -175,6 +175,7 @@ export class PropertyCatalogue {
         const [primaryType = 'apartment'] = Object.entries(typeCounts)
           .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0] ?? [];
         const placeholder = this.placeholderForBuilding(building);
+        const buildingImage = this.buildingService.imageFor(building);
 
         return {
           building,
@@ -194,7 +195,7 @@ export class PropertyCatalogue {
           closedCount: statusCounts['closed'] ?? 0,
           primaryType,
           hasMixedTypes: Object.keys(typeCounts).length > 1,
-          heroImage: placeholder.image,
+          heroImage: buildingImage || placeholder.image,
           heroAccent: placeholder.accent,
           heroGlow: placeholder.glow,
         };

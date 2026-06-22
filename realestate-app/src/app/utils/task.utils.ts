@@ -1,6 +1,14 @@
-import { TASK_TOPICS, TaskTopic } from '../models/task.model';
+import { TASK_TOPICS, TaskStatus, TaskTopic } from '../models/task.model';
 
 const TASK_TOPIC_TAG_PREFIX = 'topic:';
+const CHECKLIST_TASK_PATTERN = /^\s*[-*]\s*\[(x|\s)\]\s+(.+?)\s*$/i;
+
+export interface ImportedTaskDraft {
+  title: string;
+  status: TaskStatus;
+  topic: TaskTopic;
+  assignee: string;
+}
 
 function pad(value: number): string {
   return `${value}`.padStart(2, '0');
@@ -59,4 +67,49 @@ export function stripTaskMetaTags(tags: readonly string[]): string[] {
 
 export function serializeTaskTags(tags: readonly string[], topic: TaskTopic): string[] {
   return [`${TASK_TOPIC_TAG_PREFIX}${normalizeTaskTopic(topic)}`, ...stripTaskMetaTags(tags)];
+}
+
+export function parseImportedTasks(input: string): ImportedTaskDraft[] {
+  return String(input ?? '')
+    .split(/\r?\n/)
+    .map(line => parseImportedTaskLine(line))
+    .filter((task): task is ImportedTaskDraft => task !== null);
+}
+
+function parseImportedTaskLine(line: string): ImportedTaskDraft | null {
+  const match = line.match(CHECKLIST_TASK_PATTERN);
+  if (!match) return null;
+
+  const [, checked, rawText] = match;
+  const { assignee, title } = splitImportedTaskAssignee(rawText);
+  if (!title) return null;
+
+  return {
+    title,
+    assignee,
+    status: checked.toLowerCase() === 'x' ? 'done' : 'todo',
+    topic: inferImportedTaskTopic(`${title} ${assignee}`),
+  };
+}
+
+function splitImportedTaskAssignee(value: string): { assignee: string; title: string } {
+  const normalized = value.trim();
+  const separatorIndex = normalized.indexOf(':');
+  if (separatorIndex <= 0) return { assignee: '', title: normalized };
+
+  const candidate = normalized.slice(0, separatorIndex).trim();
+  const title = normalized.slice(separatorIndex + 1).trim();
+  if (!title || candidate.length > 80) return { assignee: '', title: normalized };
+
+  return { assignee: candidate, title };
+}
+
+function inferImportedTaskTopic(value: string): TaskTopic {
+  const text = value.toLowerCase();
+
+  if (/(crm|код|code|bug|ошибк|сайт|automation|автоматизац)/i.test(text)) return 'it';
+  if (/(agreement|contract|договор|документ|kpmg|таблиц|sheet|invoice|инвойс|платеж|payment|почт)/i.test(text)) return 'documents';
+  if (/(client|клиент|owner|владел|арендатор|tenant|звон|call|связаться|отправить всем)/i.test(text)) return 'clients';
+
+  return 'office';
 }

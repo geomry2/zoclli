@@ -205,4 +205,24 @@ describe('LeadsTable', () => {
       'realtorName',
     ]);
   });
+
+  it('formats compact budget values without throwing', () => {
+    const { table, injector: createdInjector, translationService } = createLeadsTable([
+      buildLead({
+        id: 'l1',
+        budgetMin: null as unknown as number,
+        budgetMax: null as unknown as number,
+      }),
+      buildLead({ id: 'l2', budgetMin: 250000, budgetMax: 0 }),
+      buildLead({ id: 'l3', budgetMin: 250000, budgetMax: 250000 }),
+    ]);
+    injector = createdInjector;
+
+    expect(table.formatBudget(table.filteredLeads()[0])).toBe('€0');
+    expect(table.formatBudget(table.filteredLeads()[1])).toBe('from €250,000');
+    expect(table.formatBudget(table.filteredLeads()[2])).toBe('€250,000');
+
+    translationService.setLang('ru');
+    expect(table.formatBudget(table.filteredLeads()[1])).toBe('от €250,000');
+  });
 });

@@ -70,9 +70,16 @@ export class LeadService {
       notes?: unknown;
       emailConfirmationStatus?: unknown;
       emailConfirmed?: unknown;
+      budgetMin?: unknown;
+      budgetMax?: unknown;
     };
+    const budgetMin = this.normalizeBudgetValue(camelRow.budgetMin);
+    const budgetMax = this.normalizeBudgetValue(camelRow.budgetMax);
+
     return {
       ...camelRow,
+      budgetMin,
+      budgetMax,
       emailConfirmationStatus: this.normalizeEmailConfirmationStatus(camelRow.emailConfirmationStatus, camelRow.emailConfirmed),
       notes: deserializeContactNotes(camelRow.notes),
     };
@@ -91,5 +98,20 @@ export class LeadService {
     }
 
     return legacyConfirmed ? 'resolved' : 'not_sent';
+  }
+
+  private normalizeBudgetValue(value: unknown): number {
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      return value;
+    }
+
+    if (typeof value === 'string') {
+      const parsed = Number(value);
+      if (Number.isFinite(parsed)) {
+        return parsed;
+      }
+    }
+
+    return 0;
   }
 }
