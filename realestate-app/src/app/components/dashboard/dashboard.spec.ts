@@ -3,9 +3,12 @@ import { Dashboard } from './dashboard';
 import { ActivityService, type ActivityEntry } from '../../services/activity.service';
 import { ClientService } from '../../services/client.service';
 import { LeadService } from '../../services/lead.service';
+import { AuthService } from '../../services/auth.service';
+import { TaskService } from '../../services/task.service';
 import { TranslationService } from '../../services/translation.service';
 import type { Client } from '../../models/client.model';
 import type { Lead } from '../../models/lead.model';
+import type { Task } from '../../models/task.model';
 
 function buildClient(overrides: Partial<Client>): Client {
   return {
@@ -49,14 +52,42 @@ function buildLead(overrides: Partial<Lead>): Lead {
   };
 }
 
+function buildTask(overrides: Partial<Task>): Task {
+  return {
+    id: 'task-1',
+    title: 'Task',
+    shortTitle: '',
+    description: '',
+    status: 'todo',
+    board: 'operations',
+    priority: 'medium',
+    topic: 'office',
+    dueAt: '',
+    assignee: '',
+    createdBy: '',
+    relatedEntityType: null,
+    relatedEntityId: '',
+    source: 'manual',
+    tags: [],
+    metadata: {},
+    createdAt: '',
+    updatedAt: '',
+    ...overrides,
+  };
+}
+
 function createDashboard(options?: {
   clients?: Client[];
   leads?: Lead[];
   activities?: ActivityEntry[];
+  tasks?: Task[];
+  currentTaskName?: string;
 }) {
   const clientService = { clients: signal(options?.clients ?? []) };
   const leadService = { leads: signal(options?.leads ?? []) };
   const activityService = { activities: signal(options?.activities ?? []) };
+  const taskService = { tasks: signal(options?.tasks ?? []) };
+  const authService = { currentTaskName: vi.fn(() => options?.currentTaskName ?? 'George') };
   const translationService = {
     lang: signal<'en' | 'ru'>('en'),
     t: vi.fn((key: string, params?: Record<string, string | number>) => {
@@ -74,11 +105,13 @@ function createDashboard(options?: {
     { provide: ClientService, useValue: clientService },
     { provide: LeadService, useValue: leadService },
     { provide: ActivityService, useValue: activityService },
+    { provide: TaskService, useValue: taskService },
+    { provide: AuthService, useValue: authService },
   ]);
 
   const dashboard = runInInjectionContext(injector, () => new Dashboard());
 
-  return { dashboard, injector, clientService, leadService, activityService };
+  return { dashboard, injector, clientService, leadService, activityService, taskService, authService };
 }
 
 describe('Dashboard', () => {
@@ -214,6 +247,36 @@ describe('Dashboard', () => {
     expect(dashboard.activityKey({ action: 'updated', entityType: 'lead' } as ActivityEntry)).toBe('act.updatedLead');
     expect(dashboard.formatTime('2026-04-05T11:15:00.000Z')).toBe('45m ago');
     expect(dashboard.formatTime('2026-04-03T12:00:00.000Z')).toBe('3 Apr');
+  });
+
+  it('shows only the five latest activity entries', () => {
+    const activities = Array.from({ length: 7 }, (_, index) => ({
+      id: `a${index}`,
+      action: 'updated' as const,
+      entityType: 'lead' as const,
+      name: `Lead ${index}`,
+      timestamp: `2026-04-05T11:0${index}:00.000Z`,
+    }));
+
+    const { dashboard, injector: createdInjector } = createDashboard({ activities });
+    injector = createdInjector;
+
+    expect(dashboard.recentActivity()).toHaveLength(5);
+    expect(dashboard.recentActivity().map(entry => entry.id)).toEqual(['a0', 'a1', 'a2', 'a3', 'a4']);
+  });
+
+  it('shows open tasks assigned to the current user', () => {
+    const { dashboard, injector: createdInjector } = createDashboard({
+      currentTaskName: 'George',
+      tasks: [
+        buildTask({ id: 'mine', title: 'Mine', assignee: 'George', status: 'todo' }),
+        buildTask({ id: 'done', title: 'Done', assignee: 'George', status: 'done' }),
+        buildTask({ id: 'other', title: 'Other', assignee: 'Tanya', status: 'todo' }),
+      ],
+    });
+    injector = createdInjector;
+
+    expect(dashboard.myTasks().map(task => task.id)).toEqual(['mine']);
   });
 
   it('emits the requested follow-up filter when a dashboard shortcut is used', () => {

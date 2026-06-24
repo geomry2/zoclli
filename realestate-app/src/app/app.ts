@@ -15,16 +15,18 @@ import { LeadsBoard } from './components/leads-board/leads-board';
 import { LeadFollowUps } from './components/lead-follow-ups/lead-follow-ups';
 import { LeadsInsights } from './components/leads-insights/leads-insights';
 import { TaskBoard } from './components/task-board/task-board';
+import { MaintenanceBoard } from './components/maintenance-board/maintenance-board';
 import { TaskImportModal } from './components/task-import-modal/task-import-modal';
 import { TaskModal } from './components/task-modal/task-modal';
 import { Workflow } from './components/workflow/workflow';
 import { EmailTemplates } from './components/email-templates/email-templates';
 import { Client } from './models/client.model';
 import { Lead } from './models/lead.model';
-import { Task } from './models/task.model';
+import { Task, TaskBoardType } from './models/task.model';
 import { Unit } from './models/unit.model';
 import { ClientService } from './services/client.service';
 import { LeadService } from './services/lead.service';
+import { AuthService } from './services/auth.service';
 import { TranslationService } from './services/translation.service';
 import { TranslatePipe } from './pipes/translate.pipe';
 import { exportToXlsx } from './utils/xlsx.utils';
@@ -36,12 +38,13 @@ import { parseAppUrl, routeForLeadView, routeForTab, type LeadViewMode } from '.
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [SearchBar, TabNav, ClientsTable, LeadsTable, LeadsBoard, LeadFollowUps, LeadsInsights, TaskBoard, TaskImportModal, TaskModal, CreateModal, AddUnitModal, PasswordGate, Dashboard, PropertyCatalogue, Workflow, EmailTemplates, TranslatePipe],
+  imports: [SearchBar, TabNav, ClientsTable, LeadsTable, LeadsBoard, LeadFollowUps, LeadsInsights, TaskBoard, MaintenanceBoard, TaskImportModal, TaskModal, CreateModal, AddUnitModal, PasswordGate, Dashboard, PropertyCatalogue, Workflow, EmailTemplates, TranslatePipe],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
 export class App {
   readonly ts = inject(TranslationService);
+  readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly currentUrl = toSignal(
     this.router.events.pipe(
@@ -57,6 +60,8 @@ export class App {
   readonly sidebarPreviewExpanded = signal(false);
   readonly taskRelationPrefill = signal<{ type: 'lead' | 'client' | 'property' | 'deal'; id: string; sourceLabel?: string } | null>(null);
   readonly editingTask = signal<Task | null>(null);
+  readonly taskModalBoard = signal<TaskBoardType>('operations');
+  readonly focusedTaskId = signal<string | null>(null);
   readonly showTaskModal = signal(false);
   readonly showTaskImportModal = signal(false);
   readonly leadsViewMode = computed<LeadViewMode>(() => this.routeState().leadsViewMode);
@@ -84,11 +89,17 @@ export class App {
       leads: 'nav.leads',
       properties: 'nav.properties',
       tasks: 'nav.tasks',
+      maintenance: 'nav.maintenance',
       workflow: 'nav.workflow',
       emails: 'nav.emails',
     };
     return labels[this.activeTab()];
   });
+  readonly currentUserName = computed(() => this.auth.nameForLanguage(this.ts.lang()));
+  readonly currentUserInitial = computed(() => this.currentUserName().charAt(0).toUpperCase());
+  readonly dashboardGreeting = computed(() =>
+    this.ts.t('app.greeting', { name: this.currentUserName() || this.ts.t('app.teammate') })
+  );
 
   private readonly clientService = inject(ClientService);
   private readonly leadService = inject(LeadService);
@@ -164,8 +175,9 @@ export class App {
     this.prefillBuilding.set(null);
   }
 
-  openCreateTask(prefill?: { type: 'lead' | 'client' | 'property' | 'deal'; id: string; sourceLabel?: string }) {
-    void this.router.navigateByUrl(routeForTab('tasks'));
+  openCreateTask(prefill?: { type: 'lead' | 'client' | 'property' | 'deal'; id: string; sourceLabel?: string }, board: TaskBoardType = 'operations') {
+    void this.router.navigateByUrl(routeForTab(board === 'maintenance' ? 'maintenance' : 'tasks'));
+    this.taskModalBoard.set(board);
     this.taskRelationPrefill.set(prefill ?? null);
     this.editingTask.set(null);
     this.showTaskModal.set(true);
@@ -186,10 +198,22 @@ export class App {
   }
 
   openEditTask(task: Task) {
-    void this.router.navigateByUrl(routeForTab('tasks'));
+    void this.router.navigateByUrl(routeForTab(task.board === 'maintenance' ? 'maintenance' : 'tasks'));
+    this.taskModalBoard.set(task.board);
     this.taskRelationPrefill.set(null);
     this.editingTask.set(task);
     this.showTaskModal.set(true);
+  }
+
+  focusTaskFromDashboard(task: Task) {
+    this.searchQuery.set('');
+    this.focusedTaskId.set(null);
+    void this.router.navigateByUrl(routeForTab(task.board === 'maintenance' ? 'maintenance' : 'tasks')).then(() => {
+      queueMicrotask(() => this.focusedTaskId.set(task.id));
+      window.setTimeout(() => {
+        if (this.focusedTaskId() === task.id) this.focusedTaskId.set(null);
+      }, 2500);
+    });
   }
 
   closeTaskModal() {
@@ -230,5 +254,9 @@ export class App {
       }
       exportToXlsx('leads.xlsx', rows);
     }
+  }
+
+  signOut() {
+    void this.auth.signOut();
   }
 }

@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, output, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { TASK_TOPICS, Task, TaskStatus, TaskTopic } from '../../models/task.model';
@@ -36,6 +36,7 @@ interface TaskAssigneeOption {
 export class TaskBoard {
   readonly ts = inject(TranslationService);
   readonly searchQuery = input<string>('');
+  readonly focusTaskId = input<string | null>(null);
   readonly createRequest = output<void>();
   readonly importRequest = output<void>();
   readonly editRequest = output<Task>();
@@ -49,6 +50,20 @@ export class TaskBoard {
   readonly selectedAssignee = signal<TaskAssigneeFilter>('all');
   readonly dropTargetKey = signal<string | null>(null);
   readonly taskError = computed(() => this.taskService.error());
+
+  constructor() {
+    effect(() => {
+      const id = this.focusTaskId();
+      if (!id) return;
+
+      const task = this.taskService.tasks().find(entry => entry.id === id && entry.board !== 'maintenance');
+      if (!task) return;
+
+      this.selectedTopic.set('all');
+      this.selectedAssignee.set('all');
+      window.setTimeout(() => this.scrollToTask(id), 0);
+    });
+  }
 
   readonly assigneeOptions = computed<TaskAssigneeOption[]>(() => {
     this.ts.lang();
@@ -65,6 +80,7 @@ export class TaskBoard {
 
   readonly filteredTasks = computed(() =>
     (applySearch(this.taskService.tasks() as unknown as Record<string, unknown>[], this.searchQuery()) as unknown as Task[])
+      .filter(task => task.board !== 'maintenance')
       .filter(task => this.matchesAssigneeFilter(task))
   );
 
@@ -166,5 +182,19 @@ export class TaskBoard {
 
   private dropKey(status: TaskStatus, topic: TaskTopic): string {
     return `${topic}:${status}`;
+  }
+
+  private scrollToTask(id: string) {
+    const element = this.findTaskElement(id);
+    if (!element) return;
+
+    element.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+    element.classList.add('task-card--focused');
+    window.setTimeout(() => element.classList.remove('task-card--focused'), 1800);
+  }
+
+  private findTaskElement(id: string): HTMLElement | null {
+    return [...document.querySelectorAll<HTMLElement>('[data-task-id]')]
+      .find(element => element.dataset['taskId'] === id) ?? null;
   }
 }

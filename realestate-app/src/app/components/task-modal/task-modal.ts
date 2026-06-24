@@ -1,12 +1,14 @@
 import { AfterViewInit, Component, ElementRef, computed, inject, input, output, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '../../pipes/translate.pipe';
-import { TASK_TOPICS, Task, TaskCreateInput, TaskPriority, TaskRelatedEntityType, TaskSource, TaskStatus, TaskTopic } from '../../models/task.model';
+import { TASK_TOPICS, MaintenanceTaskMetadata, Task, TaskBoardType, TaskCreateInput, TaskPriority, TaskRelatedEntityType, TaskSource, TaskStatus, TaskTopic } from '../../models/task.model';
 import { TaskParserService } from '../../services/task-parser.service';
 import { TaskService } from '../../services/task.service';
 import { ClientService } from '../../services/client.service';
 import { LeadService } from '../../services/lead.service';
+import { AuthService } from '../../services/auth.service';
 import { TranslationService } from '../../services/translation.service';
+import { extractMaintenanceMetadata } from '../../utils/maintenance-task.utils';
 import { normalizeTaskTopic, toTaskInputDateTime } from '../../utils/task.utils';
 import { FancyDateInput } from '../fancy-date-input/fancy-date-input';
 
@@ -14,6 +16,7 @@ interface TaskDraft {
   title: string;
   description: string;
   status: TaskStatus;
+  board: TaskBoardType;
   priority: TaskPriority;
   topic: TaskTopic;
   dueAt: string;
@@ -23,10 +26,18 @@ interface TaskDraft {
   relatedEntityId: string;
   source: TaskSource;
   tagsInput: string;
+  maintenance: MaintenanceTaskMetadata;
+  metadata: Record<string, unknown>;
 }
 
 interface TaskAssigneeOption {
   value: string;
+  label: string;
+}
+
+interface MaintenanceMediaItem {
+  url: string;
+  type: 'image' | 'video' | 'file';
   label: string;
 }
 
@@ -39,6 +50,7 @@ interface TaskAssigneeOption {
 })
 export class TaskModal implements AfterViewInit {
   readonly editTask = input<Task | null>(null);
+  readonly taskBoard = input<TaskBoardType>('operations');
   readonly relationPrefill = input<{ type: TaskRelatedEntityType; id: string; sourceLabel?: string } | null>(null);
   readonly closed = output<void>();
   readonly saved = output<void>();
@@ -50,6 +62,7 @@ export class TaskModal implements AfterViewInit {
   private readonly taskService = inject(TaskService);
   private readonly clientService = inject(ClientService);
   private readonly leadService = inject(LeadService);
+  private readonly auth = inject(AuthService);
 
   readonly draft = signal<TaskDraft>(this.defaultDraft());
   readonly saving = signal(false);
@@ -69,6 +82,8 @@ export class TaskModal implements AfterViewInit {
   readonly priorities: TaskPriority[] = ['low', 'medium', 'high', 'urgent'];
   readonly topics = [...TASK_TOPICS];
   readonly sources: TaskSource[] = ['manual', 'voice', 'ai', 'automation'];
+  readonly activeTaskBoard = computed<TaskBoardType>(() => this.editTask()?.board ?? this.taskBoard());
+  readonly isMaintenanceBoard = computed(() => this.activeTaskBoard() === 'maintenance');
   readonly assigneeOptions = computed<TaskAssigneeOption[]>(() => {
     this.ts.lang();
 
@@ -98,8 +113,20 @@ export class TaskModal implements AfterViewInit {
   readonly dueTimeValue = computed(() => this.extractDueTime(this.draft().dueAt) || this.pendingDueTime());
   readonly taskKey = computed(() => {
     const existingId = this.editTask()?.id;
-    if (existingId) return `TASK-${existingId.slice(0, 4).toUpperCase()}`;
-    return this.ts.t('tasks.newIssueKey');
+    if (existingId) return `${this.isMaintenanceBoard() ? 'MNT' : 'TASK'}-${existingId.slice(0, 4).toUpperCase()}`;
+    return this.ts.t(this.isMaintenanceBoard() ? 'maintenance.newIssueKey' : 'tasks.newIssueKey');
+  });
+  readonly modalCrumbLabel = computed(() => this.ts.t(this.isMaintenanceBoard() ? 'maintenance.title' : 'tasks.title'));
+  readonly titlePlaceholder = computed(() => this.ts.t(this.isMaintenanceBoard() ? 'maintenance.modalTitle' : 'tasks.fieldTitle'));
+  readonly mediaGalleryItems = computed<MaintenanceMediaItem[]>(() =>
+    this.draft().maintenance.filesMedia
+      .map(url => this.toMediaGalleryItem(url))
+      .filter((item): item is MaintenanceMediaItem => item !== null)
+  );
+  readonly submitLabel = computed(() => {
+    if (this.saving()) return this.ts.t('btn.saving');
+    if (this.editTask()) return this.ts.t('btn.saveChanges');
+    return this.ts.t(this.isMaintenanceBoard() ? 'maintenance.createAction' : 'tasks.createAction');
   });
   readonly taskInitial = computed(() => {
     const title = this.draft().title.trim();
@@ -136,21 +163,29 @@ export class TaskModal implements AfterViewInit {
           title: editing.title,
           description: editing.description,
           status: editing.status,
+          board: editing.board,
           priority: editing.priority,
           topic: normalizeTaskTopic(editing.topic),
           dueAt: toTaskInputDateTime(editing.dueAt),
           assignee: editing.assignee,
-          createdBy: editing.createdBy,
+          createdBy: editing.createdBy || this.currentAuthorName(),
           relatedEntityType: editing.relatedEntityType,
           relatedEntityId: editing.relatedEntityId,
           source: editing.source,
           tagsInput: editing.tags.join(', '),
+          maintenance: this.maintenanceFromMetadata(editing.metadata),
+          metadata: editing.metadata,
         });
         this.pendingDueTime.set(this.extractDueTime(toTaskInputDateTime(editing.dueAt)) || '09:00');
         return;
       }
 
       const prefill = this.relationPrefill();
+      this.draft.update(current => ({
+        ...current,
+        board: this.taskBoard(),
+      }));
+
       if (prefill) {
         this.draft.update(current => ({
           ...current,
@@ -182,8 +217,9 @@ export class TaskModal implements AfterViewInit {
   }
 
   async submit() {
-    const draft = this.draft();
-    if (!draft.title.trim()) {
+    const draft = { ...this.draft(), board: this.activeTaskBoard() };
+    const title = this.resolveTitle(draft);
+    if (!title) {
       this.error.set(this.ts.t('tasks.errorTitleRequired'));
       return;
     }
@@ -197,10 +233,11 @@ export class TaskModal implements AfterViewInit {
       description: '',
       status: draft.status,
       priority: draft.priority,
+      board: this.activeTaskBoard(),
       topic: draft.topic,
       dueAt: draft.dueAt,
       assignee: draft.assignee.trim(),
-      createdBy: draft.createdBy.trim() || 'Current user',
+      createdBy: draft.createdBy.trim() || this.currentAuthorName(),
       relatedEntityType: draft.relatedEntityType,
       relatedEntityId: draft.relatedEntityId.trim(),
       source: draft.source,
@@ -208,10 +245,11 @@ export class TaskModal implements AfterViewInit {
         .split(',')
         .map(tag => tag.trim())
         .filter(Boolean),
+      metadata: this.buildMetadata(draft),
     };
 
-    payload.title = draft.title.trim();
-    payload.description = draft.description.trim();
+    payload.title = title;
+    payload.description = this.resolveDescription(draft);
 
     try {
       const editTask = this.editTask();
@@ -242,7 +280,7 @@ export class TaskModal implements AfterViewInit {
       ...this.defaultDraft(),
       ...parsed,
       dueAt: toTaskInputDateTime(parsed.dueAt),
-      createdBy: 'Current user',
+      createdBy: this.currentAuthorName(),
       tagsInput: parsed.tags.join(', '),
     });
     this.parsing.set(false);
@@ -313,14 +351,126 @@ export class TaskModal implements AfterViewInit {
       description: '',
       status: 'inbox',
       priority: 'medium',
+      board: this.taskBoard(),
       topic: 'office',
       dueAt: '',
       assignee: '',
-      createdBy: 'Current user',
+      createdBy: this.currentAuthorName(),
       relatedEntityType: null,
       relatedEntityId: '',
       source: 'manual',
       tagsInput: '',
+      maintenance: this.emptyMaintenanceMetadata(),
+      metadata: {},
+    };
+  }
+
+  private currentAuthorName(): string {
+    return this.auth.currentTaskName() || 'Current user';
+  }
+
+  updateMaintenance<K extends keyof MaintenanceTaskMetadata>(key: K, value: MaintenanceTaskMetadata[K]) {
+    this.draft.update(current => ({
+      ...current,
+      maintenance: {
+        ...current.maintenance,
+        [key]: value,
+      },
+    }));
+  }
+
+  updateFilesMedia(value: string) {
+    this.updateMaintenance(
+      'filesMedia',
+      value
+        .split(/\r?\n|,/)
+        .map(entry => entry.trim())
+        .filter(Boolean),
+    );
+  }
+
+  filesMediaInput(): string {
+    return this.draft().maintenance.filesMedia.join('\n');
+  }
+
+  private toMediaGalleryItem(value: string): MaintenanceMediaItem | null {
+    const url = String(value ?? '').trim();
+    if (!url) return null;
+
+    const pathname = this.mediaPathname(url);
+    const label = decodeURIComponent(pathname.split('/').pop() || 'media');
+    const extension = (pathname.match(/\.([a-z0-9]+)$/i)?.[1] ?? '').toLowerCase();
+    const imageExtensions = new Set(['apng', 'avif', 'gif', 'jpeg', 'jpg', 'png', 'webp']);
+    const videoExtensions = new Set(['mov', 'mp4', 'm4v', 'ogg', 'ogv', 'webm']);
+
+    return {
+      url,
+      label,
+      type: imageExtensions.has(extension)
+        ? 'image'
+        : videoExtensions.has(extension)
+          ? 'video'
+          : 'file',
+    };
+  }
+
+  private mediaPathname(url: string): string {
+    try {
+      return new URL(url).pathname;
+    } catch {
+      return url.split('?')[0] ?? url;
+    }
+  }
+
+  private buildMetadata(draft: TaskDraft): Record<string, unknown> {
+    if (draft.board !== 'maintenance') return draft.metadata;
+
+    return {
+      ...draft.metadata,
+      maintenance: {
+        ...draft.maintenance,
+      },
+    };
+  }
+
+  private resolveTitle(draft: TaskDraft): string {
+    const explicitTitle = draft.title.trim();
+    if (explicitTitle) return explicitTitle;
+    if (draft.board !== 'maintenance') return '';
+
+    const issue = draft.maintenance.issue.trim();
+    const location = [draft.maintenance.building, draft.maintenance.apartment]
+      .map(value => value.trim())
+      .filter(Boolean)
+      .join(' ');
+
+    return [issue || this.ts.t('maintenance.fallbackTitle'), location].filter(Boolean).join(' - ').trim();
+  }
+
+  private resolveDescription(draft: TaskDraft): string {
+    if (draft.board !== 'maintenance') return draft.description.trim();
+
+    return draft.description.trim() || draft.maintenance.moreDetails.trim() || draft.maintenance.issue.trim();
+  }
+
+  private maintenanceFromMetadata(metadata: Record<string, unknown>): MaintenanceTaskMetadata {
+    const task = this.editTask();
+    if (!task) return this.emptyMaintenanceMetadata();
+    return extractMaintenanceMetadata(task);
+  }
+
+  private emptyMaintenanceMetadata(): MaintenanceTaskMetadata {
+    return {
+      requesterName: '',
+      email: '',
+      phone: '',
+      city: '',
+      building: '',
+      apartment: '',
+      maintenanceType: '',
+      issue: '',
+      moreDetails: '',
+      filesMedia: [],
     };
   }
 

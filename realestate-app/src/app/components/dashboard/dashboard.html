@@ -4,6 +4,31 @@
   <div class="hero-row">
     <!-- Left: big numbers + progress cards -->
     <div class="hero-left">
+      <div class="card card-my-tasks" style="animation-delay: 0ms">
+        <div class="card-header">
+          <h3 class="card-title">{{ 'dash.myTasks' | translate }}</h3>
+        </div>
+        @if (myTasks().length === 0) {
+          <div class="activity-empty">{{ 'dash.noMyTasks' | translate }}</div>
+        } @else {
+          <ul class="my-task-list">
+            @for (task of myTasks(); track task.id) {
+              <li class="my-task-item">
+                <button type="button" class="my-task-button" (click)="openTask(task)">
+                  <div class="my-task-item__main">
+                    <span class="my-task-item__title">{{ task.shortTitle || task.title }}</span>
+                    <span class="my-task-item__meta">
+                      {{ taskBoardLabelKey(task) | translate }} · {{ ('tasks.status.' + task.status) | translate }} · {{ formatTaskDue(task) }}
+                    </span>
+                  </div>
+                  <span class="task-priority task-priority-{{ task.priority }}">{{ ('tasks.priority.' + task.priority) | translate }}</span>
+                </button>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+
       <div class="hero-stats">
         <div class="hero-stat" style="animation-delay: 0ms">
           <span class="hero-stat__label">{{ 'dash.totalClients' | translate }}</span>

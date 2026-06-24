@@ -1,7 +1,7 @@
 import { Component, computed, input, output, signal } from '@angular/core';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 
-export type TabType = 'clients' | 'leads' | 'dashboard' | 'properties' | 'tasks' | 'workflow' | 'emails';
+export type TabType = 'clients' | 'leads' | 'dashboard' | 'properties' | 'tasks' | 'maintenance' | 'workflow' | 'emails';
 
 interface SidebarItem {
   id: TabType;
@@ -38,6 +38,7 @@ export class TabNav {
     { id: 'leads',      labelKey: 'nav.leads',      icon: 'leads',      group: 'main' },
     { id: 'properties', labelKey: 'nav.properties', icon: 'properties', group: 'main' },
     { id: 'tasks',      labelKey: 'nav.tasks',      icon: 'tasks',      group: 'main' },
+    { id: 'maintenance', labelKey: 'nav.maintenance', icon: 'maintenance', group: 'main' },
     { id: 'workflow',   labelKey: 'nav.workflow',   icon: 'workflow',   group: 'main' },
     { id: 'emails',     labelKey: 'nav.emails',     icon: 'emails',     group: 'main' },
   ];

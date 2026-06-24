@@ -2,10 +2,13 @@ import { Component, computed, inject, output, signal, OnInit } from '@angular/co
 import { ClientService } from '../../services/client.service';
 import { LeadService } from '../../services/lead.service';
 import { ActivityService, ActivityEntry } from '../../services/activity.service';
+import { AuthService } from '../../services/auth.service';
+import { TaskService } from '../../services/task.service';
 import { TranslationService } from '../../services/translation.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { countByFollowUpFilter, FollowUpFilter } from '../../utils/follow-up.utils';
 import { getCommissionAmount } from '../../utils/commission.utils';
+import { Task } from '../../models/task.model';
 
 interface StatRow { label: string; count: number; color: string; }
 
@@ -16,6 +19,8 @@ interface MonthlyData {
   profit: number;
 }
 
+const RECENT_ACTIVITY_LIMIT = 5;
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -25,15 +30,27 @@ interface MonthlyData {
 })
 export class Dashboard implements OnInit {
   readonly followUpsRequest = output<FollowUpFilter>();
+  readonly taskFocusRequest = output<Task>();
   readonly ts = inject(TranslationService);
   private readonly clientService = inject(ClientService);
   private readonly leadService = inject(LeadService);
   private readonly activityService = inject(ActivityService);
+  private readonly taskService = inject(TaskService);
+  private readonly auth = inject(AuthService);
 
   readonly animatedIn = signal(false);
   readonly chartReady = signal(false);
 
-  readonly recentActivity = computed(() => this.activityService.activities().slice(0, 20));
+  readonly recentActivity = computed(() => this.activityService.activities().slice(0, RECENT_ACTIVITY_LIMIT));
+  readonly myTasks = computed(() => {
+    const assignee = this.auth.currentTaskName().trim().toLowerCase();
+    if (!assignee) return [];
+
+    return this.taskService.tasks()
+      .filter(task => task.assignee.trim().toLowerCase() === assignee)
+      .filter(task => task.status !== 'done')
+      .slice(0, 8);
+  });
   readonly visibleClients = computed(() =>
     this.clientService.clients().filter(client => client.status !== 'closed')
   );
@@ -343,6 +360,21 @@ export class Dashboard implements OnInit {
     const diffHrs = Math.floor(diffMins / 60);
     if (diffHrs < 24) return this.ts.t('time.hoursAgo', { n: diffHrs });
     return d.toLocaleDateString(this.locale(), { day: 'numeric', month: 'short' }).replace('.', '');
+  }
+
+  formatTaskDue(task: Task): string {
+    if (!task.dueAt) return this.ts.t('tasks.none');
+    const parsed = new Date(task.dueAt);
+    if (Number.isNaN(parsed.getTime())) return task.dueAt;
+    return parsed.toLocaleDateString(this.locale(), { day: 'numeric', month: 'short' }).replace('.', '');
+  }
+
+  taskBoardLabelKey(task: Task): string {
+    return task.board === 'maintenance' ? 'maintenance.title' : 'tasks.title';
+  }
+
+  openTask(task: Task) {
+    this.taskFocusRequest.emit(task);
   }
 
   openFollowUps(filter: FollowUpFilter) {
