@@ -32,12 +32,20 @@ export class LeadsBoard implements OnDestroy {
   readonly pendingStatuses = signal<Record<string, LeadStatus>>({});
   readonly moveError = signal<string | null>(null);
   readonly moveErrorLeadId = signal<string | null>(null);
+  private readonly compactViewport = signal(this.isCompactViewport());
+  readonly dragEnabled = computed(() => !this.compactViewport());
 
   private touchGhost: HTMLElement | null = null;
   private touchOffsetX = 0;
   private touchOffsetY = 0;
   private readonly boundOnTouchMove = (e: TouchEvent) => this.onTouchMove(e);
   private readonly boundOnTouchEnd = (e: TouchEvent) => this.onTouchEnd(e);
+
+  constructor() {
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', this.syncViewportState, { passive: true });
+    }
+  }
 
   readonly visibleLeads = computed(() => {
     const filtered = applySearch(
@@ -171,6 +179,9 @@ export class LeadsBoard implements OnDestroy {
   }
 
   ngOnDestroy() {
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('resize', this.syncViewportState);
+    }
     this.cleanupTouchListeners();
     if (this.touchGhost) {
       document.body.removeChild(this.touchGhost);
@@ -179,6 +190,7 @@ export class LeadsBoard implements OnDestroy {
   }
 
   onTouchStart(event: TouchEvent, lead: Lead) {
+    if (!this.dragEnabled()) return;
     if (this.movingLeadId() === lead.id) return;
 
     const touch = event.touches[0];
@@ -329,5 +341,22 @@ export class LeadsBoard implements OnDestroy {
 
   private formatCurrency(value: number): string {
     return '€' + value.toLocaleString('en-US');
+  }
+
+  private syncViewportState = () => {
+    this.compactViewport.set(this.isCompactViewport());
+    if (this.compactViewport()) {
+      this.cleanupTouchListeners();
+      this.draggedLeadId.set(null);
+      this.dropTargetStatus.set(null);
+      if (this.touchGhost) {
+        document.body.removeChild(this.touchGhost);
+        this.touchGhost = null;
+      }
+    }
+  };
+
+  private isCompactViewport(): boolean {
+    return typeof window !== 'undefined' ? window.innerWidth <= 760 : false;
   }
 }

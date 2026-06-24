@@ -61,7 +61,12 @@
             } @else {
               <div class="tasks-list">
                 @for (task of column.tasks; track task.id) {
-                  <article class="task-card" [attr.data-task-id]="task.id" draggable="true" (dragstart)="onDragStart($event, task)" (click)="openEdit(task)">
+                  <article
+                    class="task-card"
+                    [attr.data-task-id]="task.id"
+                    [attr.draggable]="dragEnabled() ? 'true' : null"
+                    (dragstart)="onDragStart($event, task)"
+                    (click)="openEdit(task)">
                     <div class="task-card__key">MNT-{{ task.id.slice(0, 4).toUpperCase() }}</div>
                     <div class="task-card__top">
                       <h5>{{ displayTitle(task) }}</h5>

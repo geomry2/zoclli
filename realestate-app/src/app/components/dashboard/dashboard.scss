@@ -1368,7 +1368,18 @@
   }
 
   .chart-filters {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  .chart-filter-btn {
+    flex: 0 0 auto;
   }
 
   .sidebar-stats {
@@ -1381,6 +1392,30 @@
 
   .followup-mini-grid {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .bottom-row {
+    gap: 16px;
+  }
+
+  .realtor-table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+
+    th,
+    td {
+      white-space: nowrap;
+    }
+  }
+
+  .activity-item {
+    align-items: flex-start;
+  }
+
+  .activity-time {
+    white-space: normal;
+    text-align: right;
   }
 }
 
@@ -1399,5 +1434,41 @@
 
   .stat-card__metric-value {
     font-size: 17px;
+  }
+
+  .hero-stat__label,
+  .card-title,
+  .feature-card__title,
+  .stat-card__title,
+  .chart-axis-label {
+    letter-spacing: 0;
+  }
+
+  .followup-mini {
+    padding: 12px 10px;
+  }
+
+  .revenue-metrics {
+    gap: 12px;
+  }
+
+  .rev-metric {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .realtor-table th,
+  .realtor-table td {
+    padding-right: 16px;
+  }
+
+  .activity-item {
+    gap: 10px;
+  }
+
+  .activity-time {
+    width: 100%;
+    text-align: left;
+    padding-left: 46px;
   }
 }

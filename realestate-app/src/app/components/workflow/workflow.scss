@@ -470,6 +470,10 @@
     grid-template-columns: 1fr;
   }
 
+  .workflow__hero {
+    gap: var(--space-md);
+  }
+
   .workflow__note-item {
     grid-template-columns: 34px minmax(0, 1fr);
     gap: 10px;
@@ -479,5 +483,42 @@
     width: 34px;
     height: 34px;
     border-radius: 12px;
+  }
+
+  .workflow__stage,
+  .workflow__notes,
+  .workflow__header {
+    box-shadow: 0 12px 30px -24px rgba(15, 23, 42, 0.28);
+  }
+
+  .workflow__card {
+    padding: 14px;
+    border-radius: 20px;
+  }
+
+  .workflow__card-meta {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .workflow__card-title {
+    font-size: 17px;
+  }
+
+  .workflow__card-desc {
+    font-size: 12px;
+  }
+
+  .workflow__arrow,
+  .workflow__legend-arrow {
+    display: none;
+  }
+
+  .workflow__legend {
+    gap: 10px 16px;
+  }
+
+  .workflow__legend-item {
+    align-items: flex-start;
   }
 }

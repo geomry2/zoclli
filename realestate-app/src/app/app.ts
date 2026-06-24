@@ -58,6 +58,7 @@ export class App {
   readonly activeTab = computed<TabType>(() => this.routeState().tab);
   readonly sidebarCollapsed = signal(true);
   readonly sidebarPreviewExpanded = signal(false);
+  readonly mobileSidebarOpen = signal(false);
   readonly taskRelationPrefill = signal<{ type: 'lead' | 'client' | 'property' | 'deal'; id: string; sourceLabel?: string } | null>(null);
   readonly editingTask = signal<Task | null>(null);
   readonly taskModalBoard = signal<TaskBoardType>('operations');
@@ -106,7 +107,16 @@ export class App {
 
   switchTab(tab: TabType) {
     this.searchQuery.set('');
+    this.mobileSidebarOpen.set(false);
     void this.router.navigateByUrl(routeForTab(tab));
+  }
+
+  toggleMobileSidebar() {
+    this.mobileSidebarOpen.update(open => !open);
+  }
+
+  closeMobileSidebar() {
+    this.mobileSidebarOpen.set(false);
   }
 
   onSidebarCollapsedChange(collapsed: boolean) {
@@ -126,33 +136,39 @@ export class App {
   }
 
   setLeadsViewMode(mode: LeadViewMode) {
+    this.closeMobileSidebar();
     void this.router.navigateByUrl(routeForLeadView(mode));
   }
 
   openLeadFollowUps(filter: FollowUpFilter = 'all') {
     this.searchQuery.set('');
+    this.closeMobileSidebar();
     void this.router.navigateByUrl(routeForLeadView('followups', filter));
   }
 
   setLeadFollowUpFilter(filter: FollowUpFilter) {
+    this.closeMobileSidebar();
     void this.router.navigateByUrl(routeForLeadView('followups', filter));
   }
 
   onQueryChange(query: string) { this.searchQuery.set(query); }
 
   openCreate() {
+    this.closeMobileSidebar();
     this.editingClient.set(null);
     this.editingLead.set(null);
     this.showModal.set(true);
   }
 
   openEditClient(client: Client) {
+    this.closeMobileSidebar();
     this.editingClient.set(client);
     this.editingLead.set(null);
     this.showModal.set(true);
   }
 
   openEditLead(lead: Lead) {
+    this.closeMobileSidebar();
     this.editingLead.set(lead);
     this.editingClient.set(null);
     this.convertingLead.set(null);
@@ -160,6 +176,7 @@ export class App {
   }
 
   openConvertLead(lead: Lead) {
+    this.closeMobileSidebar();
     void this.router.navigateByUrl(routeForTab('clients'));
     this.convertingLead.set(lead);
     this.editingClient.set(null);
@@ -176,6 +193,7 @@ export class App {
   }
 
   openCreateTask(prefill?: { type: 'lead' | 'client' | 'property' | 'deal'; id: string; sourceLabel?: string }, board: TaskBoardType = 'operations') {
+    this.closeMobileSidebar();
     void this.router.navigateByUrl(routeForTab(board === 'maintenance' ? 'maintenance' : 'tasks'));
     this.taskModalBoard.set(board);
     this.taskRelationPrefill.set(prefill ?? null);
@@ -185,6 +203,7 @@ export class App {
 
   openTaskImport() {
     this.searchQuery.set('');
+    this.closeMobileSidebar();
     void this.router.navigateByUrl(routeForTab('tasks'));
     this.showTaskImportModal.set(true);
   }
@@ -198,6 +217,7 @@ export class App {
   }
 
   openEditTask(task: Task) {
+    this.closeMobileSidebar();
     void this.router.navigateByUrl(routeForTab(task.board === 'maintenance' ? 'maintenance' : 'tasks'));
     this.taskModalBoard.set(task.board);
     this.taskRelationPrefill.set(null);
@@ -207,6 +227,7 @@ export class App {
 
   focusTaskFromDashboard(task: Task) {
     this.searchQuery.set('');
+    this.closeMobileSidebar();
     this.focusedTaskId.set(null);
     void this.router.navigateByUrl(routeForTab(task.board === 'maintenance' ? 'maintenance' : 'tasks')).then(() => {
       queueMicrotask(() => this.focusedTaskId.set(task.id));
@@ -223,12 +244,14 @@ export class App {
   }
 
   openAddUnit(buildingName: string) {
+    this.closeMobileSidebar();
     this.editingUnit.set(null);
     this.addUnitBuilding.set(buildingName);
     this.showAddUnitModal.set(true);
   }
 
   openEditUnit(unit: Unit) {
+    this.closeMobileSidebar();
     this.editingUnit.set(unit);
     this.addUnitBuilding.set(unit.buildingName);
     this.showAddUnitModal.set(true);

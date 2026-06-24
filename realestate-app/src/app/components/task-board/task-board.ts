@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, output, signal, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { TASK_TOPICS, Task, TaskStatus, TaskTopic } from '../../models/task.model';
@@ -33,7 +33,7 @@ interface TaskAssigneeOption {
   templateUrl: './task-board.html',
   styleUrl: './task-board.scss'
 })
-export class TaskBoard {
+export class TaskBoard implements OnDestroy {
   readonly ts = inject(TranslationService);
   readonly searchQuery = input<string>('');
   readonly focusTaskId = input<string | null>(null);
@@ -49,6 +49,9 @@ export class TaskBoard {
   readonly selectedTopic = signal<TaskTopicFilter>('all');
   readonly selectedAssignee = signal<TaskAssigneeFilter>('all');
   readonly dropTargetKey = signal<string | null>(null);
+  private readonly compactViewport = signal(this.isCompactViewport());
+  private readonly updateViewportState = () => this.compactViewport.set(this.isCompactViewport());
+  readonly dragEnabled = computed(() => !this.compactViewport());
   readonly taskError = computed(() => this.taskService.error());
 
   constructor() {
@@ -63,6 +66,10 @@ export class TaskBoard {
       this.selectedAssignee.set('all');
       window.setTimeout(() => this.scrollToTask(id), 0);
     });
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', this.updateViewportState, { passive: true });
+    }
   }
 
   readonly assigneeOptions = computed<TaskAssigneeOption[]>(() => {
@@ -122,6 +129,7 @@ export class TaskBoard {
   }
 
   onDragStart(event: DragEvent, task: Task) {
+    if (!this.dragEnabled()) return;
     this.draggedTaskId.set(task.id);
     event.dataTransfer?.setData('text/plain', task.id);
     if (event.dataTransfer) event.dataTransfer.effectAllowed = 'move';
@@ -168,6 +176,12 @@ export class TaskBoard {
     await this.taskService.remove(task.id);
   }
 
+  ngOnDestroy() {
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('resize', this.updateViewportState);
+    }
+  }
+
   displayTitle(task: Task): string {
     return task.shortTitle?.trim() || task.title.trim();
   }
@@ -196,5 +210,9 @@ export class TaskBoard {
   private findTaskElement(id: string): HTMLElement | null {
     return [...document.querySelectorAll<HTMLElement>('[data-task-id]')]
       .find(element => element.dataset['taskId'] === id) ?? null;
+  }
+
+  private isCompactViewport(): boolean {
+    return typeof window !== 'undefined' ? window.innerWidth <= 760 : false;
   }
 }

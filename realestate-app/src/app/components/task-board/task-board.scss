@@ -30,6 +30,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  flex-wrap: wrap;
 }
 
 .tasks-new-btn,
@@ -209,6 +210,7 @@
 .tasks-columns-scroll {
   overflow-x: auto;
   padding-bottom: 6px;
+  -webkit-overflow-scrolling: touch;
 }
 
 .tasks-columns {
@@ -345,6 +347,7 @@
   background: var(--color-surface);
   box-shadow: var(--shadow-xs);
   cursor: grab;
+  touch-action: pan-y;
   transition: all 0.2s var(--ease-out);
 
   &:hover {
@@ -556,5 +559,102 @@
 
   .tasks-board-actions {
     flex-direction: column;
+  }
+
+  .tasks-toolbar {
+    align-items: stretch;
+  }
+
+  .tasks-topic-filters {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    margin-inline: calc(var(--space-md) * -1);
+    padding-inline: var(--space-md);
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  .tasks-topic-filter {
+    flex: 0 0 auto;
+  }
+
+  .tasks-assignee-filter {
+    width: 100%;
+    margin-left: 0;
+    justify-content: space-between;
+    border-radius: var(--radius-lg);
+    padding: 10px 12px;
+  }
+
+  .tasks-assignee-filter select {
+    flex: 1 1 auto;
+  }
+
+  .tasks-section {
+    padding: 14px;
+  }
+
+  .tasks-columns-scroll {
+    overflow: visible;
+    padding-bottom: 0;
+  }
+
+  .tasks-columns {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .tasks-column {
+    min-width: 0;
+    min-height: 0;
+  }
+
+  .tasks-column > header {
+    padding: 11px 12px;
+  }
+
+  .tasks-list {
+    padding: 10px;
+  }
+
+  .task-card {
+    cursor: pointer;
+    padding: 12px 11px;
+    border-radius: var(--radius-md);
+  }
+
+  .task-card__top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .task-priority {
+    width: fit-content;
+  }
+
+  .task-card__meta {
+    gap: 6px;
+  }
+
+  .task-card__actions {
+    flex-direction: column;
+
+    button {
+      width: 100%;
+    }
+  }
+
+  .tasks-column-empty {
+    min-height: 56px;
+  }
+}
+
+@media (max-width: 1120px) and (min-width: 761px) {
+  .tasks-columns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

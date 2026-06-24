@@ -121,4 +121,20 @@
   .budget-range-divider {
     display: none;
   }
+
+  .filter-group-range .filter-range-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .filter-group-range .filter-input-date,
+  .filter-group-range .filter-input {
+    width: 100%;
+    flex: 1 1 auto;
+  }
+
+  .filter-group-range .filter-separator {
+    display: none;
+  }
 }
