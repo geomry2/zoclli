@@ -47,7 +47,7 @@
                   class="lead-card"
                   [class.dragging]="isDragging(lead)"
                   [class.saving]="isSaving(lead)"
-                  draggable="true"
+                  [attr.draggable]="dragEnabled() ? 'true' : null"
                   (dragstart)="onDragStart($event, lead)"
                   (dragend)="onDragEnd()"
                   (touchstart)="onTouchStart($event, lead)">

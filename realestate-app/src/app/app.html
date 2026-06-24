@@ -1,12 +1,17 @@
 <app-password-gate>
-<div class="app-layout" [class.sidebar-collapsed]="sidebarCollapsed() && !sidebarPreviewExpanded()">
+<div
+  class="app-layout"
+  [class.sidebar-collapsed]="sidebarCollapsed() && !sidebarPreviewExpanded()"
+  [class.mobile-sidebar-open]="mobileSidebarOpen()">
   <!-- Left Sidebar -->
   <app-tab-nav
     [activeTab]="activeTab()"
     [collapsed]="sidebarCollapsed()"
+    [mobileOpen]="mobileSidebarOpen()"
     (tabChange)="switchTab($event)"
     (collapsedChange)="onSidebarCollapsedChange($event)"
     (previewExpandedChange)="onSidebarPreviewExpandedChange($event)"
+    (mobileOpenChange)="mobileSidebarOpen.set($event)"
   />
 
   <!-- Main Content Area -->
@@ -14,6 +19,27 @@
     <!-- Top Header Bar -->
     <header class="top-bar">
       <div class="top-bar__left">
+        <button
+          type="button"
+          class="mobile-menu-btn"
+          [class.open]="mobileSidebarOpen()"
+          (click)="toggleMobileSidebar()"
+          [attr.aria-expanded]="mobileSidebarOpen()"
+          [attr.aria-label]="(mobileSidebarOpen() ? 'nav.closeMenu' : 'nav.openMenu') | translate"
+          [attr.title]="(mobileSidebarOpen() ? 'nav.closeMenu' : 'nav.openMenu') | translate">
+          @if (mobileSidebarOpen()) {
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          } @else {
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="4" y1="6" x2="20" y2="6"/>
+              <line x1="4" y1="12" x2="20" y2="12"/>
+              <line x1="4" y1="18" x2="20" y2="18"/>
+            </svg>
+          }
+        </button>
         <div class="page-context">
           <h1 class="page-title">{{ activeTabLabel() | translate }}</h1>
           <span class="page-breadcrumb">
@@ -146,6 +172,14 @@
       }
     </main>
   </div>
+
+  <button
+    type="button"
+    class="mobile-sidebar-backdrop"
+    [class.open]="mobileSidebarOpen()"
+    (click)="closeMobileSidebar()"
+    [attr.aria-label]="'nav.closeMenu' | translate"
+    tabindex="-1"></button>
 </div>
 
 @if (showAddUnitModal()) {

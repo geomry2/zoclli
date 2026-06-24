@@ -758,6 +758,20 @@
   .btn-toggle-details {
     align-self: flex-start;
   }
+
+  .property-card__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .property-action {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .unit-list {
+    -webkit-overflow-scrolling: touch;
+  }
 }
 
 @media (max-width: 640px) {
@@ -779,6 +793,10 @@
     gap: 16px;
   }
 
+  .property-card__topline {
+    gap: 12px;
+  }
+
   .property-card__title {
     font-size: 21px;
   }
@@ -787,9 +805,52 @@
     grid-template-columns: 1fr;
   }
 
+  .property-card__unit-chips,
+  .property-card__status-pills,
+  .property-card__actions {
+    width: 100%;
+  }
+
   .property-card__unit-preview {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .property-card__media-value {
+    font-size: 22px;
+    max-width: none;
+  }
+
+  .unit-list {
+    overflow-x: auto;
+  }
+
+  .unit-table {
+    min-width: 840px;
+  }
+
+  .unit-actions-cell {
+    min-width: 0;
+  }
+
+  .unit-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btn-row-action {
+    width: 100%;
+  }
+
+  .row-confirm,
+  .property-delete-banner {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .row-confirm button,
+  .property-delete-banner button {
+    width: 100%;
   }
 
   .property-delete-banner {

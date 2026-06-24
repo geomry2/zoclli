@@ -244,9 +244,59 @@
 
   .followups-filter-row {
     justify-content: flex-start;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    margin-inline: calc(var(--space-md) * -1);
+    padding-inline: var(--space-md);
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  .followups-filter-chip {
+    flex: 0 0 auto;
+  }
+
+  .followups-item {
+    padding: 14px;
+  }
+
+  .followups-item__top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .followups-status {
+    align-self: flex-start;
+  }
+
+  .followups-meta {
+    gap: 8px;
+  }
+
+  .followups-meta__label,
+  .followups-date-pill {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .followups-actions {
+    gap: 8px;
   }
 
   .followups-reschedule {
     flex-direction: column;
+    gap: 8px;
+  }
+
+  .followups-btn {
+    width: 100%;
+  }
+
+  .followups-date-input {
+    width: 100%;
   }
 }

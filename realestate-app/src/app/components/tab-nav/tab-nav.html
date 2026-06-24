@@ -1,6 +1,7 @@
 <aside
   class="sidebar"
   [class.collapsed]="effectiveCollapsed()"
+  [class.mobile-open]="mobileOpen()"
   (mouseenter)="onMouseEnterSidebar()"
   (mouseleave)="onMouseLeaveSidebar()">
   <!-- Logo area -->
@@ -14,6 +15,17 @@
     @if (!effectiveCollapsed()) {
       <span class="logo-text">Zortive CRM</span>
     }
+    <button
+      type="button"
+      class="sidebar-mobile-close"
+      (click)="closeMobileDrawer()"
+      [attr.aria-label]="'nav.closeMenu' | translate"
+      [attr.title]="'nav.closeMenu' | translate">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
   </div>
 
   <!-- Navigation items -->
@@ -102,11 +114,12 @@
   <div class="sidebar-bottom">
     <div class="sidebar-footer-links">
       @for (link of footerLinks; track link.href) {
-        <a
+      <a
           class="nav-item footer-link"
           [href]="link.href"
           target="_blank"
           rel="noopener noreferrer"
+          (click)="closeMobileDrawer()"
           [title]="link.labelKey | translate">
           <span class="nav-icon">
             @switch (link.icon) {
@@ -136,7 +149,11 @@
       }
     </div>
 
-    <button class="nav-item collapse-btn" (click)="toggleCollapse()" [title]="collapsed() ? 'Expand' : 'Collapse'">
+    <button
+      class="nav-item collapse-btn"
+      type="button"
+      (click)="toggleCollapse()"
+      [title]="collapsed() ? 'Expand' : 'Collapse'">
       <span class="nav-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
           [style.transform]="collapsed() ? 'rotate(0deg)' : 'rotate(180deg)'"

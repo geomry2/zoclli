@@ -149,7 +149,7 @@
   background: var(--color-surface);
   box-shadow: var(--shadow-xs);
   cursor: grab;
-  touch-action: none;
+  touch-action: pan-y;
   transition: all 0.2s var(--ease-out);
 
   &:hover {
@@ -344,9 +344,52 @@
 
   .board-columns {
     grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .board-column {
+    min-height: 0;
+  }
+
+  .column-header {
+    padding: 13px 14px 12px;
+  }
+
+  .column-body {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .lead-card {
+    padding: 12px;
+    border-radius: var(--radius-lg);
+  }
+
+  .lead-card__top {
+    gap: 10px;
+  }
+
+  .lead-budget {
+    width: 100%;
+    text-align: center;
+  }
+
+  .lead-meta {
+    gap: 6px;
+  }
+
+  .lead-tag,
+  .lead-follow-up {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .lead-actions {
+    flex-direction: column;
   }
 
   .lead-action {
-    flex-basis: 100%;
+    width: 100%;
+    flex-basis: auto;
   }
 }

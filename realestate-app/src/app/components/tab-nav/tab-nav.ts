@@ -26,11 +26,13 @@ interface SidebarLink {
 export class TabNav {
   readonly activeTab = input<TabType>('clients');
   readonly collapsed = input(true);
+  readonly mobileOpen = input(false);
   readonly tabChange = output<TabType>();
   readonly collapsedChange = output<boolean>();
   readonly previewExpandedChange = output<boolean>();
+  readonly mobileOpenChange = output<boolean>();
   private readonly previewExpanded = signal(false);
-  readonly effectiveCollapsed = computed(() => this.collapsed() && !this.previewExpanded());
+  readonly effectiveCollapsed = computed(() => this.collapsed() && !this.previewExpanded() && !this.mobileOpen());
 
   readonly items: SidebarItem[] = [
     { id: 'dashboard',  labelKey: 'nav.dashboard',  icon: 'dashboard',  group: 'main' },
@@ -50,6 +52,11 @@ export class TabNav {
 
   switchTab(tab: TabType) {
     this.tabChange.emit(tab);
+    this.mobileOpenChange.emit(false);
+  }
+
+  closeMobileDrawer() {
+    this.mobileOpenChange.emit(false);
   }
 
   toggleCollapse() {

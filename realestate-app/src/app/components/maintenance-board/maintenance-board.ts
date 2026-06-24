@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, output, signal, OnDestroy } from '@angular/core';
 import { Task, TaskStatus } from '../../models/task.model';
 import { TaskService } from '../../services/task.service';
 import { TranslationService } from '../../services/translation.service';
@@ -21,7 +21,7 @@ type MaintenanceComplexFilter = 'all' | typeof MAINTENANCE_COMPLEXES[number];
   templateUrl: './maintenance-board.html',
   styleUrl: '../task-board/task-board.scss'
 })
-export class MaintenanceBoard {
+export class MaintenanceBoard implements OnDestroy {
   readonly ts = inject(TranslationService);
   readonly searchQuery = input<string>('');
   readonly focusTaskId = input<string | null>(null);
@@ -35,6 +35,9 @@ export class MaintenanceBoard {
   readonly selectedComplex = signal<MaintenanceComplexFilter>('all');
   readonly draggedTaskId = signal<string | null>(null);
   readonly dropTargetStatus = signal<TaskStatus | null>(null);
+  private readonly compactViewport = signal(this.isCompactViewport());
+  private readonly updateViewportState = () => this.compactViewport.set(this.isCompactViewport());
+  readonly dragEnabled = computed(() => !this.compactViewport());
   readonly taskError = computed(() => this.taskService.error());
 
   constructor() {
@@ -48,6 +51,10 @@ export class MaintenanceBoard {
       this.selectedComplex.set('all');
       window.setTimeout(() => this.scrollToTask(id), 0);
     });
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', this.updateViewportState, { passive: true });
+    }
   }
 
   readonly filteredTasks = computed(() =>
@@ -78,6 +85,7 @@ export class MaintenanceBoard {
   }
 
   onDragStart(event: DragEvent, task: Task) {
+    if (!this.dragEnabled()) return;
     this.draggedTaskId.set(task.id);
     event.dataTransfer?.setData('text/plain', task.id);
     if (event.dataTransfer) event.dataTransfer.effectAllowed = 'move';
@@ -124,6 +132,12 @@ export class MaintenanceBoard {
     await this.taskService.remove(task.id);
   }
 
+  ngOnDestroy() {
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('resize', this.updateViewportState);
+    }
+  }
+
   displayTitle(task: Task): string {
     return maintenanceDisplayTitle(task);
   }
@@ -140,6 +154,10 @@ export class MaintenanceBoard {
 
   private normalizeComplex(value: string): string {
     return value.trim().toLowerCase();
+  }
+
+  private isCompactViewport(): boolean {
+    return typeof window !== 'undefined' ? window.innerWidth <= 760 : false;
   }
 
   private scrollToTask(id: string) {
