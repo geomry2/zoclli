@@ -60,6 +60,10 @@
   font-weight: 500;
 }
 
+.card-my-tasks {
+  min-height: 0;
+}
+
 /* ═══════════════════════════════════════════════════════════
    ROW 1: HERO STATS + FEATURE CARD
    ═══════════════════════════════════════════════════════════ */
@@ -1197,6 +1201,85 @@
   flex-shrink: 0;
   white-space: nowrap;
 }
+
+.my-task-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.my-task-item {
+  padding: 0;
+  border-bottom: 1px solid var(--color-border-light);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.my-task-button {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: color 0.15s var(--ease-out);
+
+  &:hover .my-task-item__title,
+  &:focus-visible .my-task-item__title {
+    color: var(--color-primary);
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba(0, 82, 204, 0.22);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+}
+
+.my-task-item__main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.my-task-item__title {
+  color: var(--color-text);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.35;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.my-task-item__meta {
+  color: var(--color-text-muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.task-priority {
+  flex-shrink: 0;
+  border-radius: var(--radius-full);
+  padding: 5px 9px;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.task-priority-low { background: var(--color-success-bg); color: #15803D; }
+.task-priority-medium { background: var(--color-info-bg); color: #1E40AF; }
+.task-priority-high { background: var(--color-warning-bg); color: #92400E; }
+.task-priority-urgent { background: var(--color-danger-bg); color: #DC2626; }
 
 /* ═══════════════════════════════════════════════════════════
    RESPONSIVE

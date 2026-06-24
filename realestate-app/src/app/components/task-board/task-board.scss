@@ -354,6 +354,24 @@
   }
 }
 
+.task-card--focused {
+  border-color: #0052cc;
+  box-shadow: 0 0 0 4px rgba(0, 82, 204, 0.14), var(--shadow-md);
+  animation: task-focus-pulse 1.8s ease-out;
+}
+
+@keyframes task-focus-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 82, 204, 0.28), var(--shadow-md);
+  }
+  60% {
+    box-shadow: 0 0 0 8px rgba(0, 82, 204, 0.06), var(--shadow-md);
+  }
+  100% {
+    box-shadow: 0 0 0 4px rgba(0, 82, 204, 0.14), var(--shadow-md);
+  }
+}
+
 .task-card__key {
   margin-bottom: 7px;
   color: #0052cc;

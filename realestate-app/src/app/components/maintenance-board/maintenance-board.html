@@ -1,0 +1,98 @@
+<div class="tasks-shell">
+  <div class="tasks-board-head">
+    <div>
+      <div class="tasks-board-title">{{ 'maintenance.title' | translate }}</div>
+      <div class="tasks-board-subtitle">{{ 'maintenance.subtitle' | translate }}</div>
+    </div>
+    <div class="tasks-board-actions">
+      <button type="button" class="tasks-new-btn" (click)="openCreate()">{{ 'maintenance.newTask' | translate }}</button>
+    </div>
+  </div>
+
+  <div class="tasks-toolbar">
+    <div class="tasks-topic-filters">
+      <button
+        type="button"
+        class="tasks-topic-filter"
+        [class.active]="selectedComplex() === 'all'"
+        (click)="setComplexFilter('all')">
+        {{ 'maintenance.allComplexes' | translate }}
+      </button>
+      @for (complex of complexes; track complex) {
+        <button
+          type="button"
+          class="tasks-topic-filter"
+          [class.active]="selectedComplex() === complex"
+          (click)="setComplexFilter(complex)">
+          {{ complex }}
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (taskError() && filteredTasks().length > 0) {
+    <div class="tasks-error">{{ taskError() }}</div>
+  }
+
+  @if (filteredTasks().length === 0) {
+    <div class="tasks-empty" [class.tasks-empty--error]="taskError() !== null">{{ taskError() || ('maintenance.empty' | translate) }}</div>
+  } @else {
+    <div class="tasks-columns-scroll">
+      <div class="tasks-columns">
+        @for (column of columns(); track column.status) {
+          <section
+            class="tasks-column"
+            [class.tasks-column--inbox]="column.status === 'inbox'"
+            [class.tasks-column--todo]="column.status === 'todo'"
+            [class.tasks-column--in-progress]="column.status === 'in_progress'"
+            [class.tasks-column--waiting]="column.status === 'waiting'"
+            [class.tasks-column--done]="column.status === 'done'"
+            [class.drop-target]="dropTargetStatus() === column.status"
+            (dragover)="onDragOver($event, column.status)"
+            (dragleave)="onDragLeave()"
+            (drop)="onDrop($event, column.status)">
+            <header>
+              <h4>{{ ('tasks.status.' + column.status) | translate }}</h4>
+              <span>{{ column.tasks.length }}</span>
+            </header>
+
+            @if (column.tasks.length === 0) {
+              <div class="tasks-column-empty">{{ 'tasks.dropHere' | translate }}</div>
+            } @else {
+              <div class="tasks-list">
+                @for (task of column.tasks; track task.id) {
+                  <article class="task-card" [attr.data-task-id]="task.id" draggable="true" (dragstart)="onDragStart($event, task)" (click)="openEdit(task)">
+                    <div class="task-card__key">MNT-{{ task.id.slice(0, 4).toUpperCase() }}</div>
+                    <div class="task-card__top">
+                      <h5>{{ displayTitle(task) }}</h5>
+                      <span class="task-priority task-priority-{{ task.priority }}">{{ ('tasks.priority.' + task.priority) | translate }}</span>
+                    </div>
+
+                    @if (displayTags(task).length > 0) {
+                      <div class="task-card__tags">
+                        @for (tag of displayTags(task); track tag) {
+                          <span>{{ tag }}</span>
+                        }
+                      </div>
+                    }
+
+                    <div class="task-card__meta">
+                      <span class="task-card__meta-chip">{{ formatDueAt(task) }}</span>
+                      @if (task.assignee) { <span class="task-card__assignee">{{ task.assignee }}</span> }
+                      @if (task.relatedEntityType) { <span>{{ ('tasks.related.' + task.relatedEntityType) | translate }}</span> }
+                    </div>
+
+                    <div class="task-card__actions">
+                      <button type="button" (click)="openEdit(task); $event.stopPropagation()">{{ 'btn.edit' | translate }}</button>
+                      <button type="button" (click)="removeTask(task); $event.stopPropagation()">{{ 'btn.delete' | translate }}</button>
+                    </div>
+                  </article>
+                }
+              </div>
+            }
+          </section>
+        }
+      </div>
+    </div>
+  }
+</div>

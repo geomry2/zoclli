@@ -6,7 +6,7 @@
       <div class="task-modal__icon" aria-hidden="true">{{ taskInitial() }}</div>
       <div>
         <div class="task-modal__crumb">
-          <span>{{ 'tasks.title' | translate }}</span>
+          <span>{{ modalCrumbLabel() }}</span>
           <span>/</span>
           <strong>{{ taskKey() }}</strong>
         </div>
@@ -14,14 +14,14 @@
           #titleInput
           class="task-title-input"
           [attr.aria-label]="'tasks.fieldTitle' | translate"
-          [attr.placeholder]="'tasks.fieldTitle' | translate"
+          [attr.placeholder]="titlePlaceholder()"
           [ngModel]="draft().title"
           (ngModelChange)="draft.update(v => ({...v, title: $event}))" />
       </div>
     </div>
     <div class="task-modal__header-actions">
       <button type="button" class="task-action-btn" (click)="submit()" [disabled]="saving()">
-        {{ saving() ? ('btn.saving' | translate) : (editTask() ? ('btn.saveChanges' | translate) : ('tasks.createAction' | translate)) }}
+        {{ submitLabel() }}
       </button>
       <button type="button" class="task-modal__close" (click)="close()" [attr.aria-label]="'btn.cancel' | translate">×</button>
     </div>
@@ -40,58 +40,168 @@
           </select>
         </div>
 
-        <section class="task-issue-section">
-          <h3>{{ 'tasks.detailsTitle' | translate }}</h3>
-          <dl class="task-details-grid">
-            <div>
-              <dt>{{ 'tasks.fieldTopic' | translate }}</dt>
-              <dd>
-                <select [ngModel]="draft().topic" (ngModelChange)="draft.update(v => ({...v, topic: $event}))">
-                  @for (topic of topics; track topic) {
-                    <option [value]="topic">{{ ('tasks.topic.' + topic) | translate }}</option>
-                  }
-                </select>
-              </dd>
-            </div>
-            <div>
-              <dt>{{ 'tasks.fieldPriority' | translate }}</dt>
-              <dd>
-                <select class="priority-select priority-select--{{ draft().priority }}" [ngModel]="draft().priority" (ngModelChange)="draft.update(v => ({...v, priority: $event}))">
-                  @for (priority of priorities; track priority) {
-                    <option [value]="priority">{{ ('tasks.priority.' + priority) | translate }}</option>
-                  }
-                </select>
-              </dd>
-            </div>
-            <div>
-              <dt>{{ 'tasks.fieldSource' | translate }}</dt>
-              <dd>
-                <select [ngModel]="draft().source" (ngModelChange)="draft.update(v => ({...v, source: $event}))">
-                  @for (source of sources; track source) {
-                    <option [value]="source">{{ ('tasks.source.' + source) | translate }}</option>
-                  }
-                </select>
-              </dd>
-            </div>
-            <div>
-              <dt>{{ 'tasks.fieldTags' | translate }}</dt>
-              <dd>
-                <input [ngModel]="draft().tagsInput" (ngModelChange)="draft.update(v => ({...v, tagsInput: $event}))" [attr.placeholder]="'tasks.tagsHint' | translate" />
-              </dd>
-            </div>
-          </dl>
-        </section>
+        @if (!isMaintenanceBoard()) {
+          <section class="task-issue-section">
+            <h3>{{ 'tasks.detailsTitle' | translate }}</h3>
+            <dl class="task-details-grid">
+              <div>
+                <dt>{{ 'tasks.fieldTopic' | translate }}</dt>
+                <dd>
+                  <select [ngModel]="draft().topic" (ngModelChange)="draft.update(v => ({...v, topic: $event}))">
+                    @for (topic of topics; track topic) {
+                      <option [value]="topic">{{ ('tasks.topic.' + topic) | translate }}</option>
+                    }
+                  </select>
+                </dd>
+              </div>
+              <div>
+                <dt>{{ 'tasks.fieldPriority' | translate }}</dt>
+                <dd>
+                  <select class="priority-select priority-select--{{ draft().priority }}" [ngModel]="draft().priority" (ngModelChange)="draft.update(v => ({...v, priority: $event}))">
+                    @for (priority of priorities; track priority) {
+                      <option [value]="priority">{{ ('tasks.priority.' + priority) | translate }}</option>
+                    }
+                  </select>
+                </dd>
+              </div>
+              <div>
+                <dt>{{ 'tasks.fieldSource' | translate }}</dt>
+                <dd>
+                  <select [ngModel]="draft().source" (ngModelChange)="draft.update(v => ({...v, source: $event}))">
+                    @for (source of sources; track source) {
+                      <option [value]="source">{{ ('tasks.source.' + source) | translate }}</option>
+                    }
+                  </select>
+                </dd>
+              </div>
+              <div>
+                <dt>{{ 'tasks.fieldTags' | translate }}</dt>
+                <dd>
+                  <input [ngModel]="draft().tagsInput" (ngModelChange)="draft.update(v => ({...v, tagsInput: $event}))" [attr.placeholder]="'tasks.tagsHint' | translate" />
+                </dd>
+              </div>
+            </dl>
+          </section>
+        }
 
-        <section class="task-issue-section">
-          <h3>{{ 'tasks.fieldDescription' | translate }}</h3>
-          <textarea
-            class="task-description"
-            [ngModel]="draft().description"
-            (ngModelChange)="draft.update(v => ({...v, description: $event}))"
-            [attr.placeholder]="'tasks.noDescription' | translate"></textarea>
-        </section>
+        @if (isMaintenanceBoard()) {
+          <section class="task-issue-section task-maintenance-section">
+            <h3>{{ 'maintenance.modalTitle' | translate }}</h3>
+            <dl class="task-details-grid task-maintenance-grid">
+              <div>
+                <dt>{{ 'maintenance.fieldBuilding' | translate }}</dt>
+                <dd>
+                  <input
+                    [ngModel]="draft().maintenance.building"
+                    (ngModelChange)="updateMaintenance('building', $event)" />
+                </dd>
+              </div>
+              <div>
+                <dt>{{ 'maintenance.fieldApartment' | translate }}</dt>
+                <dd>
+                  <input
+                    [ngModel]="draft().maintenance.apartment"
+                    (ngModelChange)="updateMaintenance('apartment', $event)" />
+                </dd>
+              </div>
+              <div>
+                <dt>{{ 'maintenance.fieldType' | translate }}</dt>
+                <dd>
+                  <input
+                    [ngModel]="draft().maintenance.maintenanceType"
+                    (ngModelChange)="updateMaintenance('maintenanceType', $event)" />
+                </dd>
+              </div>
+              <div>
+                <dt>{{ 'maintenance.fieldPhone' | translate }}</dt>
+                <dd>
+                  <input
+                    [ngModel]="draft().maintenance.phone"
+                    (ngModelChange)="updateMaintenance('phone', $event)" />
+                </dd>
+              </div>
+              <div>
+                <dt>{{ 'maintenance.fieldName' | translate }}</dt>
+                <dd>
+                  <input
+                    [ngModel]="draft().maintenance.requesterName"
+                    (ngModelChange)="updateMaintenance('requesterName', $event)" />
+                </dd>
+              </div>
+              <div>
+                <dt>{{ 'maintenance.fieldEmail' | translate }}</dt>
+                <dd>
+                  <input
+                    [ngModel]="draft().maintenance.email"
+                    (ngModelChange)="updateMaintenance('email', $event)" />
+                </dd>
+              </div>
+              <div>
+                <dt>{{ 'maintenance.fieldCity' | translate }}</dt>
+                <dd>
+                  <input
+                    [ngModel]="draft().maintenance.city"
+                    (ngModelChange)="updateMaintenance('city', $event)" />
+                </dd>
+              </div>
+              <div class="task-maintenance-grid__wide">
+                <dt>{{ 'maintenance.fieldDescription' | translate }}</dt>
+                <dd>
+                  <textarea
+                    [ngModel]="draft().maintenance.issue"
+                    (ngModelChange)="updateMaintenance('issue', $event)"></textarea>
+                </dd>
+              </div>
+              <div class="task-maintenance-grid__wide">
+                <dt>{{ 'maintenance.fieldMoreDetails' | translate }}</dt>
+                <dd>
+                  <textarea
+                    [ngModel]="draft().maintenance.moreDetails"
+                    (ngModelChange)="updateMaintenance('moreDetails', $event)"></textarea>
+                </dd>
+              </div>
+              <div class="task-maintenance-grid__wide">
+                <dt>{{ 'maintenance.fieldFilesMedia' | translate }}</dt>
+                <dd>
+                  <textarea
+                    [ngModel]="filesMediaInput()"
+                    (ngModelChange)="updateFilesMedia($event)"
+                    [attr.placeholder]="'maintenance.filesPlaceholder' | translate"></textarea>
+                  @if (mediaGalleryItems().length > 0) {
+                    <div class="maintenance-media-gallery">
+                      @for (item of mediaGalleryItems(); track item.url) {
+                        @if (item.type === 'image') {
+                          <a class="maintenance-media-item maintenance-media-item--image" [href]="item.url" target="_blank" rel="noopener noreferrer">
+                            <img [src]="item.url" [alt]="item.label" loading="lazy" />
+                          </a>
+                        } @else if (item.type === 'video') {
+                          <video class="maintenance-media-item maintenance-media-item--video" controls preload="metadata">
+                            <source [src]="item.url" />
+                          </video>
+                        } @else {
+                          <a class="maintenance-media-file" [href]="item.url" target="_blank" rel="noopener noreferrer">{{ item.label }}</a>
+                        }
+                      }
+                    </div>
+                  }
+                </dd>
+              </div>
+            </dl>
+          </section>
+        }
 
-        @if (!editTask()) {
+        @if (!isMaintenanceBoard()) {
+          <section class="task-issue-section">
+            <h3>{{ 'tasks.fieldDescription' | translate }}</h3>
+            <textarea
+              class="task-description"
+              [ngModel]="draft().description"
+              (ngModelChange)="draft.update(v => ({...v, description: $event}))"
+              [attr.placeholder]="'tasks.noDescription' | translate"></textarea>
+          </section>
+        }
+
+        @if (!editTask() && !isMaintenanceBoard()) {
           <section class="task-assist">
             <div class="task-assist__intro">
               <div>
@@ -162,7 +272,7 @@
           </label>
           <label>
             <span>{{ 'tasks.fieldCreatedBy' | translate }}</span>
-            <input [ngModel]="draft().createdBy" (ngModelChange)="draft.update(v => ({...v, createdBy: $event}))" />
+            <input [ngModel]="draft().createdBy" readonly />
           </label>
         </section>
 
@@ -196,19 +306,21 @@
           }
         </section>
 
-        <section class="task-side-section">
-          <h3>{{ 'tasks.metadataTitle' | translate }}</h3>
-          <dl class="task-date-facts">
-            <div>
-              <dt>{{ 'tasks.fieldRelatedType' | translate }}</dt>
-              <dd>{{ draft().relatedEntityType ? (('tasks.related.' + draft().relatedEntityType) | translate) : ('tasks.none' | translate) }}</dd>
-            </div>
-            <div>
-              <dt>{{ 'tasks.fieldRelatedId' | translate }}</dt>
-              <dd>{{ draft().relatedEntityId || ('tasks.none' | translate) }}</dd>
-            </div>
-          </dl>
-        </section>
+        @if (!isMaintenanceBoard()) {
+          <section class="task-side-section">
+            <h3>{{ 'tasks.metadataTitle' | translate }}</h3>
+            <dl class="task-date-facts">
+              <div>
+                <dt>{{ 'tasks.fieldRelatedType' | translate }}</dt>
+                <dd>{{ draft().relatedEntityType ? (('tasks.related.' + draft().relatedEntityType) | translate) : ('tasks.none' | translate) }}</dd>
+              </div>
+              <div>
+                <dt>{{ 'tasks.fieldRelatedId' | translate }}</dt>
+                <dd>{{ draft().relatedEntityId || ('tasks.none' | translate) }}</dd>
+              </div>
+            </dl>
+          </section>
+        }
 
         @if (error()) {
           <div class="task-error">{{ error() }}</div>
@@ -220,7 +332,7 @@
   <footer class="task-modal__footer">
     <button type="button" class="ghost" (click)="close()">{{ 'btn.cancel' | translate }}</button>
     <button type="button" class="primary" (click)="submit()" [disabled]="saving()">
-      {{ saving() ? ('btn.saving' | translate) : (editTask() ? ('btn.saveChanges' | translate) : ('tasks.createAction' | translate)) }}
+      {{ submitLabel() }}
     </button>
   </footer>
 </section>

@@ -2,6 +2,7 @@ import { Component, computed, inject, output, signal } from '@angular/core';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { TaskCreateInput } from '../../models/task.model';
 import { TaskService } from '../../services/task.service';
+import { AuthService } from '../../services/auth.service';
 import { TranslationService } from '../../services/translation.service';
 import { parseImportedTasks } from '../../utils/task.utils';
 
@@ -16,6 +17,7 @@ export class TaskImportModal {
   readonly closed = output<void>();
 
   private readonly taskService = inject(TaskService);
+  private readonly auth = inject(AuthService);
   private readonly ts = inject(TranslationService);
 
   readonly importText = signal('');
@@ -54,15 +56,17 @@ export class TaskImportModal {
           shortTitle: '',
           description: '',
           status: draft.status,
+          board: 'operations',
           priority: 'medium',
           topic: draft.topic,
           dueAt: '',
           assignee: draft.assignee,
-          createdBy: '',
+          createdBy: this.auth.currentTaskName() || 'Current user',
           relatedEntityType: null,
           relatedEntityId: '',
           source: 'manual',
           tags: ['imported'],
+          metadata: {},
         };
         const result = await this.taskService.add(payload);
         if (result.error) {

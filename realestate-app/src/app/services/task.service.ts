@@ -134,9 +134,11 @@ export class TaskService {
       topic,
       tags: stripTaskMetaTags(rawTags),
       description: String(task.description ?? ''),
+      board: task.board === 'maintenance' ? 'maintenance' : 'operations',
       assignee: String(task.assignee ?? ''),
       createdBy: String(task.createdBy ?? ''),
       relatedEntityId: String(task.relatedEntityId ?? ''),
+      metadata: this.normalizeMetadata(task.metadata),
       dueAt: toTaskInputDateTime(String(task.dueAt ?? '')),
     };
   }
@@ -147,12 +149,19 @@ export class TaskService {
       title: task.title.trim(),
       shortTitle: String(task.shortTitle ?? '').trim(),
       description: task.description.trim(),
+      board: task.board === 'maintenance' ? 'maintenance' : 'operations',
       dueAt: toTaskStorageDateTime(task.dueAt),
       assignee: task.assignee.trim(),
       createdBy: task.createdBy.trim(),
       relatedEntityId: task.relatedEntityId.trim(),
+      metadata: this.normalizeMetadata(task.metadata),
       tags: serializeTaskTags(task.tags, task.topic),
     } as unknown as Record<string, unknown>);
+  }
+
+  private normalizeMetadata(value: unknown): Record<string, unknown> {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+    return value as Record<string, unknown>;
   }
 
   private async withShortTitle(task: TaskCreateInput, existing?: Task): Promise<TaskCreateInput> {
